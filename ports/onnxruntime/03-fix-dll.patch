@@ -1,0 +1,35 @@
+﻿diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index 2714e6f59d..a0911c4284 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -1750,9 +1750,16 @@ if(VERSION_MAJOR_PART STREQUAL "0" AND VERSION_MINOR_PART STREQUAL "0" AND VERSI
+     list(GET ORT_VERSION_STRING_LIST 0 VERSION_MAJOR_PART)
+     list(GET ORT_VERSION_STRING_LIST 1 VERSION_MINOR_PART)
+     list(GET ORT_VERSION_STRING_LIST 2 VERSION_BUILD_PART)
+-    set(VERSION_STRING ORT_VERSION)
++    set(VERSION_STRING ${ORT_VERSION})
+ endif()
+ 
++if (WIN32)
++add_compile_definitions(VER_MAJOR=${VERSION_MAJOR_PART})
++add_compile_definitions(VER_MINOR=${VERSION_MINOR_PART})
++add_compile_definitions(VER_BUILD=${VERSION_BUILD_PART})
++add_compile_definitions(VER_PRIVATE=${VERSION_PRIVATE_PART})
++add_compile_definitions(VER_STRING=\"${VERSION_STRING}\")
++endif()
+ 
+ if (WIN32)
+   if (onnxruntime_USE_MIMALLOC)
+diff --git a/onnxruntime/core/dll/onnxruntime.rc b/onnxruntime/core/dll/onnxruntime.rc
+index 4b08dfdb7e..184195bcad 100644
+--- a/onnxruntime/core/dll/onnxruntime.rc
++++ b/onnxruntime/core/dll/onnxruntime.rc
+@@ -33,7 +33,7 @@ BEGIN
+             VALUE "FileVersion",      VER_STRING
+             VALUE "InternalName",     "ONNX Runtime"
+             VALUE "LegalCopyright",   "\251 Microsoft Corporation. All rights reserved."
+-            VALUE "OriginalFilename", FILE_NAME
++            VALUE "OriginalFilename", "onnxruntime.dll"
+             VALUE "ProductName",      "Microsoft\256 Windows\256 Operating System"
+             VALUE "ProductVersion",   VER_STRING
+         END
