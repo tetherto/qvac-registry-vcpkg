@@ -48,6 +48,10 @@
       "baseline": "0.6.2",
       "port-version": 0
     },
+    "qvac-lint-cpp": {
+      "baseline": "1.0.1",
+      "port-version": 0
+    },
     "sentencepiece": {
       "baseline": "0.2.0",
       "port-version": 2
