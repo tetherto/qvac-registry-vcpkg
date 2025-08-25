@@ -9,7 +9,8 @@
     {
       "name": "vcpkg-cmake-config",
       "host": true
-    }
+    },
+    "qvac-lint-cpp"
   ],
   "features": {
     "tests": {
