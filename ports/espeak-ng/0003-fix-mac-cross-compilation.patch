@@ -1,0 +1,182 @@
+diff --git a/cmake/data.cmake b/cmake/data.cmake
+index e7e9aed6..e06934c0 100644
+--- a/cmake/data.cmake
++++ b/cmake/data.cmake
+@@ -63,19 +63,66 @@ file(COPY "${PHONEME_SRC_DIR}" DESTINATION "${DATA_DIST_ROOT}")
+ set(ESPEAK_RUN_ENV ${CMAKE_COMMAND} -E env "ESPEAK_DATA_PATH=${DATA_DIST_ROOT}")
+ 
+ # Handle cross-compilation: use host-native espeak-ng for data generation
++# Check for both traditional cross-compilation and architecture mismatches (e.g., ARM64 host building x86_64)
++set(IS_CROSS_COMPILING FALSE)
++
+ if(CMAKE_CROSSCOMPILING)
++  set(IS_CROSS_COMPILING TRUE)
++elseif(APPLE)
++  # On macOS, detect architecture cross-compilation
++  execute_process(COMMAND uname -m OUTPUT_VARIABLE HOST_ARCH OUTPUT_STRIP_TRAILING_WHITESPACE)
++  if(CMAKE_OSX_ARCHITECTURES)
++    list(GET CMAKE_OSX_ARCHITECTURES 0 TARGET_ARCH)
++    if(HOST_ARCH STREQUAL "arm64" AND TARGET_ARCH STREQUAL "x86_64")
++      set(IS_CROSS_COMPILING TRUE)
++      message(STATUS "Architecture cross-compilation detected: ${HOST_ARCH} host building for ${TARGET_ARCH}")
++    elseif(HOST_ARCH STREQUAL "x86_64" AND TARGET_ARCH STREQUAL "arm64")
++      set(IS_CROSS_COMPILING TRUE)
++      message(STATUS "Architecture cross-compilation detected: ${HOST_ARCH} host building for ${TARGET_ARCH}")
++    endif()
++  else()
++    # Check compiler flags for architecture
++    if(CMAKE_C_FLAGS MATCHES "-arch[ ]+x86_64" AND HOST_ARCH STREQUAL "arm64")
++      set(IS_CROSS_COMPILING TRUE)
++      message(STATUS "Architecture cross-compilation detected via compiler flags: ${HOST_ARCH} host building for x86_64")
++    elseif(CMAKE_C_FLAGS MATCHES "-arch[ ]+arm64" AND HOST_ARCH STREQUAL "x86_64")
++      set(IS_CROSS_COMPILING TRUE)
++      message(STATUS "Architecture cross-compilation detected via compiler flags: ${HOST_ARCH} host building for arm64")
++    endif()
++  endif()
++endif()
++
++if(IS_CROSS_COMPILING OR IOS)
+   # Try to find a host-native espeak-ng binary
+   find_program(HOST_ESPEAK_NG espeak-ng)
+   if(HOST_ESPEAK_NG)
+-    message(STATUS "Cross-compilation detected: Using host espeak-ng binary at ${HOST_ESPEAK_NG}")
++    if(IOS)
++      message(STATUS "iOS build detected: Using host espeak-ng binary at ${HOST_ESPEAK_NG}")
++    else()
++      message(STATUS "Cross-compilation detected: Using host espeak-ng binary at ${HOST_ESPEAK_NG}")
++    endif()
+     set(ESPEAK_RUN_CMD ${ESPEAK_RUN_ENV} ${HOST_ESPEAK_NG})
++    set(USE_HOST_ESPEAK TRUE)
+   else()
+-    message(WARNING "Cross-compilation detected but no host espeak-ng found. Data generation may fail.")
+-    message(WARNING "Please install espeak-ng on the host system or provide pre-built data files.")
+-    set(ESPEAK_RUN_CMD ${ESPEAK_RUN_ENV} $ENV{VALGRIND} "$<TARGET_FILE:espeak-ng-bin>")
++    if(IOS)
++      message(FATAL_ERROR "iOS build requires host espeak-ng binary for data generation. Please install espeak-ng on the host system.")
++    else()
++      message(WARNING "Cross-compilation detected but no host espeak-ng found. Data generation may fail.")
++      message(WARNING "Please install espeak-ng on the host system or provide pre-built data files.")
++      set(ESPEAK_RUN_CMD ${ESPEAK_RUN_ENV} $ENV{VALGRIND} "$<TARGET_FILE:espeak-ng-bin>")
++      set(USE_HOST_ESPEAK FALSE)
++    endif()
+   endif()
+ else()
+   set(ESPEAK_RUN_CMD ${ESPEAK_RUN_ENV} $ENV{VALGRIND} "$<TARGET_FILE:espeak-ng-bin>")
++  set(USE_HOST_ESPEAK FALSE)
++endif()
++
++# Set up dependencies for data generation commands
++if(USE_HOST_ESPEAK)
++  set(ESPEAK_BIN_DEPS)
++else()
++  set(ESPEAK_BIN_DEPS "$<TARGET_FILE:espeak-ng-bin>")
+ endif()
+ 
+ add_custom_command(
+@@ -84,7 +131,7 @@ add_custom_command(
+   WORKING_DIRECTORY "${PHONEME_SRC_DIR}"
+   COMMENT "Compile intonations"
+   DEPENDS
+-    "$<TARGET_FILE:espeak-ng-bin>"
++    ${ESPEAK_BIN_DEPS}
+     "${PHONEME_SRC_DIR}/intonation"
+ )
+ 
+@@ -114,7 +161,7 @@ add_custom_command(
+   WORKING_DIRECTORY "${PHONEME_SRC_DIR}"
+   COMMENT "Compile phonemes"
+   DEPENDS
+-    "$<TARGET_FILE:espeak-ng-bin>"
++    ${ESPEAK_BIN_DEPS}
+     ${_phon_deps}
+ )
+ 
+@@ -150,7 +197,7 @@ foreach(_dict_name ${_dict_compile_list})
+     COMMAND ${ESPEAK_RUN_CMD} --compile=${_dict_name}
+     WORKING_DIRECTORY "${DICT_TMP_DIR}"
+     DEPENDS
+-      "$<TARGET_FILE:espeak-ng-bin>"
++      ${ESPEAK_BIN_DEPS}
+       "${DATA_DIST_DIR}/phondata"
+       "${DATA_DIST_DIR}/intonations"
+       ${_dict_deps}
+@@ -167,7 +214,7 @@ if (HAVE_MBROLA AND USE_MBROLA)
+     add_custom_command(
+       OUTPUT "${_mbl_out}"
+       COMMAND ${ESPEAK_RUN_CMD} --compile-mbrola="${_mbl_src}"
+-      DEPENDS "$<TARGET_FILE:espeak-ng-bin>" "${_mbl_src}"
++      DEPENDS ${ESPEAK_BIN_DEPS} "${_mbl_src}"
+     )
+   endforeach(_mbl)
+ endif()
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 03b4a7d9..26499ba0 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -5,32 +5,39 @@ add_subdirectory(ucd-tools)
+ add_subdirectory(speechPlayer)
+ add_subdirectory(libespeak-ng)
+ 
+-add_executable(espeak-ng-bin espeak-ng.c)
+-set_target_properties(espeak-ng-bin PROPERTIES OUTPUT_NAME espeak-ng)
+-target_link_libraries(
+-  espeak-ng-bin PRIVATE espeak-ng espeak-ng-config
+-)
+-if (MINGW)
+-  target_link_options(espeak-ng-bin PRIVATE "-static-libstdc++" "-static")
+-endif()
+-if (MSVC)
+-  target_sources(espeak-ng-bin PRIVATE compat/getopt.c)
+-endif()
+-if (NOT WIN32)
+-  add_custom_target(
+-    speak-ng ALL
+-    COMMAND ${CMAKE_COMMAND} -E create_symlink espeak-ng ${CMAKE_CURRENT_BINARY_DIR}/speak-ng
+-    COMMAND ${CMAKE_COMMAND} -E create_symlink espeak-ng ${CMAKE_CURRENT_BINARY_DIR}/espeak
+-    COMMAND ${CMAKE_COMMAND} -E create_symlink espeak-ng ${CMAKE_CURRENT_BINARY_DIR}/speak
+-    COMMENT "Link espeak-ng to compat names"
+-    DEPENDS espeak-ng-bin
++if(NOT IOS)
++  add_executable(espeak-ng-bin espeak-ng.c)
++  set_target_properties(espeak-ng-bin PROPERTIES OUTPUT_NAME espeak-ng)
++  target_link_libraries(
++    espeak-ng-bin PRIVATE espeak-ng espeak-ng-config
+   )
+-endif()
+-install(TARGETS espeak-ng-bin)
+-install(DIRECTORY include/espeak include/espeak-ng TYPE INCLUDE)
++  if (MINGW)
++    target_link_options(espeak-ng-bin PRIVATE "-static-libstdc++" "-static")
++  endif()
++  if (MSVC)
++    target_sources(espeak-ng-bin PRIVATE compat/getopt.c)
++  endif()
++  if (NOT WIN32)
++    add_custom_target(
++      speak-ng ALL
++      COMMAND ${CMAKE_COMMAND} -E create_symlink espeak-ng ${CMAKE_CURRENT_BINARY_DIR}/speak-ng
++      COMMAND ${CMAKE_COMMAND} -E create_symlink espeak-ng ${CMAKE_CURRENT_BINARY_DIR}/espeak
++      COMMAND ${CMAKE_COMMAND} -E create_symlink espeak-ng ${CMAKE_CURRENT_BINARY_DIR}/speak
++      COMMENT "Link espeak-ng to compat names"
++      DEPENDS espeak-ng-bin
++    )
++  endif()
++  install(TARGETS espeak-ng-bin RUNTIME DESTINATION bin BUNDLE DESTINATION bin)
++  install(DIRECTORY include/espeak include/espeak-ng TYPE INCLUDE)
+ 
+-if (ESPEAK_COMPAT AND NOT WIN32)
+-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/speak-ng DESTINATION bin)
+-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/espeak DESTINATION bin)
+-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/speak DESTINATION bin)
++  if (ESPEAK_COMPAT AND NOT WIN32)
++    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/speak-ng DESTINATION bin)
++    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/espeak DESTINATION bin)
++    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/speak DESTINATION bin)
++  endif()
++else()
++  # For iOS builds, we don't build the executable since it can't run on iOS
++  # Data generation will use host-native espeak-ng binary
++  message(STATUS "iOS build detected: Skipping espeak-ng-bin executable build")
++  install(DIRECTORY include/espeak include/espeak-ng TYPE INCLUDE)
+ endif()
+\ No newline at end of file
