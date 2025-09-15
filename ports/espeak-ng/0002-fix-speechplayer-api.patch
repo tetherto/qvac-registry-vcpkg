@@ -1,33 +1,5 @@
-diff --git a/cmake/data.cmake b/cmake/data.cmake
-index 7c792768..e7e9aed6 100644
---- a/cmake/data.cmake
-+++ b/cmake/data.cmake
-@@ -61,7 +61,22 @@ file(COPY "${DATA_SRC_DIR}/voices/!v" DESTINATION "${DATA_DIST_DIR}/voices")
- file(COPY "${PHONEME_SRC_DIR}" DESTINATION "${DATA_DIST_ROOT}")
- 
- set(ESPEAK_RUN_ENV ${CMAKE_COMMAND} -E env "ESPEAK_DATA_PATH=${DATA_DIST_ROOT}")
--set(ESPEAK_RUN_CMD ${ESPEAK_RUN_ENV} $ENV{VALGRIND} "$<TARGET_FILE:espeak-ng-bin>")
-+
-+# Handle cross-compilation: use host-native espeak-ng for data generation
-+if(CMAKE_CROSSCOMPILING)
-+  # Try to find a host-native espeak-ng binary
-+  find_program(HOST_ESPEAK_NG espeak-ng)
-+  if(HOST_ESPEAK_NG)
-+    message(STATUS "Cross-compilation detected: Using host espeak-ng binary at ${HOST_ESPEAK_NG}")
-+    set(ESPEAK_RUN_CMD ${ESPEAK_RUN_ENV} ${HOST_ESPEAK_NG})
-+  else()
-+    message(WARNING "Cross-compilation detected but no host espeak-ng found. Data generation may fail.")
-+    message(WARNING "Please install espeak-ng on the host system or provide pre-built data files.")
-+    set(ESPEAK_RUN_CMD ${ESPEAK_RUN_ENV} $ENV{VALGRIND} "$<TARGET_FILE:espeak-ng-bin>")
-+  endif()
-+else()
-+  set(ESPEAK_RUN_CMD ${ESPEAK_RUN_ENV} $ENV{VALGRIND} "$<TARGET_FILE:espeak-ng-bin>")
-+endif()
- 
- add_custom_command(
-   OUTPUT "${DATA_DIST_DIR}/intonations"
 diff --git a/src/speechPlayer/include/speechPlayer.h b/src/speechPlayer/include/speechPlayer.h
-index 2f5a9b69..eabcaab3 100644
+index 2f5a9b69..3d7a5d8d 100644
 --- a/src/speechPlayer/include/speechPlayer.h
 +++ b/src/speechPlayer/include/speechPlayer.h
 @@ -57,7 +57,7 @@ typedef void* speechPlayer_handle_t;
@@ -35,7 +7,7 @@ index 2f5a9b69..eabcaab3 100644
  speechPlayer_handle_t speechPlayer_initialize(int sampleRate);
  void speechPlayer_queueFrame(speechPlayer_handle_t playerHandle, speechPlayer_frame_t* framePtr, unsigned int minFrameDuration, unsigned int fadeDuration, int userIndex, bool purgeQueue);
 -int speechPlayer_synthesize(speechPlayer_handle_t playerHandle, unsigned int sampleCount, sample* sampleBuf); 
-+int speechPlayer_synthesize(speechPlayer_handle_t playerHandle, unsigned int sampleCount, ::sample* sampleBuf);
++int speechPlayer_synthesize(speechPlayer_handle_t playerHandle, unsigned int sampleCount, ::sample* sampleBuf); 
  int speechPlayer_getLastIndex(speechPlayer_handle_t playerHandle);
  void speechPlayer_terminate(speechPlayer_handle_t playerHandle);
  
@@ -53,7 +25,7 @@ index 30a970c4..c0ac52c0 100644
  }
  
 diff --git a/src/speechPlayer/src/speechPlayer.h b/src/speechPlayer/src/speechPlayer.h
-index d19d695e..271f2af3 100644
+index d19d695e..4c0a8780 100644
 --- a/src/speechPlayer/src/speechPlayer.h
 +++ b/src/speechPlayer/src/speechPlayer.h
 @@ -27,7 +27,7 @@ typedef void* speechPlayer_handle_t;
@@ -61,7 +33,7 @@ index d19d695e..271f2af3 100644
  speechPlayer_handle_t speechPlayer_initialize(int sampleRate);
  void speechPlayer_queueFrame(speechPlayer_handle_t playerHandle, speechPlayer_frame_t* framePtr, unsigned int minFrameDuration, unsigned int fadeDuration, int userIndex, bool purgeQueue);
 -int speechPlayer_synthesize(speechPlayer_handle_t playerHandle, unsigned int sampleCount, sample* sampleBuf); 
-+int speechPlayer_synthesize(speechPlayer_handle_t playerHandle, unsigned int sampleCount, ::sample* sampleBuf);
++int speechPlayer_synthesize(speechPlayer_handle_t playerHandle, unsigned int sampleCount, ::sample* sampleBuf); 
  int speechPlayer_getLastIndex(speechPlayer_handle_t playerHandle);
  void speechPlayer_terminate(speechPlayer_handle_t playerHandle);
  

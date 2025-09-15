@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "espeak-ng",
   "version": "1.52.0",
-  "port-version": 1,
+  "port-version": 2,
   "description": "eSpeak NG is an open source speech synthesizer that supports more than hundred languages and accents",
   "homepage": "https://github.com/espeak-ng/espeak-ng",
   "license": "GPL-3.0-or-later",

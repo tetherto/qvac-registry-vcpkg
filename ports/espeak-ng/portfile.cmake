@@ -6,10 +6,10 @@ vcpkg_from_github(
     HEAD_REF master
     PATCHES
         0001-fix-sonic-fetchcontent.patch
-        0002-fix-android-build.patch
-        0003-fix-mac-cross-compilation.patch
-        0004-fix-tests-not-available.patch
-        0005-fix-compatibility-header.patch
+        0002-fix-speechplayer-api.patch
+        0003-fix-tests-not-available.patch
+        0004-fix-compatibility-header.patch
+        0005-remove-data-generation.patch
 )
 
 vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
