@@ -1,8 +1,7 @@
-vcpkg_from_github(
+vcpkg_from_git(
   OUT_SOURCE_PATH SOURCE_PATH
-  REPO tetherto/qvac-ext-lib-llama.cpp
-  REF b${VERSION}
-  SHA512 c869a45e809c367cae6122bfc26c26f16767b010f2da804eb6d20eab8fc9ee8a6fa9c35d04792d0dc1e7483a1b552441027a96ebd30cfb8ac455a3da52801f59
+  URL /luksmap/Code/llamacpp_tether
+  REF 9aa7017bebcdd500dc266689b837f2e26695a5fc
 )
 
 if (VCPKG_TARGET_IS_ANDROID)
