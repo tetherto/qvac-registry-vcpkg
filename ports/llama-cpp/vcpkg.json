@@ -1,6 +1,6 @@
 {
   "name": "llama-cpp",
-  "version": "6435.1.1",
+  "version": "6435.2.0",
   "description": "LLM inference in C/C++",
   "homepage": "https://github.com/ggml-org/llama.cpp",
   "license": "MIT",
@@ -17,5 +17,10 @@
       "name": "vcpkg-cmake-config",
       "host": true
     }
-  ]
+  ],
+  "features": {
+    "force-profiler": {
+      "description": "Force vk performance logging in ggml"
+    }
+  }
 }
