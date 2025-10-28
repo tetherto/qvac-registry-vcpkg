@@ -10,6 +10,14 @@ set(ONNXRUNTIME_PATCHES
   "06-fix-array-bounds-issue-ios-sim.patch"
 )
 
+# Add extra patches only for Windows builds
+if("dml-ep" IN_LIST FEATURES)
+  message(STATUS "Applying Windows-specific patches (DirectML)...")
+  list(APPEND ONNXRUNTIME_PATCHES
+    "07-fix-dml-export.patch"
+  )
+endif()
+
 # Add extra patches only for Apple builds
 if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR VCPKG_CMAKE_SYSTEM_NAME STREQUAL "iOS")
   message(STATUS "Applying Apple-specific patches (CoreML)...")
@@ -24,8 +32,7 @@ if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
   message(STATUS "Applying Android-specific patches (NNAPI)...")
   list(APPEND ONNXRUNTIME_PATCHES
     "07-fix-nnapi-export.patch"
-  )
-
+  ) 
 endif()
 
 vcpkg_from_github(
@@ -93,6 +100,7 @@ vcpkg_check_features(
     FEATURES
       nnapi-ep onnxruntime_USE_NNAPI_BUILTIN
       coreml-ep onnxruntime_USE_COREML
+      dml-ep onnxruntime_USE_DML
       tests onnxruntime_BUILD_UNIT_TESTS
 )
 
