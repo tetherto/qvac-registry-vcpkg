@@ -109,6 +109,7 @@ vcpkg_cmake_configure(
   SOURCE_PATH "${SOURCE_PATH}/cmake"
   OPTIONS
     -Donnxruntime_USE_VCPKG=ON
+    -DFETCHCONTENT_FULLY_DISCONNECTED=OFF
     -Donnxruntime_BUILD_SHARED_LIB=ON
     -Donnxruntime_ENABLE_BITCODE=OFF
     -Donnxruntime_ENABLE_PYTHON=OFF
