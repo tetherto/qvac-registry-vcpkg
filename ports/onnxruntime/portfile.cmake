@@ -114,7 +114,7 @@ vcpkg_cmake_configure(
     -Donnxruntime_ENABLE_PYTHON=OFF
     -Donnxruntime_DISABLE_RTTI=OFF
     -Donnxruntime_DISABLE_EXCEPTIONS=OFF
-    # -Donnxruntime_MINIMAL_BUILD=ON
+    -Donnxruntime_MINIMAL_BUILD=ON
     ${FEATURE_OPTIONS}
     ${ANDROID_BUILD_OPTIONS}
     ${APPLE_BUILD_OPTIONS}
