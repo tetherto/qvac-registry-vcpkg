@@ -52,8 +52,8 @@ if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
   set(ANDROID_BUILD_OPTIONS
     -DMLAS_USE_EIGEN_BFLOAT16=ON
     # -Donnxruntime_ENABLE_ANDROID_NNAPI=ON
-    -Donnxruntime_USE_NEON=ON
-    -Donnxruntime_USE_OPENMP=ON
+    # -Donnxruntime_USE_NEON=ON
+    # -Donnxruntime_USE_OPENMP=ON
   )
 endif()
 
