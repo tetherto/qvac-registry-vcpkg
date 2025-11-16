@@ -24,12 +24,24 @@ index 2714e6f59d..62bfea1b0b 100644
 +  # Fix export dependencies: Exclude onnx and onnx_proto from export set
 +  # as they are not in any export set themselves when using vcpkg
 +  # This prevents: CMake Error: install(EXPORT ...) includes target which requires target that is not in any export set
++  # We prevent CMake from trying to export these targets by ensuring they're not in the export set
++  # Since install(EXPORT) happens at install time (after build), we can safely modify the target properties
 +  if(TARGET onnxruntime_static)
-+    # Temporarily remove onnx and onnx_proto from interface link libraries to exclude them from export
++    # Store original properties
++    get_target_property(ORIG_LINK_LIBS onnxruntime_static LINK_LIBRARIES)
++    if(ORIG_LINK_LIBS)
++      # Create modified list without onnx and onnx_proto targets
++      set(MODIFIED_LIBS ${ORIG_LINK_LIBS})
++      list(REMOVE_ITEM MODIFIED_LIBS onnx onnx_proto)
++      # Set modified libraries (this happens at install time, so build is already complete)
++      set_target_properties(onnxruntime_static PROPERTIES LINK_LIBRARIES "${MODIFIED_LIBS}")
++    endif()
++    # Also handle INTERFACE_LINK_LIBRARIES
 +    get_target_property(ORIG_INTERFACE_LIBS onnxruntime_static INTERFACE_LINK_LIBRARIES)
 +    if(ORIG_INTERFACE_LIBS)
-+      list(REMOVE_ITEM ORIG_INTERFACE_LIBS onnx onnx_proto)
-+      set_target_properties(onnxruntime_static PROPERTIES INTERFACE_LINK_LIBRARIES "${ORIG_INTERFACE_LIBS}")
++      set(MODIFIED_INTERFACE_LIBS ${ORIG_INTERFACE_LIBS})
++      list(REMOVE_ITEM MODIFIED_INTERFACE_LIBS onnx onnx_proto)
++      set_target_properties(onnxruntime_static PROPERTIES INTERFACE_LINK_LIBRARIES "${MODIFIED_INTERFACE_LIBS}")
 +    endif()
 +  endif()
 +
