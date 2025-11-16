@@ -1,5 +1,5 @@
 diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 2714e6f59d..62bfea1b0b 100644
+index 2714e6f59d..6b9014a26f 100644
 --- a/cmake/CMakeLists.txt
 +++ b/cmake/CMakeLists.txt
 @@ -947,11 +947,11 @@ if (onnxruntime_USE_JSEP)
@@ -16,7 +16,7 @@ index 2714e6f59d..62bfea1b0b 100644
      endif()
  
      list(APPEND ONNXRUNTIME_PROVIDER_NAMES qnn)
-@@ -1934,6 +1934,19 @@ if(TARGET onnxruntime)
+@@ -1934,6 +1934,31 @@ if(TARGET onnxruntime)
    string(APPEND PROJECT_CONFIG_CONTENT
          "include(\"\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}Targets.cmake\")")
    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/PROJECT_CONFIG_FILE" ${PROJECT_CONFIG_CONTENT})
