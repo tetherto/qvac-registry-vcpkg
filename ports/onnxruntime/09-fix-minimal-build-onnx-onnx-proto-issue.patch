@@ -1,0 +1,38 @@
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index 2714e6f59d..62bfea1b0b 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -947,11 +947,11 @@ if (onnxruntime_USE_JSEP)
+     list(APPEND ONNXRUNTIME_PROVIDER_NAMES js)
+ endif()
+ if (onnxruntime_USE_QNN OR onnxruntime_USE_QNN_INTERFACE)
+-    
++
+     if(onnxruntime_USE_QNN)
+         list(APPEND ORT_PROVIDER_FLAGS -DUSE_QNN=1)
+     else()
+-        list(APPEND ORT_EXTRA_INTERFACE_FLAGS -DUSE_QNN=1) 
++        list(APPEND ORT_EXTRA_INTERFACE_FLAGS -DUSE_QNN=1)
+     endif()
+ 
+     list(APPEND ONNXRUNTIME_PROVIDER_NAMES qnn)
+@@ -1934,6 +1934,19 @@ if(TARGET onnxruntime)
+   string(APPEND PROJECT_CONFIG_CONTENT
+         "include(\"\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}Targets.cmake\")")
+   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/PROJECT_CONFIG_FILE" ${PROJECT_CONFIG_CONTENT})
++
++  # Fix export dependencies: Exclude onnx and onnx_proto from export set
++  # as they are not in any export set themselves when using vcpkg
++  # This prevents: CMake Error: install(EXPORT ...) includes target which requires target that is not in any export set
++  if(TARGET onnxruntime_static)
++    # Temporarily remove onnx and onnx_proto from interface link libraries to exclude them from export
++    get_target_property(ORIG_INTERFACE_LIBS onnxruntime_static INTERFACE_LINK_LIBRARIES)
++    if(ORIG_INTERFACE_LIBS)
++      list(REMOVE_ITEM ORIG_INTERFACE_LIBS onnx onnx_proto)
++      set_target_properties(onnxruntime_static PROPERTIES INTERFACE_LINK_LIBRARIES "${ORIG_INTERFACE_LIBS}")
++    endif()
++  endif()
++
+   install(EXPORT ${PROJECT_NAME}Targets
+     NAMESPACE ${PROJECT_NAME}::
+     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
