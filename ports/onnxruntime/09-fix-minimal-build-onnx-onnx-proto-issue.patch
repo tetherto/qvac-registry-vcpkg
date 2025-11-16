@@ -1,5 +1,5 @@
 diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 2714e6f59d..0cdcfd65c6 100644
+index 2714e6f59d..d503c15c4d 100644
 --- a/cmake/CMakeLists.txt
 +++ b/cmake/CMakeLists.txt
 @@ -947,11 +947,11 @@ if (onnxruntime_USE_JSEP)
@@ -16,7 +16,7 @@ index 2714e6f59d..0cdcfd65c6 100644
      endif()
  
      list(APPEND ONNXRUNTIME_PROVIDER_NAMES qnn)
-@@ -1934,6 +1934,17 @@ if(TARGET onnxruntime)
+@@ -1934,6 +1934,34 @@ if(TARGET onnxruntime)
    string(APPEND PROJECT_CONFIG_CONTENT
          "include(\"\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}Targets.cmake\")")
    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/PROJECT_CONFIG_FILE" ${PROJECT_CONFIG_CONTENT})
@@ -24,11 +24,28 @@ index 2714e6f59d..0cdcfd65c6 100644
 +  # Fix export dependencies: Add onnx and onnx_proto to the export set
 +  # This prevents: CMake Error: install(EXPORT ...) includes target which requires target that is not in any export set
 +  # We need to install these targets to the same export set before installing onnxruntimeTargets
++  # However, we must clean up their INTERFACE properties to remove build directory paths
 +  if(TARGET onnx)
-+    install(TARGETS onnx EXPORT ${PROJECT_NAME}Targets)
++    # Clear build-specific properties that can't be exported
++    set_target_properties(onnx PROPERTIES
++      INTERFACE_INCLUDE_DIRECTORIES ""
++      INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ""
++    )
++    install(TARGETS onnx EXPORT ${PROJECT_NAME}Targets
++      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 +  endif()
 +  if(TARGET onnx_proto)
-+    install(TARGETS onnx_proto EXPORT ${PROJECT_NAME}Targets)
++    # Clear build-specific properties that can't be exported
++    set_target_properties(onnx_proto PROPERTIES
++      INTERFACE_INCLUDE_DIRECTORIES ""
++      INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ""
++    )
++    install(TARGETS onnx_proto EXPORT ${PROJECT_NAME}Targets
++      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 +  endif()
 +
    install(EXPORT ${PROJECT_NAME}Targets
