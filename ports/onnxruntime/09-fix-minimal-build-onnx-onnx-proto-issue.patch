@@ -1,5 +1,5 @@
 diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 2714e6f59d..6b9014a26f 100644
+index 2714e6f59d..0cdcfd65c6 100644
 --- a/cmake/CMakeLists.txt
 +++ b/cmake/CMakeLists.txt
 @@ -947,11 +947,11 @@ if (onnxruntime_USE_JSEP)
@@ -16,33 +16,19 @@ index 2714e6f59d..6b9014a26f 100644
      endif()
  
      list(APPEND ONNXRUNTIME_PROVIDER_NAMES qnn)
-@@ -1934,6 +1934,31 @@ if(TARGET onnxruntime)
+@@ -1934,6 +1934,17 @@ if(TARGET onnxruntime)
    string(APPEND PROJECT_CONFIG_CONTENT
          "include(\"\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}Targets.cmake\")")
    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/PROJECT_CONFIG_FILE" ${PROJECT_CONFIG_CONTENT})
 +
-+  # Fix export dependencies: Exclude onnx and onnx_proto from export set
-+  # as they are not in any export set themselves when using vcpkg
++  # Fix export dependencies: Add onnx and onnx_proto to the export set
 +  # This prevents: CMake Error: install(EXPORT ...) includes target which requires target that is not in any export set
-+  # We prevent CMake from trying to export these targets by ensuring they're not in the export set
-+  # Since install(EXPORT) happens at install time (after build), we can safely modify the target properties
-+  if(TARGET onnxruntime_static)
-+    # Store original properties
-+    get_target_property(ORIG_LINK_LIBS onnxruntime_static LINK_LIBRARIES)
-+    if(ORIG_LINK_LIBS)
-+      # Create modified list without onnx and onnx_proto targets
-+      set(MODIFIED_LIBS ${ORIG_LINK_LIBS})
-+      list(REMOVE_ITEM MODIFIED_LIBS onnx onnx_proto)
-+      # Set modified libraries (this happens at install time, so build is already complete)
-+      set_target_properties(onnxruntime_static PROPERTIES LINK_LIBRARIES "${MODIFIED_LIBS}")
-+    endif()
-+    # Also handle INTERFACE_LINK_LIBRARIES
-+    get_target_property(ORIG_INTERFACE_LIBS onnxruntime_static INTERFACE_LINK_LIBRARIES)
-+    if(ORIG_INTERFACE_LIBS)
-+      set(MODIFIED_INTERFACE_LIBS ${ORIG_INTERFACE_LIBS})
-+      list(REMOVE_ITEM MODIFIED_INTERFACE_LIBS onnx onnx_proto)
-+      set_target_properties(onnxruntime_static PROPERTIES INTERFACE_LINK_LIBRARIES "${MODIFIED_INTERFACE_LIBS}")
-+    endif()
++  # We need to install these targets to the same export set before installing onnxruntimeTargets
++  if(TARGET onnx)
++    install(TARGETS onnx EXPORT ${PROJECT_NAME}Targets)
++  endif()
++  if(TARGET onnx_proto)
++    install(TARGETS onnx_proto EXPORT ${PROJECT_NAME}Targets)
 +  endif()
 +
    install(EXPORT ${PROJECT_NAME}Targets
