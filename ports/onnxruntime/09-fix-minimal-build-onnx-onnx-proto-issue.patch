@@ -1,5 +1,5 @@
 diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 2714e6f59d..da75e8209c 100644
+index 2714e6f59d..3928a0af6d 100644
 --- a/cmake/CMakeLists.txt
 +++ b/cmake/CMakeLists.txt
 @@ -947,11 +947,11 @@ if (onnxruntime_USE_JSEP)
@@ -16,23 +16,26 @@ index 2714e6f59d..da75e8209c 100644
      endif()
  
      list(APPEND ONNXRUNTIME_PROVIDER_NAMES qnn)
-@@ -1934,6 +1934,22 @@ if(TARGET onnxruntime)
+@@ -1934,6 +1934,25 @@ if(TARGET onnxruntime)
    string(APPEND PROJECT_CONFIG_CONTENT
          "include(\"\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}Targets.cmake\")")
    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/PROJECT_CONFIG_FILE" ${PROJECT_CONFIG_CONTENT})
 +
 +  # Fix export dependencies: onnx and onnx_proto should not be exported
-+  # They are internal dependencies that conflict with vcpkg's separate onnx package
-+  # Make them PRIVATE instead of PUBLIC/INTERFACE to exclude them from export
++  # They are internal dependencies that will be found via vcpkg's ONNX package
++  # Remove them from LINK_LIBRARIES to prevent CMake from trying to export them
 +  if(TARGET onnxruntime_static)
-+    # Get current link libraries
++    # Remove from LINK_LIBRARIES
 +    get_target_property(LINK_LIBS onnxruntime_static LINK_LIBRARIES)
 +    if(LINK_LIBS)
-+      # Replace onnx and onnx_proto with $<LINK_ONLY:...> generator expression
-+      # This makes them private dependencies that won't be exported
-+      list(TRANSFORM LINK_LIBS REPLACE "^onnx$" "$<LINK_ONLY:onnx>")
-+      list(TRANSFORM LINK_LIBS REPLACE "^onnx_proto$" "$<LINK_ONLY:onnx_proto>")
++      list(REMOVE_ITEM LINK_LIBS onnx onnx_proto)
 +      set_target_properties(onnxruntime_static PROPERTIES LINK_LIBRARIES "${LINK_LIBS}")
++    endif()
++    # Also remove from INTERFACE_LINK_LIBRARIES if present
++    get_target_property(INTERFACE_LIBS onnxruntime_static INTERFACE_LINK_LIBRARIES)
++    if(INTERFACE_LIBS)
++      list(REMOVE_ITEM INTERFACE_LIBS onnx onnx_proto)
++      set_target_properties(onnxruntime_static PROPERTIES INTERFACE_LINK_LIBRARIES "${INTERFACE_LIBS}")
 +    endif()
 +  endif()
 +
