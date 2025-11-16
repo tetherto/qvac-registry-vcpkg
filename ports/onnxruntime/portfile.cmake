@@ -30,12 +30,12 @@ if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR VCPKG_CMAKE_SYSTEM_NAME STREQUAL
 endif()
 
 # Add extra patches only for Android builds
-if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
-  message(STATUS "Applying Android-specific patches (NNAPI)...")
-  list(APPEND ONNXRUNTIME_PATCHES
-    "07-fix-nnapi-export.patch"
-  ) 
-endif()
+# if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
+#   message(STATUS "Applying Android-specific patches (NNAPI)...")
+#   list(APPEND ONNXRUNTIME_PATCHES
+#     "07-fix-nnapi-export.patch"
+#   ) 
+# endif()
 
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
