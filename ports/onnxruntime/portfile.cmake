@@ -11,7 +11,7 @@ set(ONNXRUNTIME_PATCHES
   "09-fix-minimal-build-onnx-onnx-proto-issue.patch"
 )
   
-if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
+if(NOT VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
   list(APPEND ONNXRUNTIME_PATCHES
     "10-fix-logger-maybe-unused.patch"
   )
