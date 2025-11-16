@@ -9,8 +9,13 @@ set(ONNXRUNTIME_PATCHES
   "05-add-dependencies-to-config.patch"
   "06-fix-array-bounds-issue-ios-sim.patch"
   "09-fix-minimal-build-onnx-onnx-proto-issue.patch"
-  "10-fix-logger-maybe-unused.patch"
 )
+  
+if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
+  list(APPEND ONNXRUNTIME_PATCHES
+    "10-fix-logger-maybe-unused.patch"
+  )
+endif()
 
 # Add extra patches only for Windows builds
 if("dml-ep" IN_LIST FEATURES)
