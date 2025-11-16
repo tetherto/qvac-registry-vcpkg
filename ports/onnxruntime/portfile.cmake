@@ -51,7 +51,7 @@ if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
 
   set(ANDROID_BUILD_OPTIONS
     -DMLAS_USE_EIGEN_BFLOAT16=ON
-    -Donnxruntime_ENABLE_ANDROID_NNAPI=ON
+    # -Donnxruntime_ENABLE_ANDROID_NNAPI=ON
     -Donnxruntime_USE_NEON=ON
     -Donnxruntime_USE_OPENMP=ON
   )
@@ -100,7 +100,7 @@ endif()
 vcpkg_check_features(
   OUT_FEATURE_OPTIONS FEATURE_OPTIONS
     FEATURES
-      nnapi-ep onnxruntime_USE_NNAPI_BUILTIN
+      # nnapi-ep onnxruntime_USE_NNAPI_BUILTIN
       coreml-ep onnxruntime_USE_COREML
       dml-ep onnxruntime_USE_DML
       tests onnxruntime_BUILD_UNIT_TESTS
