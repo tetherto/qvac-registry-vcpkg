@@ -9,6 +9,7 @@ set(ONNXRUNTIME_PATCHES
   "05-add-dependencies-to-config.patch"
   "06-fix-array-bounds-issue-ios-sim.patch"
   "09-fix-minimal-build-onnx-onnx-proto-issue.patch"
+  "10-fix-logger-maybe-unused.patch"
 )
 
 # Add extra patches only for Windows builds
