@@ -1,44 +1,27 @@
-diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 2714e6f59d..3928a0af6d 100644
---- a/cmake/CMakeLists.txt
-+++ b/cmake/CMakeLists.txt
-@@ -947,11 +947,11 @@ if (onnxruntime_USE_JSEP)
-     list(APPEND ONNXRUNTIME_PROVIDER_NAMES js)
- endif()
- if (onnxruntime_USE_QNN OR onnxruntime_USE_QNN_INTERFACE)
--    
-+
-     if(onnxruntime_USE_QNN)
-         list(APPEND ORT_PROVIDER_FLAGS -DUSE_QNN=1)
-     else()
--        list(APPEND ORT_EXTRA_INTERFACE_FLAGS -DUSE_QNN=1) 
-+        list(APPEND ORT_EXTRA_INTERFACE_FLAGS -DUSE_QNN=1)
+diff --git a/cmake/external/onnxruntime_external_deps.cmake b/cmake/external/onnxruntime_external_deps.cmake
+index ebf20ab21b..5140a19051 100644
+--- a/cmake/external/onnxruntime_external_deps.cmake
++++ b/cmake/external/onnxruntime_external_deps.cmake
+@@ -304,7 +304,7 @@ if(NOT TARGET Boost::mp11)
+      EXCLUDE_FROM_ALL
+      FIND_PACKAGE_ARGS NAMES Boost
+     )
+-    onnxruntime_fetchcontent_makeavailable(mp11)    
++    onnxruntime_fetchcontent_makeavailable(mp11)
+     if(NOT TARGET Boost::mp11)
+       add_library(Boost::mp11 ALIAS Boost::headers)
      endif()
- 
-     list(APPEND ONNXRUNTIME_PROVIDER_NAMES qnn)
-@@ -1934,6 +1934,25 @@ if(TARGET onnxruntime)
-   string(APPEND PROJECT_CONFIG_CONTENT
-         "include(\"\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}Targets.cmake\")")
-   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/PROJECT_CONFIG_FILE" ${PROJECT_CONFIG_CONTENT})
-+
-+  # Fix export dependencies: onnx and onnx_proto should not be exported
-+  # They are internal dependencies that will be found via vcpkg's ONNX package
-+  # Remove them from LINK_LIBRARIES to prevent CMake from trying to export them
-+  if(TARGET onnxruntime_static)
-+    # Remove from LINK_LIBRARIES
-+    get_target_property(LINK_LIBS onnxruntime_static LINK_LIBRARIES)
-+    if(LINK_LIBS)
-+      list(REMOVE_ITEM LINK_LIBS onnx onnx_proto)
-+      set_target_properties(onnxruntime_static PROPERTIES LINK_LIBRARIES "${LINK_LIBS}")
-+    endif()
-+    # Also remove from INTERFACE_LINK_LIBRARIES if present
-+    get_target_property(INTERFACE_LIBS onnxruntime_static INTERFACE_LINK_LIBRARIES)
-+    if(INTERFACE_LIBS)
-+      list(REMOVE_ITEM INTERFACE_LIBS onnx onnx_proto)
-+      set_target_properties(onnxruntime_static PROPERTIES INTERFACE_LINK_LIBRARIES "${INTERFACE_LIBS}")
-+    endif()
+@@ -532,7 +532,12 @@ onnxruntime_fetchcontent_declare(
+ if (NOT onnxruntime_MINIMAL_BUILD)
+   onnxruntime_fetchcontent_makeavailable(onnx)
+ else()
+-  include(onnx_minimal)
++  # When using vcpkg, use the ONNX package from vcpkg instead of building our own
++  if(onnxruntime_USE_VCPKG)
++    find_package(ONNX CONFIG REQUIRED)
++  else()
++    include(onnx_minimal)
 +  endif()
-+
-   install(EXPORT ${PROJECT_NAME}Targets
-     NAMESPACE ${PROJECT_NAME}::
-     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+ endif()
+ 
+ if(TARGET ONNX::onnx AND NOT TARGET onnx)
