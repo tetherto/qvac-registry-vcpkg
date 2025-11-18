@@ -112,6 +112,9 @@
           "version>=": "onnxruntime"
         }
       ]
+    },
+    "minimal-build": {
+      "description": "Build with --minimal_build option"
     }
   },
   "overrides": [

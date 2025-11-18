@@ -8,7 +8,6 @@ set(ONNXRUNTIME_PATCHES
   "04-fix-android-binary-size.patch"
   "05-add-dependencies-to-config.patch"
   "06-fix-array-bounds-issue-ios-sim.patch"
-  "09-fix-minimal-build-onnx-onnx-proto-issue.patch"
 )
   
 if(NOT VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
@@ -35,12 +34,18 @@ if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR VCPKG_CMAKE_SYSTEM_NAME STREQUAL
 endif()
 
 # Add extra patches only for Android builds
-# if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
-#   message(STATUS "Applying Android-specific patches (NNAPI)...")
-#   list(APPEND ONNXRUNTIME_PATCHES
-#     "07-fix-nnapi-export.patch"
-#   ) 
-# endif()
+if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT "minimal-build" IN_LIST FEATURES)
+  message(STATUS "Applying Android-specific patches (NNAPI)...")
+  list(APPEND ONNXRUNTIME_PATCHES
+    "07-fix-nnapi-export.patch"
+  ) 
+endif()
+
+if("minimal-build" IN_LIST FEATURES)
+  list(APPEND ONNXRUNTIME_PATCHES
+    "09-fix-minimal-build-onnx-onnx-proto-issue.patch"
+  )
+endif()
 
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
@@ -53,12 +58,11 @@ vcpkg_from_github(
 # Android build options
 set(ANDROID_BUILD_OPTIONS "")
 if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
-
   set(ANDROID_BUILD_OPTIONS
-    # -DMLAS_USE_EIGEN_BFLOAT16=ON
-    # -Donnxruntime_ENABLE_ANDROID_NNAPI=ON
-    # -Donnxruntime_USE_NEON=ON
-    # -Donnxruntime_USE_OPENMP=ON
+    -DMLAS_USE_EIGEN_BFLOAT16=ON
+    -Donnxruntime_ENABLE_ANDROID_NNAPI=ON
+    -Donnxruntime_USE_NEON=ON
+    -Donnxruntime_USE_OPENMP=ON
   )
 endif()
 
@@ -105,9 +109,10 @@ endif()
 vcpkg_check_features(
   OUT_FEATURE_OPTIONS FEATURE_OPTIONS
     FEATURES
-      # nnapi-ep onnxruntime_USE_NNAPI_BUILTIN
+      nnapi-ep onnxruntime_USE_NNAPI_BUILTIN
       coreml-ep onnxruntime_USE_COREML
       dml-ep onnxruntime_USE_DML
+      minimal-build onnxruntime_MINIMAL_BUILD
       tests onnxruntime_BUILD_UNIT_TESTS
 )
 
@@ -116,13 +121,11 @@ vcpkg_cmake_configure(
   SOURCE_PATH "${SOURCE_PATH}/cmake"
   OPTIONS
     -Donnxruntime_USE_VCPKG=ON
-    -DFETCHCONTENT_FULLY_DISCONNECTED=OFF
     -Donnxruntime_BUILD_SHARED_LIB=ON
     -Donnxruntime_ENABLE_BITCODE=OFF
     -Donnxruntime_ENABLE_PYTHON=OFF
     -Donnxruntime_DISABLE_RTTI=OFF
     -Donnxruntime_DISABLE_EXCEPTIONS=OFF
-    -Donnxruntime_MINIMAL_BUILD=ON
     ${FEATURE_OPTIONS}
     ${ANDROID_BUILD_OPTIONS}
     ${APPLE_BUILD_OPTIONS}
