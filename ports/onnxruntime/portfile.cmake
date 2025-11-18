@@ -9,12 +9,6 @@ set(ONNXRUNTIME_PATCHES
   "05-add-dependencies-to-config.patch"
   "06-fix-array-bounds-issue-ios-sim.patch"
 )
-  
-if(NOT VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
-  list(APPEND ONNXRUNTIME_PATCHES
-    "10-fix-logger-maybe-unused.patch"
-  )
-endif()
 
 # Add extra patches only for Windows builds
 if("dml-ep" IN_LIST FEATURES)
@@ -54,17 +48,6 @@ vcpkg_from_github(
   SHA512 028a7f48f41d2e8a453aae25ebc4cd769db389401937928b7d452fab5f8d7af8cb63eb4150daf79589845528f0e4c3bdfefa27af70d3630398990c9e8b85387b
   PATCHES ${ONNXRUNTIME_PATCHES}
 )
-
-# Android build options
-set(ANDROID_BUILD_OPTIONS "")
-if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android")
-  set(ANDROID_BUILD_OPTIONS
-    -DMLAS_USE_EIGEN_BFLOAT16=ON
-    -Donnxruntime_ENABLE_ANDROID_NNAPI=ON
-    -Donnxruntime_USE_NEON=ON
-    -Donnxruntime_USE_OPENMP=ON
-  )
-endif()
 
 # Apple build options
 set(APPLE_BUILD_OPTIONS "")
@@ -127,7 +110,6 @@ vcpkg_cmake_configure(
     -Donnxruntime_DISABLE_RTTI=OFF
     -Donnxruntime_DISABLE_EXCEPTIONS=OFF
     ${FEATURE_OPTIONS}
-    ${ANDROID_BUILD_OPTIONS}
     ${APPLE_BUILD_OPTIONS}
 )
 
