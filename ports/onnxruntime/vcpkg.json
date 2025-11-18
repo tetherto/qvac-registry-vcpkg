@@ -94,6 +94,9 @@
         }
       ]
     },
+    "minimal-build": {
+      "description": "Build with --minimal_build option"
+    },
     "nnapi-ep": {
       "description": "Build with Android NNAPI EP",
       "supports": "android"
@@ -112,9 +115,6 @@
           "version>=": "onnxruntime"
         }
       ]
-    },
-    "minimal-build": {
-      "description": "Build with --minimal_build option"
     }
   },
   "overrides": [
