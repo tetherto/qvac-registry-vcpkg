@@ -215,7 +215,7 @@ function(vcpkg_cmake_configure)
         endif()
     endforeach()
 
-    vcpkg_list(PREPEND arg_OPTIONS "-DFETCHCONTENT_FULLY_DISCONNECTED=OFF")
+    vcpkg_list(PREPEND arg_OPTIONS "-DFETCHCONTENT_FULLY_DISCONNECTED=ON")
 
     # Allow overrides / additional configuration variables from triplets
     if(DEFINED VCPKG_CMAKE_CONFIGURE_OPTIONS)
