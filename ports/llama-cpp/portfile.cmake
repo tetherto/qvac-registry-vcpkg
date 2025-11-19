@@ -44,11 +44,14 @@ else()
   list(APPEND PLATFORM_OPTIONS -DGGML_VULKAN=ON)
 endif()
 
-if(VCPKG_TARGET_IS_ANDROID)
+if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX)
+  set(DL_BACKENDS ON)
   list(APPEND PLATFORM_OPTIONS 
     -DGGML_BACKEND_DL=ON
     -DGGML_CPU_ALL_VARIANTS=ON
     -DGGML_CPU_REPACK=ON)
+else()
+  set(DL_BACKENDS OFF)
 endif()
 
 if (VCPKG_TARGET_IS_ANDROID)
@@ -82,6 +85,7 @@ vcpkg_cmake_config_fixup(
   PACKAGE_NAME llama)
 vcpkg_cmake_config_fixup(
   PACKAGE_NAME ggml)
+
 vcpkg_copy_pdbs()
 vcpkg_fixup_pkgconfig()
 
@@ -97,7 +101,7 @@ endif()
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
-if (NOT VCPKG_TARGET_IS_ANDROID AND VCPKG_LIBRARY_LINKAGE MATCHES "static")
+if (NOT DL_BACKENDS AND VCPKG_LIBRARY_LINKAGE MATCHES "static")
   file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/bin")
   file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/bin")
 endif()
