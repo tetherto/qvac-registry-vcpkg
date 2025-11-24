@@ -1,20 +1,51 @@
-set(VERSION "a8d002cfd879315632a579e73f0148d06959de36")
 
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
-  REPO ggml-org/whisper.cpp
-  REF ${VERSION}
-  SHA512 aea24debb836131d14d362ff78c6d12cfe2e82188340e69e71e6874a1fa51fa9405f2c03fe43888b1ff4183f4288bf64f07dd1106224b0108c3e0f844989a409
+  REPO tetherto/qvac-ext-lib-whisper.cpp
+  REF v${VERSION}
+  SHA512 f3abdcda4d8fa1733447c3a4f5f6530aae5784bd59295e6aa74d739b9fe6e57930cbf301cb2d3f0c6f0a8725d64349666eca93d6992f63fe109c4f43c91c4c7f
   HEAD_REF master
   PATCHES
     0001-fix-vcpkg-build.patch
     0002-fix-apple-silicon-cross-compile.patch
+    0003-fix-windows-pthread.patch
 )
+
+if (VCPKG_TARGET_IS_ANDROID)
+  # NDK only comes with C headers.
+  # Make sure C++ header exists, it will be used by ggml tensor library.
+  # Need to determine installed vulkan version and download correct headers
+  include(${CMAKE_CURRENT_LIST_DIR}/android-vulkan-version.cmake)
+  detect_ndk_vulkan_version()
+  message(STATUS "Using Vulkan C++ wrappers from version: ${vulkan_version}")
+  file(DOWNLOAD
+    "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v${vulkan_version}.tar.gz"
+    "${SOURCE_PATH}/vulkan-sdk-${vulkan_version}.tar.gz"
+    TLS_VERIFY ON
+  )
+
+  file(ARCHIVE_EXTRACT
+    INPUT "${SOURCE_PATH}/vulkan-sdk-${vulkan_version}.tar.gz"
+    DESTINATION "${SOURCE_PATH}"
+  )
+
+  # Copy the Vulkan headers to where the build system expects them
+  # The build system looks for vulkan/vulkan.hpp with include path pointing to ggml/src/
+  file(COPY "${SOURCE_PATH}/Vulkan-Headers-${vulkan_version}/include/"
+       DESTINATION "${SOURCE_PATH}/ggml/src/")
+  
+  # Clean up the temporary extracted directory
+  file(REMOVE_RECURSE "${SOURCE_PATH}/Vulkan-Headers-${vulkan_version}")
+endif()
 
 set(PLATFORM_OPTIONS)
 
-if (VCPKG_TARGET_IS_ANDROID)
-  list(APPEND PLATFORM_OPTIONS -DWHISPER_NO_AVX=ON -DWHISPER_NO_AVX2=ON -DWHISPER_NO_FMA=ON)
+if (VCPKG_TARGET_IS_OSX OR VCPKG_TARGET_IS_IOS)
+  list(APPEND PLATFORM_OPTIONS -DGGML_METAL=ON)
+elseif("vulkan" IN_LIST FEATURES)
+  list(APPEND PLATFORM_OPTIONS -DGGML_VULKAN=ON)
+else()
+  list(APPEND PLATFORM_OPTIONS -DGGML_VULKAN=OFF)
 endif()
 
 vcpkg_cmake_configure(
