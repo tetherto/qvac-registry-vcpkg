@@ -1,9 +1,8 @@
 {
   "name": "whisper-cpp",
-  "version": "1.7.6",
-  "port-version": 2,
+  "version": "1.7.5.1",
   "description": "High-performance inference of OpenAI's Whisper automatic speech recognition (ASR) model",
-  "homepage": "https://github.com/ggml-org/whisper.cpp",
+  "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp",
   "license": "MIT",
   "dependencies": [
     {
@@ -14,5 +13,16 @@
       "name": "vcpkg-cmake-config",
       "host": true
     }
-  ]
+  ],
+  "features": {
+    "vulkan": {
+      "description": "Enable Vulkan GPU acceleration",
+      "dependencies": [
+        {
+          "name": "vulkan",
+          "platform": "!osx & !ios"
+        }
+      ]
+    }
+  }
 }
