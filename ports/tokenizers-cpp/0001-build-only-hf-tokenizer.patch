@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index ddd2042..2fcc4da 100644
+index ddd2042..b806c58 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -93,10 +93,13 @@ endif ()
@@ -19,7 +19,7 @@ index ddd2042..2fcc4da 100644
  
  if(MSVC)
    set(TOKENIZERS_RUST_LIB "${TOKENIZERS_CPP_CARGO_BINARY_DIR}/tokenizers_c.lib")
-@@ -141,35 +144,55 @@ add_custom_command(
+@@ -141,35 +144,83 @@ add_custom_command(
  
  set(
    TOKENIZER_CPP_SRCS
@@ -39,7 +39,11 @@ index ddd2042..2fcc4da 100644
  add_library(tokenizers_cpp STATIC ${TOKENIZER_CPP_SRCS})
 -target_include_directories(tokenizers_cpp PRIVATE sentencepiece/src)
 -target_include_directories(tokenizers_cpp PRIVATE msgpack/include)
- target_include_directories(tokenizers_cpp PUBLIC ${TOKENIZERS_CPP_INCLUDE})
+-target_include_directories(tokenizers_cpp PUBLIC ${TOKENIZERS_CPP_INCLUDE})
++target_include_directories(tokenizers_cpp PUBLIC
++  $<BUILD_INTERFACE:${TOKENIZERS_CPP_INCLUDE}>
++  $<INSTALL_INTERFACE:include>
++)
 +
  if (MLC_ENABLE_SENTENCEPIECE_TOKENIZER STREQUAL "ON")
 -    target_compile_definitions(tokenizers_cpp PUBLIC MLC_ENABLE_SENTENCEPIECE_TOKENIZER)
@@ -97,3 +101,28 @@ index ddd2042..2fcc4da 100644
 +if (MLC_ENABLE_SENTENCEPIECE_TOKENIZER STREQUAL "ON")
 +  target_link_libraries(tokenizers_cpp PRIVATE sentencepiece-static)
 +endif ()
++
++# Install the library targets
++install(TARGETS tokenizers_cpp tokenizers_c
++  EXPORT tokenizers_cpp_targets
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  RUNTIME DESTINATION bin
++)
++
++# Install the Rust library file
++install(FILES ${TOKENIZERS_RUST_LIB}
++  DESTINATION lib
++)
++
++# Install headers
++install(DIRECTORY ${TOKENIZERS_CPP_INCLUDE}/
++  DESTINATION include
++)
++
++# Export the targets for find_package support
++install(EXPORT tokenizers_cpp_targets
++  FILE tokenizers_cpp-config.cmake
++  NAMESPACE tokenizers::
++  DESTINATION lib/cmake/tokenizers_cpp
++)
