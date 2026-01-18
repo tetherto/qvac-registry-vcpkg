@@ -57,7 +57,7 @@
       "port-version": 0
     },
     "qvac-lib-inference-addon-cpp": {
-      "baseline": "1.0.0",
+      "baseline": "0.12.2",
       "port-version": 0
     },
     "qvac-lint-cpp": {
