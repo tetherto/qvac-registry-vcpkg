@@ -81,6 +81,33 @@ vcpkg_cmake_configure(
 )
 
 vcpkg_cmake_install()
+
+# Namespace ggml backend shared libs to avoid collisions with system installs.
+set(QVAC_GGML_PREFIX "libqvac-ggml-")
+set(GGML_PREFIX "libggml-")
+
+function(rename_ggml_backends dir)
+  if (EXISTS "${dir}")
+    file(GLOB GGML_BACKENDS
+      "${dir}/${GGML_PREFIX}*.so"
+      "${dir}/${GGML_PREFIX}*.so.*"
+      "${dir}/${GGML_PREFIX}*.dylib"
+      "${dir}/${GGML_PREFIX}*.dylib.*"
+      "${dir}/${GGML_PREFIX}*.dll"
+    )
+    foreach(lib_path IN LISTS GGML_BACKENDS)
+      get_filename_component(lib_name "${lib_path}" NAME)
+      string(REPLACE "${GGML_PREFIX}" "${QVAC_GGML_PREFIX}" new_name "${lib_name}")
+      file(RENAME "${lib_path}" "${dir}/${new_name}")
+    endforeach()
+  endif()
+endfunction()
+
+rename_ggml_backends("${CURRENT_PACKAGES_DIR}/bin")
+rename_ggml_backends("${CURRENT_PACKAGES_DIR}/lib")
+rename_ggml_backends("${CURRENT_PACKAGES_DIR}/debug/bin")
+rename_ggml_backends("${CURRENT_PACKAGES_DIR}/debug/lib")
+
 vcpkg_cmake_config_fixup(
   PACKAGE_NAME llama)
 vcpkg_cmake_config_fixup(
