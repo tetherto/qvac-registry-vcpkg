@@ -2,7 +2,7 @@ vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO mlc-ai/tokenizers-cpp
     REF tags/v${VERSION}
-    SHA512 bfe313afefdb9fb2876febe81ef1e5c46a6f3a691c047df87567711b03502e490af8b1decd427483d4496aaf8b46472358dd85b01463a88b6565cc93afdc712e
+    SHA512 e4c1a7a1f69482c4d923dbd91b1479c137dcc8f7ac8a2033f270eaf1f440d24c4f2e775a8fe4985f30cf30704de04c3102155990ce8588c76cafe4c0d33b345d
     PATCHES
         0001-build-only-hf-tokenizer.patch
         0002-fix-rust-build.patch
