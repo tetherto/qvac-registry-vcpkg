@@ -1,0 +1,28 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b806c58..582175a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -106,6 +106,14 @@ if(MSVC)
+ else()
+   set(TOKENIZERS_RUST_LIB "${TOKENIZERS_CPP_CARGO_BINARY_DIR}/libtokenizers_c.a")
+ endif()
++add_library(tokenizers-rust STATIC IMPORTED)
++set_target_properties(
++  tokenizers-rust
++  PROPERTIES
++    IMPORTED_LOCATION "${TOKENIZERS_RUST_LIB}"
++    INTERFACE_LINK_LIBRARIES ""
++)
++
+ set(TOKENIZERS_CPP_INCLUDE ${TOKENIZERS_CPP_ROOT}/include)
+ 
+ # Find cargo executable
+@@ -193,7 +201,7 @@ if (MLC_ENABLE_SENTENCEPIECE_TOKENIZER STREQUAL "ON")
+ endif ()
+ 
+ add_library(tokenizers_c INTERFACE ${TOKENIZERS_RUST_LIB})
+-target_link_libraries(tokenizers_c INTERFACE ${TOKENIZERS_RUST_LIB} ${TOKENIZERS_C_LINK_LIBS})
++target_link_libraries(tokenizers_c INTERFACE tokenizers-rust ${TOKENIZERS_C_LINK_LIBS})
+ 
+ target_link_libraries(tokenizers_cpp PRIVATE tokenizers_c ${TOKENIZERS_CPP_LINK_LIBS})
+ if (MLC_ENABLE_SENTENCEPIECE_TOKENIZER STREQUAL "ON")

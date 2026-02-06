@@ -6,6 +6,7 @@ vcpkg_from_github(
     PATCHES
         0001-build-only-hf-tokenizer.patch
         0002-fix-rust-build.patch
+	0003-remove-abs-paths.patch
 )
 
 vcpkg_cmake_configure(
@@ -14,7 +15,12 @@ vcpkg_cmake_configure(
 
 vcpkg_cmake_install()
 
+vcpkg_cmake_config_fixup(
+    PACKAGE_NAME tokenizers_cpp
+    CONFIG_PATH lib/cmake
+)
+
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
-file(INSTALL "${SOURCE_PATH}/LICENSE" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}" RENAME copyright) 
+file(INSTALL "${SOURCE_PATH}/LICENSE" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}" RENAME copyright)
