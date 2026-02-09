@@ -2,7 +2,6 @@ message(STATUS ">>> Building custom onnxruntime port with platform-specific patc
 
 # Common patches
 set(ONNXRUNTIME_PATCHES
-  "01-replace-deprecated-gsl-byte.patch"
   "02-add-static-lib.patch"
   "03-fix-dll.patch"
   "04-fix-android-binary-size.patch"
@@ -45,7 +44,7 @@ vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO microsoft/onnxruntime
   REF "v${VERSION}"
-  SHA512 028a7f48f41d2e8a453aae25ebc4cd769db389401937928b7d452fab5f8d7af8cb63eb4150daf79589845528f0e4c3bdfefa27af70d3630398990c9e8b85387b
+  SHA512 32310215a3646c64ff5e0a309c3049dbe02ae9dd5bda8c89796bd9f86374d0f43443aed756b941d9af20ef1758bb465981ac517bbe8ac33661a292d81c59b152
   PATCHES ${ONNXRUNTIME_PATCHES}
 )
 

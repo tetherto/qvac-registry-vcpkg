@@ -1,5 +1,5 @@
 diff --git a/cmake/onnxruntime.cmake b/cmake/onnxruntime.cmake
-index 6c1d448..e09389c 100644
+index 6c1d448..a1ad224 100644
 --- a/cmake/onnxruntime.cmake
 +++ b/cmake/onnxruntime.cmake
 @@ -80,12 +80,22 @@ if(WIN32)
@@ -123,11 +123,11 @@ index 6c1d448..e09389c 100644
  if (WIN32 AND NOT CMAKE_CXX_STANDARD_LIBRARIES MATCHES kernel32.lib)
    # Workaround STL bug https://github.com/microsoft/STL/issues/434#issuecomment-921321254
 diff --git a/cmake/onnxruntime_framework.cmake b/cmake/onnxruntime_framework.cmake
-index 9c9a25f..eed020e 100644
+index e96bb32..ff796ee 100644
 --- a/cmake/onnxruntime_framework.cmake
 +++ b/cmake/onnxruntime_framework.cmake
 @@ -66,9 +66,20 @@ endif()
- if(onnxruntime_USE_TENSORRT OR onnxruntime_USE_NCCL)
+ if(onnxruntime_USE_TENSORRT OR onnxruntime_USE_NCCL OR onnxruntime_USE_NV)
  # TODO: for now, core framework depends on CUDA. It should be moved to TensorRT EP
  # TODO: provider_bridge_ort.cc should not include nccl.h
 -target_include_directories(onnxruntime_framework PRIVATE ${ONNXRUNTIME_ROOT} PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
