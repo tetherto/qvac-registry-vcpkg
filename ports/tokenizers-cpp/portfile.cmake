@@ -6,7 +6,7 @@ vcpkg_from_github(
     PATCHES
         0001-build-only-hf-tokenizer.patch
         0002-fix-rust-build.patch
-	0003-remove-abs-paths.patch
+        0003-remove-abs-paths.patch
 )
 
 vcpkg_cmake_configure(
