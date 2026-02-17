@@ -34,6 +34,14 @@ if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT "minimal-build" IN_LIST FE
   ) 
 endif()
 
+# Add extra patches for XNNPack builds
+if("xnnpack-ep" IN_LIST FEATURES)
+  message(STATUS "Applying XNNPack export patch...")
+  list(APPEND ONNXRUNTIME_PATCHES
+    "07-fix-xnnpack-export.patch"
+  )
+endif()
+
 if("minimal-build" IN_LIST FEATURES)
   list(APPEND ONNXRUNTIME_PATCHES
     "09-fix-minimal-build-onnx-onnx-proto-issue.patch"
@@ -94,6 +102,7 @@ vcpkg_check_features(
       nnapi-ep onnxruntime_USE_NNAPI_BUILTIN
       coreml-ep onnxruntime_USE_COREML
       dml-ep onnxruntime_USE_DML
+      xnnpack-ep onnxruntime_USE_XNNPACK
       minimal-build onnxruntime_MINIMAL_BUILD
       tests onnxruntime_BUILD_UNIT_TESTS
 )
