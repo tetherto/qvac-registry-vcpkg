@@ -2,7 +2,7 @@ diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
 index 207abbaced..1968651e40 100644
 --- a/cmake/CMakeLists.txt
 +++ b/cmake/CMakeLists.txt
-@@ -1943,6 +1943,26 @@ if(TARGET onnxruntime)
+@@ -1943,6 +1943,30 @@ if(TARGET onnxruntime)
    include(GNUInstallDirs)
    include(CMakePackageConfigHelpers)
    set(PROJECT_CONFIG_CONTENT "@PACKAGE_INIT@\n")
@@ -25,6 +25,10 @@ index 207abbaced..1968651e40 100644
 +    "if(WIN32)\n"
 +    "  find_dependency(WIL CONFIG REQUIRED)\n"
 +    "endif()\n")
++  if(onnxruntime_USE_XNNPACK)
++    string(APPEND PROJECT_CONFIG_CONTENT
++      "find_dependency(unofficial-pthreadpool CONFIG REQUIRED)\n")
++  endif()
 +
    string(APPEND PROJECT_CONFIG_CONTENT
          "include(\"\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}Targets.cmake\")")
