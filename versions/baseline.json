@@ -44,6 +44,10 @@
       "baseline": "onnxruntime",
       "port-version": 0
     },
+    "qvac-fabric": {
+      "baseline": "7248.1.2",
+      "port-version": 0
+    },
     "qvac-lib-inference-addon-cpp": {
       "baseline": "1.1.1",
       "port-version": 0
