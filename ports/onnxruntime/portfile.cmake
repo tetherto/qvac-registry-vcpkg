@@ -34,11 +34,12 @@ if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT "minimal-build" IN_LIST FE
   ) 
 endif()
 
-# Add extra patches for XNNPack builds
+# Add extra patches for XNNPack builds (TODO: as of v1.22.0, 10-fix-xnnpack-resize-empty-scales.patch is need. confirm if needed in future versions)
 if("xnnpack-ep" IN_LIST FEATURES)
-  message(STATUS "Applying XNNPack export patch...")
+  message(STATUS "Applying XNNPack patches...")
   list(APPEND ONNXRUNTIME_PATCHES
     "07-fix-xnnpack-export.patch"
+    "10-fix-xnnpack-resize-empty-scales.patch"
   )
 endif()
 
