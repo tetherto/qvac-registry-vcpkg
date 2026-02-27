@@ -1,8 +1,8 @@
 diff --git a/cmake/onnxruntime.cmake b/cmake/onnxruntime.cmake
-index a1ad224..b895119 100644
+index f2cf1ac..568b648 100644
 --- a/cmake/onnxruntime.cmake
 +++ b/cmake/onnxruntime.cmake
-@@ -340,6 +340,21 @@ if (WIN32 AND NOT CMAKE_CXX_STANDARD_LIBRARIES MATCHES kernel32.lib)
+@@ -339,6 +339,20 @@ if (WIN32 AND NOT CMAKE_CXX_STANDARD_LIBRARIES MATCHES kernel32.lib)
    # when you're not using imports directly, even though the import exists in the STL and the DLL would have been linked without DELAYLOAD
    target_link_options(onnxruntime PRIVATE /DELAYLOAD:api-ms-win-core-heapl2-1-0.dll /ignore:4199)
  endif()
@@ -20,7 +20,6 @@ index a1ad224..b895119 100644
 +  endif()
 +endif()
 +# --- End vcpkg overlay fix ---
-+
  
  if (winml_is_inbox)
    # Apply linking flags required by inbox static analysis tools

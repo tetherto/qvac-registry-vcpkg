@@ -1,23 +1,29 @@
-set(VERSION "20240722.0")
+set(VERSION "20250814.0")
 
 if(NOT VCPKG_TARGET_IS_WINDOWS)
     vcpkg_check_linkage(ONLY_STATIC_LIBRARY)
+endif()
+
+# Set patches based on target platform
+set(ABSEIL_PATCHES "")
+if(VCPKG_TARGET_IS_WINDOWS)
+    list(APPEND ABSEIL_PATCHES "absl_windows.patch")
 endif()
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO abseil/abseil-cpp
     REF "${VERSION}"
-    SHA512 bd2cca8f007f2eee66f51c95a979371622b850ceb2ce3608d00ba826f7c494a1da0fba3c1427728f2c173fe50d59b701da35c2c9fdad2752a5a49746b1c8ef31
+    SHA512 4ee1a217203933382e728d354a149253a517150eee7580a0abecc69584b2eb200d91933ef424487e3a3fe0e8ab5e77b0288485cac982171b3585314a4417e7d4
     HEAD_REF master
-    PATCHES absl_windows.patch
+    PATCHES ${ABSEIL_PATCHES}
 )
 
+# Abseil 20250814.0+ requires C++17 minimum
 # With ABSL_PROPAGATE_CXX_STD=ON abseil automatically detect if it is being
-# compiled with C++14 or C++17, and modifies the installed `absl/base/options.h`
-# header accordingly. This works even if CMAKE_CXX_STANDARD is not set. Abseil
-# uses the compiler default behavior to update `absl/base/options.h` as needed.
-set(ABSL_USE_CXX17_OPTION "")
+# compiled with C++17 or C++20, and modifies the installed `absl/base/options.h`
+# header accordingly.
+set(ABSL_USE_CXX17_OPTION "-DCMAKE_CXX_STANDARD=17")
 if("cxx17" IN_LIST FEATURES)
     set(ABSL_USE_CXX17_OPTION "-DCMAKE_CXX_STANDARD=17")
 endif()
