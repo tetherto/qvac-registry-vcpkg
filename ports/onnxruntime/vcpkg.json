@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "onnxruntime",
   "version": "1.24.2",
-  "port-version": 1,
+  "port-version": 2,
   "description": "ONNX Runtime: cross-platform, high performance ML inferencing and training accelerator",
   "homepage": "https://onnxruntime.ai/",
   "license": "MIT",
@@ -25,14 +25,14 @@
     },
     {
       "name": "cpuinfo",
-      "version>=": "onnxruntime#1"
+      "version>=": "onnxruntime"
     },
     "cxxopts",
     "date",
     "dlpack",
     {
       "name": "eigen3",
-      "version>=": "onnxruntime#1"
+      "version>=": "onnxruntime"
     },
     "flatbuffers",
     {
@@ -48,16 +48,16 @@
     "optional-lite",
     {
       "name": "protobuf",
-      "version>=": "onnxruntime#1"
+      "version>=": "onnxruntime"
     },
     {
       "name": "protobuf",
       "host": true,
-      "version>=": "onnxruntime#1"
+      "version>=": "onnxruntime"
     },
     {
       "name": "pybind11",
-      "version>=": "onnxruntime#1"
+      "version>=": "onnxruntime"
     },
     "re2",
     "safeint",
@@ -112,7 +112,7 @@
       "dependencies": [
         {
           "name": "xnnpack",
-          "version>=": "onnxruntime#1"
+          "version>=": "onnxruntime"
         }
       ]
     }
