@@ -18,7 +18,7 @@ index 207abbaced..1968651e40 100644
 +        find_dependency(re2)\n\
 +        find_dependency(flatbuffers)\n\
 +        find_dependency(cpuinfo)\n\
-+        find_dependency(protobuf)\n\
++        find_dependency(Protobuf)\n\
 +        find_dependency(Boost COMPONENTS mp11)\n\
 +        find_dependency(Microsoft.GSL 4.0)\n\
 +        if(NOT WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL \"Android\")\n\
