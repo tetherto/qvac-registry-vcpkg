@@ -9,7 +9,7 @@
   "dependencies": [
     {
       "name": "abseil",
-      "version>=": "onnxruntime"
+      "version>=": "onnxruntime#1"
     },
     {
       "name": "benchmark",
@@ -25,14 +25,14 @@
     },
     {
       "name": "cpuinfo",
-      "version>=": "onnxruntime"
+      "version>=": "onnxruntime#1"
     },
     "cxxopts",
     "date",
     "dlpack",
     {
       "name": "eigen3",
-      "version>=": "onnxruntime"
+      "version>=": "onnxruntime#1"
     },
     "flatbuffers",
     {
@@ -43,21 +43,21 @@
     "nlohmann-json",
     {
       "name": "onnx",
-      "version>=": "onnxruntime"
+      "version>=": "onnxruntime#1"
     },
     "optional-lite",
     {
       "name": "protobuf",
-      "version>=": "onnxruntime"
+      "version>=": "onnxruntime#1"
     },
     {
       "name": "protobuf",
       "host": true,
-      "version>=": "onnxruntime"
+      "version>=": "onnxruntime#1"
     },
     {
       "name": "pybind11",
-      "version>=": "onnxruntime"
+      "version>=": "onnxruntime#1"
     },
     "re2",
     "safeint",
@@ -112,7 +112,7 @@
       "dependencies": [
         {
           "name": "xnnpack",
-          "version>=": "onnxruntime"
+          "version>=": "onnxruntime#1"
         }
       ]
     }
