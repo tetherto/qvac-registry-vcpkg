@@ -139,6 +139,12 @@ string(REPLACE
   _contents "${_contents}")
 file(WRITE "${CONFIG_FILE}" "${_contents}")
 
+# Fix: Change find_dependency(protobuf) to find_dependency(Protobuf) for case sensitivity
+set(CONFIG_FILE "${CURRENT_PACKAGES_DIR}/share/${PORT}/onnxruntimeConfig.cmake")
+file(READ "${CONFIG_FILE}" _contents)
+string(REPLACE "find_dependency(protobuf)" "find_dependency(Protobuf)" _contents "${_contents}")
+file(WRITE "${CONFIG_FILE}" "${_contents}")
+
 # Cleanup
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 
