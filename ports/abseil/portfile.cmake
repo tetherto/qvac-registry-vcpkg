@@ -4,11 +4,9 @@ if(NOT VCPKG_TARGET_IS_WINDOWS)
     vcpkg_check_linkage(ONLY_STATIC_LIBRARY)
 endif()
 
-# Set patches based on target platform
-set(ABSEIL_PATCHES "")
-if(VCPKG_TARGET_IS_WINDOWS)
-    list(APPEND ABSEIL_PATCHES "absl_windows.patch")
-endif()
+# NOTE: absl_windows.patch removed as of 20250814.0
+# The main fixes (removal of /wd4244 and /wd4267 warning suppressions) are now in upstream.
+# If Windows-specific compilation issues arise, a new minimal patch can be created.
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
@@ -16,7 +14,6 @@ vcpkg_from_github(
     REF "${VERSION}"
     SHA512 4ee1a217203933382e728d354a149253a517150eee7580a0abecc69584b2eb200d91933ef424487e3a3fe0e8ab5e77b0288485cac982171b3585314a4417e7d4
     HEAD_REF master
-    PATCHES ${ABSEIL_PATCHES}
 )
 
 # Abseil 20250814.0+ requires C++17 minimum
