@@ -7,6 +7,7 @@ set(ONNXRUNTIME_PATCHES
   "04-fix-android-binary-size.patch"
   # "05-add-dependencies-to-config.patch"  # Only needed for shared library builds
   "06-fix-array-bounds-issue-ios-sim.patch"
+  "11-fix-tpause-clang.patch"
 )
 
 # Add extra patches only for Windows builds

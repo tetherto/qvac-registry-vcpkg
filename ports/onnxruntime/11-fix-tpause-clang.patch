@@ -1,0 +1,13 @@
+diff --git a/onnxruntime/core/common/spin_pause.cc b/onnxruntime/core/common/spin_pause.cc
+index 1234567890..abcdef1234 100644
+--- a/onnxruntime/core/common/spin_pause.cc
++++ b/onnxruntime/core/common/spin_pause.cc
+@@ -36,7 +36,7 @@ void SpinPause() {
+ #if defined(_WIN32)
+     _tpause(0x0, __rdtsc() + tpause_spin_delay_cycles);
+ #elif defined(__linux__)
+-    __builtin_ia32_tpause(0x0, __rdtsc() + tpause_spin_delay_cycles);
++    _tpause(0x0, __rdtsc() + tpause_spin_delay_cycles);
+ #else
+     _mm_pause();
+ #endif
