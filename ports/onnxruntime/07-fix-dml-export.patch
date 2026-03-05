@@ -16,4 +16,3 @@ index e5ff19f133..1f35d46209 100644
 +      install(FILES "${DML_PACKAGE_DIR}/bin/${onnxruntime_target_platform}-win/DirectML.lib" TYPE LIB)
      endif()
    endfunction()
- 
