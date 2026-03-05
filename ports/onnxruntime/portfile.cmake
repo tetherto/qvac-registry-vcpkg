@@ -10,12 +10,12 @@ set(ONNXRUNTIME_PATCHES
   "11-fix-tpause-clang.patch"
 )
 
-# Add extra patches only for Windows builds
+# NOTE: DirectML patches for Windows builds
+# As of v1.24.2+, 07-fix-dml-export.patch is NO LONGER NEEDED
+# The EXPORT clause is already in the upstream source
 if("dml-ep" IN_LIST FEATURES)
   message(STATUS "Applying Windows-specific patches (DirectML)...")
-  list(APPEND ONNXRUNTIME_PATCHES
-    "07-fix-dml-export.patch"
-  )
+  # No additional patches needed for DirectML in v1.24.2+
 endif()
 
 # Add extra patches only for Apple builds
