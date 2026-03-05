@@ -15,6 +15,7 @@ if("dml-ep" IN_LIST FEATURES)
   message(STATUS "Applying Windows-specific patches (DirectML)...")
   list(APPEND ONNXRUNTIME_PATCHES
     "07-fix-dml-export.patch"
+    "12-fix-delayload-static-lib.patch"
   )
 endif()
 

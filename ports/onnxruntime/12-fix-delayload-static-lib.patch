@@ -1,0 +1,15 @@
+diff --git a/cmake/onnxruntime.cmake b/cmake/onnxruntime.cmake
+index 1234567890..abcdefgh90 100644
+--- a/cmake/onnxruntime.cmake
++++ b/cmake/onnxruntime.cmake
+@@ -284,7 +284,9 @@ target_link_libraries(onnxruntime INTERFACE
+ endif()
+ 
+ if(WIN32)
+-  target_link_options(onnxruntime PRIVATE ${onnxruntime_DELAYLOAD_FLAGS})
++  if(NOT onnxruntime_BUILD_SHARED_LIB)
++    target_link_options(onnxruntime INTERFACE ${onnxruntime_DELAYLOAD_FLAGS})
++  else()
++    target_link_options(onnxruntime PRIVATE ${onnxruntime_DELAYLOAD_FLAGS})
++  endif()
+ endif()
