@@ -2,7 +2,7 @@
   "default": {
     "abseil": {
       "baseline": "onnxruntime",
-      "port-version": 1
+      "port-version": 2
     },
     "cpuinfo": {
       "baseline": "onnxruntime",
