@@ -2,7 +2,7 @@ diff --git a/cmake/onnxruntime_providers_dml.cmake b/cmake/onnxruntime_providers
 index e5ff19f133..1f35d46209 100644
 --- a/cmake/onnxruntime_providers_dml.cmake
 +++ b/cmake/onnxruntime_providers_dml.cmake
-@@ -48,8 +48,13 @@
+@@ -48,6 +48,11 @@
      else()
        add_dependencies(${target} RESTORE_PACKAGES)
 -      target_link_libraries(${target} PRIVATE "${DML_PACKAGE_DIR}/bin/${onnxruntime_target_platform}-win/DirectML.lib")
