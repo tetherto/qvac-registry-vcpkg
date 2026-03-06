@@ -13,5 +13,6 @@ index 1234567890..abcdefgh90 100644
 +    target_link_options(onnxruntime PRIVATE ${onnxruntime_DELAYLOAD_FLAGS})
 +  endif()
  endif()
-+#See: https://cmake.org/cmake/help/latest/prop_tgt/SOVERSION.html
-+if(NOT APPLE AND NOT WIN32)
+ #See: https://cmake.org/cmake/help/latest/prop_tgt/SOVERSION.html
+ if(NOT APPLE AND NOT WIN32)
+
