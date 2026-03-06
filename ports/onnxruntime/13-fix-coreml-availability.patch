@@ -1,0 +1,22 @@
+diff --git a/onnxruntime/core/providers/coreml/model/model.mm b/onnxruntime/core/providers/coreml/model/model.mm
+--- a/onnxruntime/core/providers/coreml/model/model.mm
++++ b/onnxruntime/core/providers/coreml/model/model.mm
+@@ -370,6 +370,9 @@
+ #endif
+ 
+ void ConfigureOptimizationHints(MLModelConfiguration* config, const CoreMLOptions& coreml_options) {
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
++#pragma clang diagnostic ignored "-Wunguarded-availability"
+ #if HAS_COREMLOPTIMIZATIONHINT
+   MLOptimizationHints* optimizationHints = [[MLOptimizationHints alloc] init];
+   if (coreml_options.UseStrategy("FastPrediction")) {
+@@ -381,7 +384,8 @@
+   } else {
+     // not set
+   }
+ #endif
++#pragma clang diagnostic pop
+ }
+ 
+ Status CompileOrReadCachedModel(NSURL* modelUrl, const CoreMLOptions& coreml_options,
