@@ -7,10 +7,6 @@ vcpkg_from_github(
     REPO onnx/onnx
     REF "v${VERSION}"
     SHA512 4bbc4c09e4bb3eb6049d653ce49200564e8c5dcf1154a30f894f24e15f1986d1f2fe2f4ca32fe383c559e2a0b20681f33d649376bf63e4345df6972a2c78eac8
-    # PATCHES
-    #     fix-cmakelists.patch
-    #     fix-dependency-protobuf.patch
-    #     binskim.patch
 )
 
 string(COMPARE EQUAL "${VCPKG_CRT_LINKAGE}" "static" USE_STATIC_RUNTIME)

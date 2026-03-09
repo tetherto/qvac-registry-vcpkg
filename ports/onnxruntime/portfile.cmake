@@ -2,10 +2,8 @@ message(STATUS ">>> Building custom onnxruntime port with platform-specific patc
 
 # Common patches
 set(ONNXRUNTIME_PATCHES
-  # "02-add-static-lib.patch"  # Not needed when BUILD_SHARED_LIB=OFF
   "03-fix-dll.patch"
   "04-fix-android-binary-size.patch"
-  # "05-add-dependencies-to-config.patch"  # Only needed for shared library builds
   "06-fix-array-bounds-issue-ios-sim.patch"
   "11-fix-tpause-clang.patch"
 )
