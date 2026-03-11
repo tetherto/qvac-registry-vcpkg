@@ -12,6 +12,10 @@
       "baseline": "onnxruntime",
       "port-version": 0
     },
+    "ggml": {
+      "baseline": "2026-01-30",
+      "port-version": 0
+    },
     "llama-cpp": {
       "baseline": "7248.1.2",
       "port-version": 0
@@ -59,6 +63,10 @@
     "sentencepiece": {
       "baseline": "0.2.0",
       "port-version": 2
+    },
+    "stable-diffusion-cpp": {
+      "baseline": "2026-03-01",
+      "port-version": 0
     },
     "tokenizers-cpp": {
       "baseline": "0.1.1",
