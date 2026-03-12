@@ -14,7 +14,7 @@
     },
     "ggml": {
       "baseline": "2026-01-30",
-      "port-version": 0
+      "port-version": 1
     },
     "llama-cpp": {
       "baseline": "7248.1.2",
