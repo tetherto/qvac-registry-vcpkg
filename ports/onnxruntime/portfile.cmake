@@ -6,6 +6,7 @@ set(ONNXRUNTIME_PATCHES
   "04-fix-android-binary-size.patch"
   "06-fix-array-bounds-issue-ios-sim.patch"
   "11-fix-tpause-clang.patch"
+  "14-add-fp16-bias-gelu-cpu.patch"
 )
 
 # Add extra patches only for Windows builds
