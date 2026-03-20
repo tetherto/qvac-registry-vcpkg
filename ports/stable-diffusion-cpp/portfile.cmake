@@ -12,7 +12,7 @@
 # The sd-generic-backend-init patch replaces SD's backend-specific init
 # with ggml_backend_init_by_type() which works with both statically linked
 # and dynamically loaded backends.
-
+#
 # Pinned to release tag master-514-5792c66 (2026-03-01).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
@@ -22,6 +22,7 @@ vcpkg_from_github(
     HEAD_REF master
     PATCHES
         sd-generic-backend-init.patch
+        sd-android-vulkan-diagnostics.patch
         abort-callback.patch
         fix-failure-path-cleanup.patch
 )
