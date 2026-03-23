@@ -14,7 +14,7 @@
     },
     "ggml": {
       "baseline": "2026-01-30",
-      "port-version": 2
+      "port-version": 3
     },
     "llama-cpp": {
       "baseline": "7248.1.2",
@@ -66,7 +66,7 @@
     },
     "stable-diffusion-cpp": {
       "baseline": "2026-03-01",
-      "port-version": 1
+      "port-version": 2
     },
     "tokenizers-cpp": {
       "baseline": "0.1.1",
