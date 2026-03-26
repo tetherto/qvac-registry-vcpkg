@@ -3,7 +3,7 @@ vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-whisper.cpp
   REF v${VERSION}
-  SHA512 f3abdcda4d8fa1733447c3a4f5f6530aae5784bd59295e6aa74d739b9fe6e57930cbf301cb2d3f0c6f0a8725d64349666eca93d6992f63fe109c4f43c91c4c7f
+  SHA512 752d8cdeb66414c1faacc9ba5abe0075a06ac8efe9ec70b25fd01465ebb6f67f677d8c5bc7effac497fad392ee9a5067b691faee7ebc413ec881b9e843e53eff
   HEAD_REF master
   PATCHES
     0001-fix-vcpkg-build.patch
@@ -54,6 +54,7 @@ vcpkg_cmake_configure(
   OPTIONS
     -DGGML_CCACHE=OFF
     -DGGML_OPENMP=OFF
+    -DGGML_NATIVE=OFF
     -DWHISPER_BUILD_TESTS=OFF
     -DWHISPER_BUILD_EXAMPLES=OFF
     -DWHISPER_BUILD_SERVER=OFF

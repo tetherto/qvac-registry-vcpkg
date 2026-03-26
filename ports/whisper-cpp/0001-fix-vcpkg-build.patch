@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 36eef350..dfcc171d 100644
+index a0f74041..a9cc9b58 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -23,10 +23,18 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -24,7 +24,7 @@ index 36eef350..dfcc171d 100644
  else()
      set(WHISPER_STANDALONE OFF)
  endif()
-@@ -169,23 +177,34 @@ set(WHISPER_BUILD_NUMBER        ${BUILD_NUMBER})
+@@ -172,27 +180,38 @@ set(WHISPER_BUILD_NUMBER        ${BUILD_NUMBER})
  set(WHISPER_BUILD_COMMIT        ${BUILD_COMMIT})
  set(WHISPER_INSTALL_VERSION     ${CMAKE_PROJECT_VERSION})
  
@@ -54,6 +54,10 @@ index 36eef350..dfcc171d 100644
 +  FILES ${CMAKE_CURRENT_BINARY_DIR}/whisper-config.cmake
 +  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/whisper)
  
+ target_compile_definitions(whisper PRIVATE
+     WHISPER_VERSION="${PROJECT_VERSION}"
+ )
+ 
  configure_package_config_file(
 -        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/whisper-config.cmake.in
 -        ${CMAKE_CURRENT_BINARY_DIR}/whisper-config.cmake
@@ -68,7 +72,7 @@ index 36eef350..dfcc171d 100644
  
  write_basic_package_version_file(
      ${CMAKE_CURRENT_BINARY_DIR}/whisper-version.cmake
-@@ -194,7 +213,7 @@ write_basic_package_version_file(
+@@ -201,7 +220,7 @@ write_basic_package_version_file(
  
  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/whisper-config.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/whisper-version.cmake
@@ -137,77 +141,80 @@ index 1a4c24eb..8dc51859 100644
 +    set(GIT_COMMIT_SUBJECT "unknown")
 +endif()
 diff --git a/cmake/whisper-config.cmake.in b/cmake/whisper-config.cmake.in
-index 6a3fa227..9fe65884 100644
+index b70c1e5a..678ff9f0 100644
 --- a/cmake/whisper-config.cmake.in
 +++ b/cmake/whisper-config.cmake.in
-@@ -11,24 +11,21 @@ set(GGML_ACCELERATE @GGML_ACCELERATE@)
+@@ -3,28 +3,44 @@ set(WHISPER_BUILD_COMMIT @WHISPER_BUILD_COMMIT@)
+ set(WHISPER_BUILD_NUMBER @WHISPER_BUILD_NUMBER@)
+ set(WHISPER_SHARED_LIB   @BUILD_SHARED_LIBS@)
  
++set(GGML_METAL      @GGML_METAL@)
++set(GGML_BLAS       @GGML_BLAS@)
++set(GGML_CUDA       @GGML_CUDA@)
++set(GGML_HIPBLAS    @GGML_HIPBLAS@)
++set(GGML_ACCELERATE @GGML_ACCELERATE@)
++
  @PACKAGE_INIT@
  
 -set_and_check(WHISPER_INCLUDE_DIR "@PACKAGE_WHISPER_INCLUDE_INSTALL_DIR@")
 -set_and_check(WHISPER_LIB_DIR     "@PACKAGE_WHISPER_LIB_INSTALL_DIR@")
 -set_and_check(WHISPER_BIN_DIR     "@PACKAGE_WHISPER_BIN_INSTALL_DIR@")
-+include(CMakeFindDependencyMacro)
- 
- # Ensure transient dependencies satisfied
 -
--find_package(Threads REQUIRED)
-+find_dependency(Threads REQUIRED)
- 
- if (APPLE AND GGML_ACCELERATE)
-     find_library(ACCELERATE_FRAMEWORK Accelerate REQUIRED)
- endif()
- 
- if (GGML_BLAS)
--    find_package(BLAS REQUIRED)
-+    find_dependency(BLAS REQUIRED)
- endif()
- 
- if (GGML_CUDA)
--    find_package(CUDAToolkit REQUIRED)
-+    find_dependency(CUDAToolkit REQUIRED)
- endif()
- 
- if (GGML_METAL)
-@@ -38,28 +35,13 @@ if (GGML_METAL)
- endif()
- 
- if (GGML_HIPBLAS)
--    find_package(hip REQUIRED)
--    find_package(hipblas REQUIRED)
--    find_package(rocblas REQUIRED)
-+    find_dependency(hip REQUIRED)
-+    find_dependency(hipblas REQUIRED)
-+    find_dependency(rocblas REQUIRED)
- endif()
- 
+-find_package(ggml REQUIRED HINTS ${LLAMA_LIB_DIR}/cmake)
+-
 -find_library(whisper_LIBRARY whisper
 -    REQUIRED
--    HINTS ${WHISPER_LIB_DIR})
--
--set(_whisper_link_deps "Threads::Threads" "@WHISPER_EXTRA_LIBS@")
--set(_whisper_transient_defines "@WHISPER_TRANSIENT_DEFINES@")
+-    HINTS ${WHISPER_LIB_DIR}
+-    NO_CMAKE_FIND_ROOT_PATH
+-)
 -
 -add_library(whisper UNKNOWN IMPORTED)
-+find_dependency(ggml CONFIG REQUIRED)
- 
 -set_target_properties(whisper
 -    PROPERTIES
 -    INTERFACE_INCLUDE_DIRECTORIES "${WHISPER_INCLUDE_DIR}"
--        INTERFACE_LINK_LIBRARIES "${_whisper_link_deps}"
--        INTERFACE_COMPILE_DEFINITIONS "${_whisper_transient_defines}"
+-        INTERFACE_LINK_LIBRARIES "ggml::ggml;ggml::ggml-base;"
 -        IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
 -        IMPORTED_LOCATION "${whisper_LIBRARY}"
 -        INTERFACE_COMPILE_FEATURES cxx_std_11
 -        POSITION_INDEPENDENT_CODE ON )
++include(CMakeFindDependencyMacro)
++
++find_dependency(Threads REQUIRED)
++
++if (APPLE AND GGML_ACCELERATE)
++    find_library(ACCELERATE_FRAMEWORK Accelerate REQUIRED)
++endif()
++
++if (GGML_BLAS)
++    find_dependency(BLAS REQUIRED)
++endif()
++
++if (GGML_CUDA)
++    find_dependency(CUDAToolkit REQUIRED)
++endif()
++
++if (GGML_METAL)
++    find_library(FOUNDATION_FRAMEWORK Foundation REQUIRED)
++    find_library(METAL_FRAMEWORK     Metal      REQUIRED)
++    find_library(METALKIT_FRAMEWORK  MetalKit   REQUIRED)
++endif()
++
++if (GGML_HIPBLAS)
++    find_dependency(hip REQUIRED)
++    find_dependency(hipblas REQUIRED)
++    find_dependency(rocblas REQUIRED)
++endif()
++
++find_dependency(ggml CONFIG REQUIRED)
++
 +include("${CMAKE_CURRENT_LIST_DIR}/whisper-targets.cmake")
  
  check_required_components(whisper)
 diff --git a/ggml/CMakeLists.txt b/ggml/CMakeLists.txt
-index 4e7399f9..fd3ccebe 100644
+index c780077a..137d7b60 100644
 --- a/ggml/CMakeLists.txt
 +++ b/ggml/CMakeLists.txt
-@@ -277,8 +277,17 @@ set_target_properties(ggml PROPERTIES PUBLIC_HEADER "${GGML_PUBLIC_HEADERS}")
+@@ -336,8 +336,17 @@ set_target_properties(ggml PROPERTIES PUBLIC_HEADER "${GGML_PUBLIC_HEADERS}")
  #if (GGML_METAL)
  #    set_target_properties(ggml PROPERTIES RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/src/ggml-metal.metal")
  #endif()
@@ -227,7 +234,7 @@ index 4e7399f9..fd3ccebe 100644
  
  if (GGML_STANDALONE)
      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ggml.pc.in
-@@ -349,7 +358,7 @@ set(GGML_BIN_INSTALL_DIR     ${CMAKE_INSTALL_BINDIR}     CACHE PATH "Location of
+@@ -388,7 +397,7 @@ set(GGML_BIN_INSTALL_DIR     ${CMAKE_INSTALL_BINDIR}     CACHE PATH "Location of
  configure_package_config_file(
          ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ggml-config.cmake.in
          ${CMAKE_CURRENT_BINARY_DIR}/ggml-config.cmake
@@ -236,7 +243,7 @@ index 4e7399f9..fd3ccebe 100644
      PATH_VARS GGML_INCLUDE_INSTALL_DIR
                GGML_LIB_INSTALL_DIR
                GGML_BIN_INSTALL_DIR)
-@@ -361,7 +370,7 @@ write_basic_package_version_file(
+@@ -407,7 +416,7 @@ message(STATUS "ggml commit:  ${GGML_BUILD_COMMIT}")
  
  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ggml-config.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/ggml-version.cmake
@@ -246,10 +253,10 @@ index 4e7399f9..fd3ccebe 100644
  if (MSVC)
      set(MSVC_WARNING_FLAGS
 diff --git a/ggml/src/CMakeLists.txt b/ggml/src/CMakeLists.txt
-index 9cb2c228..6396d883 100644
+index 78853304..ddd7f574 100644
 --- a/ggml/src/CMakeLists.txt
 +++ b/ggml/src/CMakeLists.txt
-@@ -231,7 +231,7 @@ function(ggml_add_backend_library backend)
+@@ -259,7 +259,7 @@ function(ggml_add_backend_library backend)
      else()
          add_library(${backend} ${ARGN})
          target_link_libraries(ggml PUBLIC ${backend})
@@ -259,10 +266,10 @@ index 9cb2c228..6396d883 100644
  
      target_link_libraries(${backend} PRIVATE ggml-base)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 2eae0c66..cd4c60e8 100644
+index 095a2791..f360411d 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -114,7 +114,11 @@ set_target_properties(whisper PROPERTIES
+@@ -115,7 +115,11 @@ set_target_properties(whisper PROPERTIES
      SOVERSION ${SOVERSION}
  )
  
