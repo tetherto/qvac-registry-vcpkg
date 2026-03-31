@@ -1,0 +1,17 @@
+{
+  "name": "simd-utils",
+  "version": "1.0.0",
+  "description": "Header-only SIMD utility functions for neural machine translation",
+  "homepage": "https://github.com/browsermt/simd_utils",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
+}
