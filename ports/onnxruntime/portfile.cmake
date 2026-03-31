@@ -35,12 +35,13 @@ if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT "minimal-build" IN_LIST FE
   # No additional patches needed for Android in v1.24.2+
 endif()
 
-# Add extra patches for XNNPack builds (TODO: as of v1.22.0, 10-fix-xnnpack-resize-empty-scales.patch is need. confirm if needed in future versions)
+# Add extra patches for XNNPack builds
 if("xnnpack-ep" IN_LIST FEATURES)
   message(STATUS "Applying XNNPack patches...")
   list(APPEND ONNXRUNTIME_PATCHES
-    "07-fix-xnnpack-export.patch"
-    "10-fix-xnnpack-resize-empty-scales.patch"
+    "15-fix-xnnpack-code-cache-api.patch"
+    "16-fix-xnnpack-workspace-api.patch"
+    "17-fix-xnnpack-resize-api.patch"
   )
 endif()
 
@@ -137,6 +138,11 @@ file(READ "${CONFIG_FILE}" _contents)
 string(REPLACE
   "# Create imported target onnxruntime::onnxruntime\nadd_library(onnxruntime::onnxruntime INTERFACE IMPORTED)\n\nset_target_properties(onnxruntime::onnxruntime PROPERTIES\n  INTERFACE_LINK_LIBRARIES"
   "# Create imported target onnxruntime::onnxruntime\nadd_library(onnxruntime::onnxruntime INTERFACE IMPORTED)\n\nset_target_properties(onnxruntime::onnxruntime PROPERTIES\n  INTERFACE_INCLUDE_DIRECTORIES \"\${_IMPORT_PREFIX}/include/onnxruntime\"\n  INTERFACE_LINK_LIBRARIES"
+  _contents "${_contents}")
+string(REPLACE ";microkernels_prod_LIBRARY-NOTFOUND" "" _contents "${_contents}")
+string(REPLACE
+  ";unofficial::pthreadpool;unofficial::pthreadpool_interface"
+  ";\$<\$<NOT:\$<CONFIG:DEBUG>>:\${VCPKG_IMPORT_PREFIX}/lib/libmicrokernels-prod.a>;\$<\$<CONFIG:DEBUG>:\${VCPKG_IMPORT_PREFIX}/debug/lib/libmicrokernels-prod.a>;unofficial::pthreadpool;unofficial::pthreadpool_interface"
   _contents "${_contents}")
 file(WRITE "${CONFIG_FILE}" "${_contents}")
 

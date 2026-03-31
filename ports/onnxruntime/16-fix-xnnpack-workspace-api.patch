@@ -1,0 +1,195 @@
+--- a/onnxruntime/core/providers/xnnpack/math/matmul.cc
++++ b/onnxruntime/core/providers/xnnpack/math/matmul.cc
+@@ -120,6 +120,7 @@
+         foutput_min,
+         foutput_max,
+         flags,
++        nullptr,
+         weight_cache,
+         &p);
+   } else if (op_type_ == OpComputeType::op_compute_type_fp16) {
+@@ -133,6 +134,7 @@
+         foutput_min,
+         foutput_max,
+         flags,
++        nullptr,
+         weight_cache,
+         &p);
+   }
+--- a/onnxruntime/core/providers/xnnpack/nn/average_pool.cc
++++ b/onnxruntime/core/providers/xnnpack/nn/average_pool.cc
+@@ -223,12 +223,18 @@
+ 
+   pthreadpool_t threadpool = GetThreadPool();
+ 
++  size_t workspace_size = 0;
++  xnn_allocator* allocator = GetStoredAllocator().second;
++  auto deallocator = [allocator](void* ptr) { allocator->aligned_deallocate(allocator->context, ptr); };
++  std::unique_ptr<void, decltype(deallocator)> workspace(nullptr, deallocator);
++
+   auto reshape_fn = xnn_reshape_average_pooling2d_nhwc_f32;
+   if (avgpool_type_ == OpComputeType::op_compute_type_fp16) {
+     reshape_fn = xnn_reshape_average_pooling2d_nhwc_f16;
+   }
+ 
+   auto status = reshape_fn(op0_.get(), N, H, W, C, C, C,
++                           &workspace_size, /*workspace_alignment=*/nullptr,
+                            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                            threadpool);
+ 
+@@ -237,11 +243,13 @@
+                            " returned ", status);
+   }
+ 
++  workspace.reset(allocator->aligned_allocate(allocator->context, XNN_ALLOCATION_ALIGNMENT, workspace_size));
++
+   if (avgpool_type_ == OpComputeType::op_compute_type_fp32) {
+-    status = xnn_setup_average_pooling2d_nhwc_f32(op0_.get(), X.Data<float>(),
++    status = xnn_setup_average_pooling2d_nhwc_f32(op0_.get(), workspace.get(), X.Data<float>(),
+                                                   Y.MutableData<float>());
+   } else if (avgpool_type_ == OpComputeType::op_compute_type_fp16) {
+-    status = xnn_setup_average_pooling2d_nhwc_f16(op0_.get(), X.Data<MLFloat16>(),
++    status = xnn_setup_average_pooling2d_nhwc_f16(op0_.get(), workspace.get(), X.Data<MLFloat16>(),
+                                                   Y.MutableData<MLFloat16>());
+   }
+ 
+--- a/onnxruntime/core/providers/xnnpack/nn/conv.cc
++++ b/onnxruntime/core/providers/xnnpack/nn/conv.cc
+@@ -108,6 +108,7 @@
+ 
+   auto status = reshape_fn(op0_.get(), N, H, W,
+                            &workspace_size,
++                           /*workspace_alignment=*/nullptr,
+                            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                            threadpool);
+   if (status != xnn_status_success) {
+--- a/onnxruntime/core/providers/xnnpack/math/matmul.cc
++++ b/onnxruntime/core/providers/xnnpack/math/matmul.cc
+@@ -120,6 +120,7 @@
+         foutput_min,
+         foutput_max,
+         flags,
++        nullptr,
+         weight_cache,
+         &p);
+   } else if (op_type_ == OpComputeType::op_compute_type_fp16) {
+@@ -133,6 +134,7 @@
+         foutput_min,
+         foutput_max,
+         flags,
++        nullptr,
+         weight_cache,
+         &p);
+   }
+--- a/onnxruntime/core/providers/xnnpack/nn/average_pool.cc
++++ b/onnxruntime/core/providers/xnnpack/nn/average_pool.cc
+@@ -223,12 +223,18 @@
+ 
+   pthreadpool_t threadpool = GetThreadPool();
+ 
++  size_t workspace_size = 0;
++  xnn_allocator* allocator = GetStoredAllocator().second;
++  auto deallocator = [allocator](void* ptr) { allocator->aligned_deallocate(allocator->context, ptr); };
++  std::unique_ptr<void, decltype(deallocator)> workspace(nullptr, deallocator);
++
+   auto reshape_fn = xnn_reshape_average_pooling2d_nhwc_f32;
+   if (avgpool_type_ == OpComputeType::op_compute_type_fp16) {
+     reshape_fn = xnn_reshape_average_pooling2d_nhwc_f16;
+   }
+ 
+   auto status = reshape_fn(op0_.get(), N, H, W, C, C, C,
++                           &workspace_size, /*workspace_alignment=*/nullptr,
+                            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                            threadpool);
+ 
+@@ -237,11 +243,13 @@
+                            " returned ", status);
+   }
+ 
++  workspace.reset(allocator->aligned_allocate(allocator->context, XNN_ALLOCATION_ALIGNMENT, workspace_size));
++
+   if (avgpool_type_ == OpComputeType::op_compute_type_fp32) {
+-    status = xnn_setup_average_pooling2d_nhwc_f32(op0_.get(), X.Data<float>(),
++    status = xnn_setup_average_pooling2d_nhwc_f32(op0_.get(), workspace.get(), X.Data<float>(),
+                                                   Y.MutableData<float>());
+   } else if (avgpool_type_ == OpComputeType::op_compute_type_fp16) {
+-    status = xnn_setup_average_pooling2d_nhwc_f16(op0_.get(), X.Data<MLFloat16>(),
++    status = xnn_setup_average_pooling2d_nhwc_f16(op0_.get(), workspace.get(), X.Data<MLFloat16>(),
+                                                   Y.MutableData<MLFloat16>());
+   }
+ 
+--- a/onnxruntime/core/providers/xnnpack/nn/conv.cc
++++ b/onnxruntime/core/providers/xnnpack/nn/conv.cc
+@@ -108,6 +108,7 @@
+ 
+   auto status = reshape_fn(op0_.get(), N, H, W,
+                            &workspace_size,
++                           /*workspace_alignment=*/nullptr,
+                            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                            threadpool);
+   if (status != xnn_status_success) {
+--- a/onnxruntime/core/providers/xnnpack/math/matmul.cc
++++ b/onnxruntime/core/providers/xnnpack/math/matmul.cc
+@@ -120,6 +120,7 @@
+         foutput_min,
+         foutput_max,
+         flags,
++        nullptr,
+         weight_cache,
+         &p);
+   } else if (op_type_ == OpComputeType::op_compute_type_fp16) {
+@@ -133,6 +134,7 @@
+         foutput_min,
+         foutput_max,
+         flags,
++        nullptr,
+         weight_cache,
+         &p);
+   }
+--- a/onnxruntime/core/providers/xnnpack/nn/average_pool.cc
++++ b/onnxruntime/core/providers/xnnpack/nn/average_pool.cc
+@@ -223,12 +223,18 @@
+ 
+   pthreadpool_t threadpool = GetThreadPool();
+ 
++  size_t workspace_size = 0;
++  xnn_allocator* allocator = GetStoredAllocator().second;
++  auto deallocator = [allocator](void* ptr) { allocator->aligned_deallocate(allocator->context, ptr); };
++  std::unique_ptr<void, decltype(deallocator)> workspace(nullptr, deallocator);
++
+   auto reshape_fn = xnn_reshape_average_pooling2d_nhwc_f32;
+   if (avgpool_type_ == OpComputeType::op_compute_type_fp16) {
+     reshape_fn = xnn_reshape_average_pooling2d_nhwc_f16;
+   }
+ 
+   auto status = reshape_fn(op0_.get(), N, H, W, C, C, C,
++                           &workspace_size, /*workspace_alignment=*/nullptr,
+                            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                            threadpool);
+ 
+@@ -237,11 +243,13 @@
+                            " returned ", status);
+   }
+ 
++  workspace.reset(allocator->aligned_allocate(allocator->context, XNN_ALLOCATION_ALIGNMENT, workspace_size));
++
+   if (avgpool_type_ == OpComputeType::op_compute_type_fp32) {
+-    status = xnn_setup_average_pooling2d_nhwc_f32(op0_.get(), X.Data<float>(),
++    status = xnn_setup_average_pooling2d_nhwc_f32(op0_.get(), workspace.get(), X.Data<float>(),
+                                                   Y.MutableData<float>());
+   } else if (avgpool_type_ == OpComputeType::op_compute_type_fp16) {
+-    status = xnn_setup_average_pooling2d_nhwc_f16(op0_.get(), X.Data<MLFloat16>(),
++    status = xnn_setup_average_pooling2d_nhwc_f16(op0_.get(), workspace.get(), X.Data<MLFloat16>(),
+                                                   Y.MutableData<MLFloat16>());
+   }
+ 
+--- a/onnxruntime/core/providers/xnnpack/nn/conv.cc
++++ b/onnxruntime/core/providers/xnnpack/nn/conv.cc
+@@ -108,6 +108,7 @@
+ 
+   auto status = reshape_fn(op0_.get(), N, H, W,
+                            &workspace_size,
++                           /*workspace_alignment=*/nullptr,
+                            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                            threadpool);
+   if (status != xnn_status_success) {

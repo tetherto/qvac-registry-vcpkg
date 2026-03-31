@@ -1,0 +1,357 @@
+diff --git a/onnxruntime/core/providers/xnnpack/math/gemm.cc b/onnxruntime/core/providers/xnnpack/math/gemm.cc
+--- a/onnxruntime/core/providers/xnnpack/math/gemm.cc
++++ b/onnxruntime/core/providers/xnnpack/math/gemm.cc
+@@ -152,11 +152,12 @@ Status Gemm::CreateKernel() {
+     status = xnn_create_fully_connected_nc_f32(
+         trans_B_ == CblasNoTrans ? B_->Shape()[0] : B_->Shape()[1],  // size_t input_channels,
+         trans_B_ == CblasNoTrans ? B_->Shape()[1] : B_->Shape()[0],  // size_t output_channels,
+         trans_B_ == CblasNoTrans ? B_->Shape()[0] : B_->Shape()[1],  // size_t input_stride,
+         trans_B_ == CblasNoTrans ? B_->Shape()[1] : B_->Shape()[0],  // size_t output_stride,
+         B_->Data<float>(),                                           // const float* kernel,
+         bias_data,                                                   // const float* bias,
+         foutput_min, foutput_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -168,11 +169,12 @@ Status Gemm::CreateKernel() {
+     status = xnn_create_fully_connected_nc_f16(
+         trans_B_ == CblasNoTrans ? B_->Shape()[0] : B_->Shape()[1],  // size_t input_channels,
+         trans_B_ == CblasNoTrans ? B_->Shape()[1] : B_->Shape()[0],  // size_t output_channels,
+         trans_B_ == CblasNoTrans ? B_->Shape()[0] : B_->Shape()[1],  // size_t input_stride,
+         trans_B_ == CblasNoTrans ? B_->Shape()[1] : B_->Shape()[0],  // size_t output_stride,
+         B_->Data<MLFloat16>(),                                       // const MLFloat16* kernel,
+         bias_data,                                                   // const float* bias,
+         foutput_min, foutput_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+diff --git a/onnxruntime/core/providers/xnnpack/nn/conv_base.cc b/onnxruntime/core/providers/xnnpack/nn/conv_base.cc
+--- a/onnxruntime/core/providers/xnnpack/nn/conv_base.cc
++++ b/onnxruntime/core/providers/xnnpack/nn/conv_base.cc
+@@ -71,12 +71,13 @@ Status ConvBase::CreateKernel() {
+     status = create_func(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels, group_output_channels,  // groups, group_input_channels, group_output_channels
+         C, M,                                         // input channel stride, output channel stride
+         Weight.Data<float>(), B_data,
+         foutput_min, foutput_max, flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -87,14 +88,15 @@ Status ConvBase::CreateKernel() {
+     status = create_func(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels,
+         group_output_channels,
+         C, M,                              // input channel stride, output channel stride
+         Weight.Data<MLFloat16>(), B_data,  // kernel, bias
+         foutput_min, foutput_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -109,16 +111,17 @@ Status ConvBase::CreateKernel() {
+     status = create_func(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels,
+         group_output_channels,
+         C, M,
+         quant_param[0].second, quant_param[0].first[0],
+         quant_param[1].first[0], Weight.Data<int8_t>(), B_data,
+         quant_param[2].second, quant_param[2].first[0],
+         output_min, output_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -131,18 +134,19 @@ Status ConvBase::CreateKernel() {
+     status = xnn_create_convolution2d_nhwc_qs8_qc8w(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels,
+         group_output_channels,
+         C, M,
+         // zero_point will convert to int8_t automatically
+         quant_param[0].second, quant_param[0].first[0],
+         quant_param[1].first.data(),
+         Weight.Data<int8_t>(), B_data,
+         quant_param[2].second, quant_param[2].first[0],
+         output_min, output_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -157,17 +161,18 @@ Status ConvBase::CreateKernel() {
+     status = create_func(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels,
+         group_output_channels,
+         C, M,
+         quant_param[0].second, quant_param[0].first[0],
+         quant_param[1].second, quant_param[1].first[0],
+         Weight.Data<uint8_t>(), B_data,
+         quant_param[2].second, quant_param[2].first[0],
+         output_min, output_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+diff --git a/onnxruntime/core/providers/xnnpack/math/gemm.cc b/onnxruntime/core/providers/xnnpack/math/gemm.cc
+--- a/onnxruntime/core/providers/xnnpack/math/gemm.cc
++++ b/onnxruntime/core/providers/xnnpack/math/gemm.cc
+@@ -152,11 +152,12 @@ Status Gemm::CreateKernel() {
+     status = xnn_create_fully_connected_nc_f32(
+         trans_B_ == CblasNoTrans ? B_->Shape()[0] : B_->Shape()[1],  // size_t input_channels,
+         trans_B_ == CblasNoTrans ? B_->Shape()[1] : B_->Shape()[0],  // size_t output_channels,
+         trans_B_ == CblasNoTrans ? B_->Shape()[0] : B_->Shape()[1],  // size_t input_stride,
+         trans_B_ == CblasNoTrans ? B_->Shape()[1] : B_->Shape()[0],  // size_t output_stride,
+         B_->Data<float>(),                                           // const float* kernel,
+         bias_data,                                                   // const float* bias,
+         foutput_min, foutput_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -168,11 +169,12 @@ Status Gemm::CreateKernel() {
+     status = xnn_create_fully_connected_nc_f16(
+         trans_B_ == CblasNoTrans ? B_->Shape()[0] : B_->Shape()[1],  // size_t input_channels,
+         trans_B_ == CblasNoTrans ? B_->Shape()[1] : B_->Shape()[0],  // size_t output_channels,
+         trans_B_ == CblasNoTrans ? B_->Shape()[0] : B_->Shape()[1],  // size_t input_stride,
+         trans_B_ == CblasNoTrans ? B_->Shape()[1] : B_->Shape()[0],  // size_t output_stride,
+         B_->Data<MLFloat16>(),                                       // const MLFloat16* kernel,
+         bias_data,                                                   // const float* bias,
+         foutput_min, foutput_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+diff --git a/onnxruntime/core/providers/xnnpack/nn/conv_base.cc b/onnxruntime/core/providers/xnnpack/nn/conv_base.cc
+--- a/onnxruntime/core/providers/xnnpack/nn/conv_base.cc
++++ b/onnxruntime/core/providers/xnnpack/nn/conv_base.cc
+@@ -71,12 +71,13 @@ Status ConvBase::CreateKernel() {
+     status = create_func(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels, group_output_channels,  // groups, group_input_channels, group_output_channels
+         C, M,                                         // input channel stride, output channel stride
+         Weight.Data<float>(), B_data,
+         foutput_min, foutput_max, flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -87,14 +88,15 @@ Status ConvBase::CreateKernel() {
+     status = create_func(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels,
+         group_output_channels,
+         C, M,                              // input channel stride, output channel stride
+         Weight.Data<MLFloat16>(), B_data,  // kernel, bias
+         foutput_min, foutput_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -109,16 +111,17 @@ Status ConvBase::CreateKernel() {
+     status = create_func(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels,
+         group_output_channels,
+         C, M,
+         quant_param[0].second, quant_param[0].first[0],
+         quant_param[1].first[0], Weight.Data<int8_t>(), B_data,
+         quant_param[2].second, quant_param[2].first[0],
+         output_min, output_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -131,18 +134,19 @@ Status ConvBase::CreateKernel() {
+     status = xnn_create_convolution2d_nhwc_qs8_qc8w(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels,
+         group_output_channels,
+         C, M,
+         // zero_point will convert to int8_t automatically
+         quant_param[0].second, quant_param[0].first[0],
+         quant_param[1].first.data(),
+         Weight.Data<int8_t>(), B_data,
+         quant_param[2].second, quant_param[2].first[0],
+         output_min, output_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -157,17 +161,18 @@ Status ConvBase::CreateKernel() {
+     status = create_func(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels,
+         group_output_channels,
+         C, M,
+         quant_param[0].second, quant_param[0].first[0],
+         quant_param[1].second, quant_param[1].first[0],
+         Weight.Data<uint8_t>(), B_data,
+         quant_param[2].second, quant_param[2].first[0],
+         output_min, output_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+diff --git a/onnxruntime/core/providers/xnnpack/math/gemm.cc b/onnxruntime/core/providers/xnnpack/math/gemm.cc
+--- a/onnxruntime/core/providers/xnnpack/math/gemm.cc
++++ b/onnxruntime/core/providers/xnnpack/math/gemm.cc
+@@ -152,11 +152,12 @@ Status Gemm::CreateKernel() {
+     status = xnn_create_fully_connected_nc_f32(
+         trans_B_ == CblasNoTrans ? B_->Shape()[0] : B_->Shape()[1],  // size_t input_channels,
+         trans_B_ == CblasNoTrans ? B_->Shape()[1] : B_->Shape()[0],  // size_t output_channels,
+         trans_B_ == CblasNoTrans ? B_->Shape()[0] : B_->Shape()[1],  // size_t input_stride,
+         trans_B_ == CblasNoTrans ? B_->Shape()[1] : B_->Shape()[0],  // size_t output_stride,
+         B_->Data<float>(),                                           // const float* kernel,
+         bias_data,                                                   // const float* bias,
+         foutput_min, foutput_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -168,11 +169,12 @@ Status Gemm::CreateKernel() {
+     status = xnn_create_fully_connected_nc_f16(
+         trans_B_ == CblasNoTrans ? B_->Shape()[0] : B_->Shape()[1],  // size_t input_channels,
+         trans_B_ == CblasNoTrans ? B_->Shape()[1] : B_->Shape()[0],  // size_t output_channels,
+         trans_B_ == CblasNoTrans ? B_->Shape()[0] : B_->Shape()[1],  // size_t input_stride,
+         trans_B_ == CblasNoTrans ? B_->Shape()[1] : B_->Shape()[0],  // size_t output_stride,
+         B_->Data<MLFloat16>(),                                       // const MLFloat16* kernel,
+         bias_data,                                                   // const float* bias,
+         foutput_min, foutput_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+diff --git a/onnxruntime/core/providers/xnnpack/nn/conv_base.cc b/onnxruntime/core/providers/xnnpack/nn/conv_base.cc
+--- a/onnxruntime/core/providers/xnnpack/nn/conv_base.cc
++++ b/onnxruntime/core/providers/xnnpack/nn/conv_base.cc
+@@ -71,12 +71,13 @@ Status ConvBase::CreateKernel() {
+     status = create_func(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels, group_output_channels,  // groups, group_input_channels, group_output_channels
+         C, M,                                         // input channel stride, output channel stride
+         Weight.Data<float>(), B_data,
+         foutput_min, foutput_max, flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -87,14 +88,15 @@ Status ConvBase::CreateKernel() {
+     status = create_func(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels,
+         group_output_channels,
+         C, M,                              // input channel stride, output channel stride
+         Weight.Data<MLFloat16>(), B_data,  // kernel, bias
+         foutput_min, foutput_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -109,16 +111,17 @@ Status ConvBase::CreateKernel() {
+     status = create_func(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels,
+         group_output_channels,
+         C, M,
+         quant_param[0].second, quant_param[0].first[0],
+         quant_param[1].first[0], Weight.Data<int8_t>(), B_data,
+         quant_param[2].second, quant_param[2].first[0],
+         output_min, output_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -131,18 +134,19 @@ Status ConvBase::CreateKernel() {
+     status = xnn_create_convolution2d_nhwc_qs8_qc8w(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels,
+         group_output_channels,
+         C, M,
+         // zero_point will convert to int8_t automatically
+         quant_param[0].second, quant_param[0].first[0],
+         quant_param[1].first.data(),
+         Weight.Data<int8_t>(), B_data,
+         quant_param[2].second, quant_param[2].first[0],
+         output_min, output_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
+@@ -157,17 +161,18 @@ Status ConvBase::CreateKernel() {
+     status = create_func(
+         input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+         kernel_height, kernel_width,
+         subsampling_height, subsampling_width,
+         dilation_height, dilation_width,
+         group_count,
+         group_input_channels,
+         group_output_channels,
+         C, M,
+         quant_param[0].second, quant_param[0].first[0],
+         quant_param[1].second, quant_param[1].first[0],
+         Weight.Data<uint8_t>(), B_data,
+         quant_param[2].second, quant_param[2].first[0],
+         output_min, output_max,
+         flags,
++        nullptr,
+         weights_cache,
+         &p);
