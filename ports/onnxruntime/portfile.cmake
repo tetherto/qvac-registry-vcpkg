@@ -29,13 +29,13 @@ if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR VCPKG_CMAKE_SYSTEM_NAME STREQUAL
 endif()
 
 # Add extra patches only for Android builds
-# Note: 07-fix-nnapi-export.patch is NOT needed for v1.24.2+ as EXPORT is already in the source
+# Note: no additional NNAPI patch is needed for v1.24.2+ because EXPORT is already in the source
 if(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT "minimal-build" IN_LIST FEATURES)
   message(STATUS "Android build detected (NNAPI EP enabled via features)")
   # No additional patches needed for Android in v1.24.2+
 endif()
 
-# Add extra patches for XNNPack builds
+# XNNPACK API compatibility fixes for ORT 1.24.2
 if("xnnpack-ep" IN_LIST FEATURES)
   message(STATUS "Applying XNNPack patches...")
   list(APPEND ONNXRUNTIME_PATCHES
