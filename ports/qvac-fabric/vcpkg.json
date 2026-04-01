@@ -18,12 +18,15 @@
       "host": true
     }
   ],
+  "default-features": [
+    "llama"
+  ],
   "features": {
     "force-profiler": {
       "description": "Force vk performance logging in ggml"
     },
-    "ggml": {
-      "description": "Build ggml only (disable llama components)"
+    "llama": {
+      "description": "Build llama components."
     }
   }
 }
