@@ -1,7 +1,6 @@
 {
   "name": "qvac-fabric",
-  "version": "7248.1.4",
-  "port-version": 1,
+  "version": "7248.2.2",
   "description": "LLM inference in C/C++",
   "homepage": "https://github.com/tetherto/qvac-fabric-llm.cpp",
   "license": "MIT",
@@ -19,9 +18,15 @@
       "host": true
     }
   ],
+  "default-features": [
+    "llama"
+  ],
   "features": {
     "force-profiler": {
       "description": "Force vk performance logging in ggml"
+    },
+    "llama": {
+      "description": "Build llama components."
     }
   }
 }
