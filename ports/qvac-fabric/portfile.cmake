@@ -2,13 +2,15 @@ vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-fabric-llm.cpp
   REF v${VERSION}
-  SHA512 94900ac5e611667d22db492bab36e6d10ba043233d561c31f9474f9b9c8cd59375dd3a914b99d52cbe4d6a000745ca65186db0a144e6d9268d846eb825bdd599
+  SHA512 a48cedb685fbee6af43e5d0b34cb5c69da1befe4c967c2cc592abcf45369b71e62dcdd893c7feea47d13942911950c1cef3e58c9c9891c10a6a81b835a76e9dc
 )
 
 vcpkg_check_features(
   OUT_FEATURE_OPTIONS FEATURE_OPTIONS
   FEATURES
     force-profiler FORCE_GGML_VK_PERF_LOGGER
+  INVERTED_FEATURES
+    ggml BUILD_LLAMA
 )
 
 if (VCPKG_TARGET_IS_ANDROID)
@@ -85,17 +87,22 @@ vcpkg_cmake_configure(
 
 vcpkg_cmake_install()
 vcpkg_cmake_config_fixup(
-  PACKAGE_NAME llama)
-vcpkg_cmake_config_fixup(
   PACKAGE_NAME ggml)
+
+if(BUILD_LLAMA)
+  vcpkg_cmake_config_fixup(PACKAGE_NAME llama)
+endif()
 
 vcpkg_copy_pdbs()
 vcpkg_fixup_pkgconfig()
 
-file(MAKE_DIRECTORY "${CURRENT_PACKAGES_DIR}/tools/${PORT}")
-file(RENAME "${CURRENT_PACKAGES_DIR}/bin/convert_hf_to_gguf.py" "${CURRENT_PACKAGES_DIR}/tools/${PORT}/convert-hf-to-gguf.py")
-file(INSTALL "${SOURCE_PATH}/gguf-py" DESTINATION "${CURRENT_PACKAGES_DIR}/tools/${PORT}")
-file(RENAME "${CURRENT_PACKAGES_DIR}/bin/vulkan_profiling_analyzer.py" "${CURRENT_PACKAGES_DIR}/tools/${PORT}/vulkan_profiling_analyzer.py")
+
+if(BUILD_LLAMA)
+  file(MAKE_DIRECTORY "${CURRENT_PACKAGES_DIR}/tools/${PORT}")
+  file(RENAME "${CURRENT_PACKAGES_DIR}/bin/convert_hf_to_gguf.py" "${CURRENT_PACKAGES_DIR}/tools/${PORT}/convert-hf-to-gguf.py")
+  file(INSTALL "${SOURCE_PATH}/gguf-py" DESTINATION "${CURRENT_PACKAGES_DIR}/tools/${PORT}")
+  file(RENAME "${CURRENT_PACKAGES_DIR}/bin/vulkan_profiling_analyzer.py" "${CURRENT_PACKAGES_DIR}/tools/${PORT}/vulkan_profiling_analyzer.py")
+endif()
 
 if (NOT VCPKG_BUILD_TYPE)
   file(REMOVE "${CURRENT_PACKAGES_DIR}/debug/bin/convert_hf_to_gguf.py")
