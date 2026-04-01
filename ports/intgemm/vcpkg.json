@@ -1,0 +1,17 @@
+{
+  "name": "intgemm",
+  "version": "1.0.0",
+  "description": "8-bit and 16-bit integer matrix multiplication for neural machine translation",
+  "homepage": "https://github.com/kpu/intgemm",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
+}
