@@ -6,7 +6,6 @@ A [vcpkg](https://vcpkg.io/) custom registry used by QVAC projects. It provides 
 
 - **QVAC packages**: `qvac-lib-inference-addon-cpp`, `qvac-lint-cpp`
 - **Inference / ML**: `llama-cpp`, `whisper-cpp`, `onnxruntime`, `onnx`, `tokenizers-cpp`, `sentencepiece`
-- **TTS**: `piper`, `piper-phonemize`, `espeak-ng`
 - **Build / runtime deps**: `vcpkg-cmake`, `vcpkg-cmake-config`, `vcpkg-cmake-get-vars`, `abseil`, `eigen3`, `opencl`, `opencl-headers`, `protobuf`, `pybind11`, `xnnpack`, and others
 
 Exact versions and baselines are defined in `versions/baseline.json`.
