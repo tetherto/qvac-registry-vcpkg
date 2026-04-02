@@ -4,6 +4,10 @@
       "baseline": "onnxruntime",
       "port-version": 1
     },
+    "bergamot-translator": {
+      "baseline": "1.0.0",
+      "port-version": 0
+    },
     "cpuinfo": {
       "baseline": "onnxruntime",
       "port-version": 0
@@ -22,6 +26,10 @@
     },
     "llama-cpp": {
       "baseline": "7248.1.2",
+      "port-version": 0
+    },
+    "marian-dev": {
+      "baseline": "1.0.0",
       "port-version": 0
     },
     "onnx": {
