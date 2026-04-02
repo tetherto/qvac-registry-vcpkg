@@ -140,10 +140,17 @@ string(REPLACE
   "# Create imported target onnxruntime::onnxruntime\nadd_library(onnxruntime::onnxruntime INTERFACE IMPORTED)\n\nset_target_properties(onnxruntime::onnxruntime PROPERTIES\n  INTERFACE_INCLUDE_DIRECTORIES \"\${_IMPORT_PREFIX}/include/onnxruntime\"\n  INTERFACE_LINK_LIBRARIES"
   _contents "${_contents}")
 string(REPLACE ";microkernels_prod_LIBRARY-NOTFOUND" "" _contents "${_contents}")
-string(REPLACE
-  ";unofficial::pthreadpool;unofficial::pthreadpool_interface"
-  ";\$<\$<NOT:\$<CONFIG:DEBUG>>:\${VCPKG_IMPORT_PREFIX}/lib/libmicrokernels-prod.a>;\$<\$<CONFIG:DEBUG>:\${VCPKG_IMPORT_PREFIX}/debug/lib/libmicrokernels-prod.a>;unofficial::pthreadpool;unofficial::pthreadpool_interface"
-  _contents "${_contents}")
+if(EXISTS "${CURRENT_INSTALLED_DIR}/lib/libmicrokernels-prod.a")
+  string(REPLACE
+    ";unofficial::pthreadpool;unofficial::pthreadpool_interface"
+    ";\$<\$<NOT:\$<CONFIG:DEBUG>>:\${VCPKG_IMPORT_PREFIX}/lib/libmicrokernels-prod.a>;\$<\$<CONFIG:DEBUG>:\${VCPKG_IMPORT_PREFIX}/debug/lib/libmicrokernels-prod.a>;unofficial::pthreadpool;unofficial::pthreadpool_interface"
+    _contents "${_contents}")
+elseif(EXISTS "${CURRENT_INSTALLED_DIR}/lib/microkernels-prod.lib")
+  string(REPLACE
+    ";unofficial::pthreadpool;unofficial::pthreadpool_interface"
+    ";\$<\$<NOT:\$<CONFIG:DEBUG>>:\${VCPKG_IMPORT_PREFIX}/lib/microkernels-prod.lib>;\$<\$<CONFIG:DEBUG>:\${VCPKG_IMPORT_PREFIX}/debug/lib/microkernels-prod.lib>;unofficial::pthreadpool;unofficial::pthreadpool_interface"
+    _contents "${_contents}")
+endif()
 file(WRITE "${CONFIG_FILE}" "${_contents}")
 
 # Fix: Change find_dependency(protobuf) to find_dependency(Protobuf) for case sensitivity
