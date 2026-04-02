@@ -1,6 +1,11 @@
 {
   "versions": [
     {
+      "git-tree": "f67f9cccd64a8b91cc6dd7a520329a28a96d05bb",
+      "version-string": "onnxruntime",
+      "port-version": 1
+    },
+    {
       "git-tree": "9abf61ec75b5fae16dba36210819533530fe07e2",
       "version-string": "onnxruntime",
       "port-version": 0

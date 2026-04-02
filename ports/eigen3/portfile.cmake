@@ -3,10 +3,9 @@ vcpkg_buildpath_length_warning(37)
 block(SCOPE_FOR VARIABLES PROPAGATE SOURCE_PATH)
 set(VCPKG_BUILD_TYPE release) # header-only
 
-vcpkg_from_gitlab(
-    GITLAB_URL https://gitlab.com
+vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO libeigen/eigen
+    REPO eigen-mirror/eigen
     REF 1d8b82b0740839c0de7f1242a3585e3390ff5f33
     SHA512 26a0d86ece9a28c93d64ee3e6ff96276b096a80e34fa2f3c474638824ffa2c56e582d9b2b9ffbb73b18a28b4828b827654b65a3471bc83505c48feab26fb836d
     HEAD_REF master
