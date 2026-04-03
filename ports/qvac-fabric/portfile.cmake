@@ -2,7 +2,7 @@ vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-fabric-llm.cpp
   REF v${VERSION}
-  SHA512 bc88539029c6276165d5c51b2061f6c59ea29597f8ee3668186b8a170656d4f6bb28f4f983a735172444d3eeba309e594cd33c6f3399a6e4e4ca5c0c52cdffe1
+  SHA512 d985b9a379c0851a9f3b801dd90d977f0977a64c489daad8c25f0714ba29dec8468d8ea0d67afe7aeffb37ff9bdb62c62d0f49be9cb8a560181bad7376cbb460
 )
 
 vcpkg_check_features(
