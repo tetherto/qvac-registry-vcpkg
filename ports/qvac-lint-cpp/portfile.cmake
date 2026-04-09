@@ -1,4 +1,4 @@
-set(QVAC_REPO "git@github.com:tetherto/qvac.git")
+set(QVAC_REPO "https://github.com/tetherto/qvac.git")
 set(QVAC_REF "3f56abff423e21fc5ac79627cc43e1161bb7caaf")
 set(QVAC_LINT_CPP_SUBDIR "packages/qvac-lint-cpp")
 
