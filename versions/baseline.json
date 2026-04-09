@@ -70,11 +70,11 @@
     },
     "qvac-lib-inference-addon-cpp": {
       "baseline": "1.1.5",
-      "port-version": 0
+      "port-version": 1
     },
     "qvac-lint-cpp": {
       "baseline": "1.4.4",
-      "port-version": 1
+      "port-version": 2
     },
     "simd-utils": {
       "baseline": "1.0.0",
