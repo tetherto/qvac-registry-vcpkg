@@ -1,0 +1,22 @@
+--- a/src/ggml-vulkan/ggml-vulkan.cpp
++++ b/src/ggml-vulkan/ggml-vulkan.cpp
+@@ -15119 +15119,2 @@ static ggml_backend_dev_t ggml_backend_vk_reg_get_device(ggml_backend_reg_t reg,
+-    static std::vector<ggml_backend_dev_t> devices;
++    static std::vector<std::unique_ptr<ggml_backend_device>> devices;
++    static std::vector<std::unique_ptr<ggml_backend_vk_device_context>> contexts;
+@@ -15129 +15130 @@ static ggml_backend_dev_t ggml_backend_vk_reg_get_device(ggml_backend_reg_t reg,
+-                ggml_backend_vk_device_context * ctx = new ggml_backend_vk_device_context;
++                auto ctx = std::make_unique<ggml_backend_vk_device_context>();
+@@ -15138,5 +15139,7 @@ static ggml_backend_dev_t ggml_backend_vk_reg_get_device(ggml_backend_reg_t reg,
+-                devices.push_back(new ggml_backend_device {
++                auto dev = std::make_unique<ggml_backend_device>(ggml_backend_device {
+                     /* .iface   = */ ggml_backend_vk_device_i,
+                     /* .reg     = */ reg,
+-                    /* .context = */ ctx,
++                    /* .context = */ ctx.get(),
+                 });
++                contexts.push_back(std::move(ctx));
++                devices.push_back(std::move(dev));
+@@ -15149 +15152 @@ static ggml_backend_dev_t ggml_backend_vk_reg_get_device(ggml_backend_reg_t reg,
+-    return devices[device];
++    return devices[device].get();

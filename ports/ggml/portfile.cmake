@@ -25,6 +25,7 @@ vcpkg_from_github(
         ggml-opencl-public-header.patch
         ggml-opencl-graceful-no-devices.patch
         ggml-config-include-dir.patch
+        ggml-vulkan-device-cache-owned-storage.patch
         ggml-static-core-dl-backends.patch
         ggml-cpu-static-hybrid.patch
         ggml-qvac-backend-prefix.patch
@@ -173,4 +174,3 @@ set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 
 file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
 vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
-
