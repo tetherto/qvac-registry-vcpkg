@@ -16,13 +16,13 @@
       "baseline": "onnxruntime",
       "port-version": 1
     },
+    "ggml": {
+      "baseline": "2026-01-30",
+      "port-version": 5
+    },
     "intgemm": {
       "baseline": "1.0.0",
       "port-version": 0
-    },
-    "ggml": {
-      "baseline": "2026-01-30",
-      "port-version": 4
     },
     "llama-cpp": {
       "baseline": "7248.1.2",
@@ -60,10 +60,6 @@
       "baseline": "onnxruntime",
       "port-version": 0
     },
-    "ruy": {
-      "baseline": "1.0.0",
-      "port-version": 0
-    },
     "qvac-fabric": {
       "baseline": "7248.2.3",
       "port-version": 0
@@ -76,6 +72,14 @@
       "baseline": "1.4.4",
       "port-version": 2
     },
+    "ruy": {
+      "baseline": "1.0.0",
+      "port-version": 0
+    },
+    "sentencepiece": {
+      "baseline": "0.2.0",
+      "port-version": 2
+    },
     "simd-utils": {
       "baseline": "1.0.0",
       "port-version": 0
@@ -83,10 +87,6 @@
     "ssplit": {
       "baseline": "1.0.0",
       "port-version": 0
-    },
-    "sentencepiece": {
-      "baseline": "0.2.0",
-      "port-version": 2
     },
     "stable-diffusion-cpp": {
       "baseline": "2026-03-01",
