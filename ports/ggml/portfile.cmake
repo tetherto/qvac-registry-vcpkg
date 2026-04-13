@@ -29,6 +29,7 @@ vcpkg_from_github(
         ggml-static-core-dl-backends.patch
         ggml-cpu-static-hybrid.patch
         ggml-qvac-backend-prefix.patch
+        ggml-opencl-kernel-cache.patch
 )
 
 # --- GPU feature flags ---
