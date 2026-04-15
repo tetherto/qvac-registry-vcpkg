@@ -9,6 +9,8 @@ vcpkg_from_github(
     0001-fix-vcpkg-build.patch
     0002-fix-apple-silicon-cross-compile.patch
     0003-fix-windows-pthread.patch
+    0004-bci-variable-conv1-kernel.patch
+    0005-bci-windowed-attention.patch
 )
 
 if (VCPKG_TARGET_IS_ANDROID)
