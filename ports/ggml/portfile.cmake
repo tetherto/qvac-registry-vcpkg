@@ -1,7 +1,9 @@
 # ggml vcpkg overlay port
 #
-# Builds the ggml tensor library from ggml-org/ggml.
-# Pinned to the commit used by stable-diffusion.cpp tag master-514-5792c66.
+# Builds the ggml tensor library from tetherto/qvac-ext-ggml.
+# Fork of ggml-org/ggml (commit a8db410a) with all overlay patches
+# pre-applied.  Pinned to the commit used by stable-diffusion.cpp tag
+# master-514-5792c66.
 #
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
@@ -16,19 +18,10 @@
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO ggml-org/ggml
-    REF a8db410a252c8c8f2d120c6f2e7133ebe032f35d
-    SHA512 bbca42948d994a33f1d6b2a65b254606f8b563d84d2b456db161cf55b6e01ed6b5eae7ad2c878bc4f03afc664c4209c2e87438fd4171a6f7c77dd907706e51bf
-    HEAD_REF master
-    PATCHES
-        ggml-max-name.patch
-        ggml-opencl-public-header.patch
-        ggml-opencl-graceful-no-devices.patch
-        ggml-config-include-dir.patch
-        ggml-vulkan-device-cache-owned-storage.patch
-        ggml-static-core-dl-backends.patch
-        ggml-cpu-static-hybrid.patch
-        ggml-qvac-backend-prefix.patch
+    REPO tetherto/qvac-ext-ggml
+    REF e16bdae279d575432337cf8cf375977812fdba9d
+    SHA512 09fa1cd58bdaf0cf77803ef723d15ef98ca4fa529e24d66bd9a9bbff09c34c9ff63a27bb8256d71d2961ee797473f72984a9f942606f3dac9d04b50b4ea11763
+    HEAD_REF 2026-01-30
 )
 
 # --- GPU feature flags ---
