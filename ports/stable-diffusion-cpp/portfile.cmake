@@ -9,22 +9,18 @@
 #   share/stable-diffusion-cpp/  (CMake package config)
 #
 # GPU backend selection is handled at runtime via ggml's backend registry.
-# The sd-generic-backend-init patch replaces SD's backend-specific init
-# with ggml_backend_init_by_type() which works with both statically linked
-# and dynamically loaded backends.
+# The downstream fork replaces SD's backend-specific init with
+# ggml_backend_init_by_type() which works with both statically linked and
+# dynamically loaded backends.
 #
-# Pinned to release tag master-514-5792c66 (2026-03-01).
+# Pinned to the 2026-03-01 branch of the downstream fork (master-514-5792c66
+# plus the squashed qvac-registry-vcpkg port patches).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 5792c668798083f9f6d57dac66fbc62ddfdac405
-    SHA512 9bdf945d27ea24d9ea8218a7b875b6d1346711122723453840f4648cd862de3be28e37736ce0ef46ed304cbe810593dfa4264eec969c9e0c8dafb854298280f7
-    HEAD_REF master
-    PATCHES
-        sd-generic-backend-init.patch
-        sd-android-vulkan-diagnostics.patch
-        abort-callback.patch
-        fix-failure-path-cleanup.patch
+    REF b474457d6cd58499d4d7ec9ad17825eba11791de
+    SHA512 628629b4bb76660f35b46bdc8941f108b6c5e932d53c739d660c217d2d9dc0293791b7c9d8176b15377d7a8cef52cec9c5533131cab69a0c59cf2da894b2c905
+    HEAD_REF 2026-03-01
 )
 
 set(SD_FLASH_ATTN OFF)
