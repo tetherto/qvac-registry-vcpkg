@@ -109,7 +109,7 @@
       "port-version": 0
     },
     "whisper-cpp": {
-      "baseline": "1.8.4.1",
+      "baseline": "1.8.4.2",
       "port-version": 0
     },
     "xnnpack": {
