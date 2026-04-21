@@ -3,12 +3,8 @@ vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-whisper.cpp
   REF v${VERSION}
-  SHA512 752d8cdeb66414c1faacc9ba5abe0075a06ac8efe9ec70b25fd01465ebb6f67f677d8c5bc7effac497fad392ee9a5067b691faee7ebc413ec881b9e843e53eff
+  SHA512 8d265bf6c0dd6e82fbc05d3b083ac0c721df4d75cb536d170eee3a4d810fdc421f79f383682fa6912aa8551a5115c4240105e00070855193df7ec41e4f6a4d83
   HEAD_REF master
-  PATCHES
-    0001-fix-vcpkg-build.patch
-    0002-fix-apple-silicon-cross-compile.patch
-    0003-fix-windows-pthread.patch
 )
 
 if (VCPKG_TARGET_IS_ANDROID)
