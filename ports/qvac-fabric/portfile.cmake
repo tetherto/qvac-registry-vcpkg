@@ -12,7 +12,20 @@ vcpkg_check_features(
     llama BUILD_LLAMA
 )
 
-if (VCPKG_TARGET_IS_ANDROID)
+# Detect the gpu-backends feature: default-on, so existing consumers
+# (llamacpp-llm, llamacpp-embed, nmtcpp, diffusion-cpp) keep building Metal
+# (Apple) / Vulkan (Linux+Windows) / Vulkan+OpenCL+DL-hybrid (Android) without
+# changing their manifest. CPU-only consumers (e.g. @qvac/classification-ggml)
+# disable it via default-features:false (and re-add 'llama' if they need it),
+# saving the vulkan-sdk / metal / opencl build cost.
+set(_qvac_gpu_backends OFF)
+if("gpu-backends" IN_LIST FEATURES)
+  set(_qvac_gpu_backends ON)
+else()
+  message(STATUS "qvac-fabric: gpu-backends feature OFF — building CPU-only ggml (no Metal/Vulkan/CUDA/OpenCL)")
+endif()
+
+if (VCPKG_TARGET_IS_ANDROID AND _qvac_gpu_backends)
   # NDK only comes with C headers.
   # Make sure C++ header exists, it will be used by ggml tensor library.
   # Need to determine installed vulkan version and download correct headers
@@ -39,7 +52,20 @@ endif()
 
 set(PLATFORM_OPTIONS)
 
-if (VCPKG_TARGET_IS_OSX OR VCPKG_TARGET_IS_IOS)
+if(NOT _qvac_gpu_backends)
+  # Force every GPU backend off explicitly, in case upstream defaults change.
+  list(APPEND PLATFORM_OPTIONS
+    -DGGML_METAL=OFF
+    -DGGML_VULKAN=OFF
+    -DGGML_CUDA=OFF
+    -DGGML_OPENCL=OFF
+  )
+  if (VCPKG_TARGET_IS_IOS)
+    # Same iOS BLAS/Accelerate gating as the GPU-on path; unrelated to the
+    # CPU-vs-GPU split, an iOS-toolchain workaround for missing frameworks.
+    list(APPEND PLATFORM_OPTIONS -DGGML_BLAS=OFF -DGGML_ACCELERATE=OFF)
+  endif()
+elseif (VCPKG_TARGET_IS_OSX OR VCPKG_TARGET_IS_IOS)
   list(APPEND PLATFORM_OPTIONS -DGGML_METAL=ON)
   if (VCPKG_TARGET_IS_IOS)
     list(APPEND PLATFORM_OPTIONS -DGGML_BLAS=OFF -DGGML_ACCELERATE=OFF)
@@ -48,6 +74,14 @@ else()
   list(APPEND PLATFORM_OPTIONS -DGGML_VULKAN=ON)
 endif()
 
+# Android: always build CPU variants (NEON_DOTPROD, NEON_I8MM, etc.) and CPU
+# repacking. These are CPU-only runtime optimizations selected based on the
+# device's SIMD capabilities at load time, completely orthogonal to the GPU
+# backends. Bundling them is essential for good CPU inference performance on
+# the wide range of arm64 devices the addons ship to. Requires GGML_BACKEND_DL
+# to dispatch the variants at runtime; the existing #ifdef guard around
+# `ggml_backend_load_all_from_path()` in ggml-backend-reg.cpp keeps the search
+# scoped to the consumer's own prebuilds dir.
 if(VCPKG_TARGET_IS_ANDROID)
   set(DL_BACKENDS ON)
   list(APPEND PLATFORM_OPTIONS
@@ -58,7 +92,7 @@ else()
   set(DL_BACKENDS OFF)
 endif()
 
-if (VCPKG_TARGET_IS_ANDROID)
+if (VCPKG_TARGET_IS_ANDROID AND _qvac_gpu_backends)
   list(APPEND PLATFORM_OPTIONS
     -DGGML_VULKAN_DISABLE_COOPMAT=ON
     -DGGML_VULKAN_DISABLE_COOPMAT2=ON
