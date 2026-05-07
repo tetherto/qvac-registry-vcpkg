@@ -2,8 +2,20 @@
 #
 # Builds the ggml tensor library from tetherto/qvac-ext-ggml.
 # Fork of ggml-org/ggml (commit a8db410a) with all overlay patches
-# pre-applied.  Pinned to the commit used by stable-diffusion.cpp tag
-# master-514-5792c66.
+# pre-applied, plus the Wan-required Metal ops.  Pinned to the commit
+# used by stable-diffusion.cpp tag master-514-5792c66.
+#
+# Pinned to 05afdc5981 -- the merge commit of tetherto/qvac-ext-ggml#6,
+# which on top of the previous pin (e16bdae2) brings:
+#   - bc053644  metal: IM2COL_3D op + PAD left-padding for Wan video (#5)
+#   - 6d2d24bb  metal: tighten IM2COL_3D supports_op (src[1]==F32)
+#   - b1923e29  metal: extend IM2COL_3D supports_op for nb[0]==sizeof(float)
+#               and F16-dst => F16-kernel match
+#   - 05afdc59  Merge pull request #6 from aegioscy
+#
+# Without these the Metal backend aborts mid-Wan inference with
+# `unsupported op 'IM2COL_3D'` and the test-backend-ops support/test
+# matrix advertises invalid IM2COL_3D combos that hit CPU GGML_ASSERTs.
 #
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
@@ -19,8 +31,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF e16bdae279d575432337cf8cf375977812fdba9d
-    SHA512 09fa1cd58bdaf0cf77803ef723d15ef98ca4fa529e24d66bd9a9bbff09c34c9ff63a27bb8256d71d2961ee797473f72984a9f942606f3dac9d04b50b4ea11763
+    REF 05afdc5981031b8dcfd5f9cc979442b707b8486c
+    SHA512 a0caf41c6ba65474ad80e42f13dc20df0f28a876cc9e05b110bfaf745a8277f0904988bc9bef2cb2693f751fcc01cdeaf3af5463028532c74a83e676435cbeda
     HEAD_REF 2026-01-30
 )
 

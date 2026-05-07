@@ -1,8 +1,8 @@
 {
   "name": "ggml",
   "version-date": "2026-01-30",
-  "port-version": 6,
-  "description": "Tensor library for machine learning (tetherto fork with overlay patches pre-applied, pinned to commit used by stable-diffusion.cpp master-514-5792c66)",
+  "port-version": 7,
+  "description": "Tensor library for machine learning (tetherto fork with overlay patches pre-applied, pinned to commit used by stable-diffusion.cpp master-514-5792c66; bumped to the merge of tetherto/qvac-ext-ggml#6 which adds the Wan-required Metal ops -- IM2COL_3D, PAD left-padding -- and tightens IM2COL_3D supports_op)",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml",
   "license": "MIT",
   "dependencies": [
