@@ -93,11 +93,6 @@ else()
 endif()
 
 if (VCPKG_TARGET_IS_ANDROID AND _qvac_gpu_backends)
-  # Re-enable Vulkan coopmat on Android: fabric v8189 includes the Mali/Adreno
-  # F16 coopmat1 corruption fix (qvac-fabric-llm.cpp commit 4644a8733
-  # "vulkan: fix F16 coopmat1 corruption ... by using non-coopmat fp32
-  # shaders"), so the previous DISABLE_COOPMAT/COOPMAT2 workaround is no
-  # longer required. Validated end-to-end in tetherto/qvac#1874.
   list(APPEND PLATFORM_OPTIONS -DGGML_OPENCL=ON)
 endif()
 
