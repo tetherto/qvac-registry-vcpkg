@@ -1,21 +1,22 @@
 # ggml vcpkg overlay port
 #
 # Builds the ggml tensor library from tetherto/qvac-ext-ggml.
-# Fork of ggml-org/ggml (commit a8db410a) with all overlay patches
-# pre-applied, plus the Wan-required Metal ops.  Pinned to the commit
-# used by stable-diffusion.cpp tag master-514-5792c66.
+# Fork of ggml-org/ggml (commit a8db410a) with all QVAC infrastructure
+# patches pre-applied as commits.  Pinned to the head of the `speech`
+# branch.
 #
-# Pinned to 05afdc5981 -- the merge commit of tetherto/qvac-ext-ggml#6,
-# which on top of the previous pin (e16bdae2) brings:
-#   - bc053644  metal: IM2COL_3D op + PAD left-padding for Wan video (#5)
-#   - 6d2d24bb  metal: tighten IM2COL_3D supports_op (src[1]==F32)
-#   - b1923e29  metal: extend IM2COL_3D supports_op for nb[0]==sizeof(float)
-#               and F16-dst => F16-kernel match
-#   - 05afdc59  Merge pull request #6 from aegioscy
-#
-# Without these the Metal backend aborts mid-Wan inference with
-# `unsupported op 'IM2COL_3D'` and the test-backend-ops support/test
-# matrix advertises invalid IM2COL_3D combos that hit CPU GGML_ASSERTs.
+# Pinned to 60a172e487 -- the merge commit of tetherto/qvac-ext-ggml#8,
+# which on top of the previous pin (05afdc59, the merge of #6) brings:
+#   - The Vulkan / Metal / CMake fixes cherry-picked from the
+#     2026-01-30 branch (persistent pipeline cache, GGML_LIB_OUTPUT_PREFIX,
+#     hybrid backend packaging, GGML_METAL_FUSE_MV_BIAS, std::filesystem
+#     pipeline-cache rename).  Merged via tetherto/qvac-ext-ggml#7.
+#   - The Supertonic 2 fused custom op family (ad40f3c7, #8): five fused
+#     Metal kernels with CPU forwards (depthwise_1d / layer_norm_channel /
+#     pw2_residual / bias_gelu / edge_pad_1d), plus a stride-parameterised
+#     body so the same compiled kernel handles both [T, C] and [C, T]
+#     activations via an op_params layout flag.  Consumed by tts-cpp's
+#     Supertonic Metal path in qvac-ext-lib-whisper.cpp#15.
 #
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
@@ -31,9 +32,9 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 05afdc5981031b8dcfd5f9cc979442b707b8486c
-    SHA512 a0caf41c6ba65474ad80e42f13dc20df0f28a876cc9e05b110bfaf745a8277f0904988bc9bef2cb2693f751fcc01cdeaf3af5463028532c74a83e676435cbeda
-    HEAD_REF 2026-01-30
+    REF 60a172e48f699bd0a00575ef911feed9473b2187
+    SHA512 dd73291c1f37d7969b0153c212efcb23c2257edcdb7056da83db6c0af33597ceaf3776ccc756a977a8b451b9e1c9b64eb0535c05f7a34e9a3212275032b3ad65
+    HEAD_REF speech
 )
 
 # --- GPU feature flags ---
