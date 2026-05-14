@@ -22,7 +22,7 @@
     },
     "ggml-speech": {
       "baseline": "2026-04-09",
-      "port-version": 1
+      "port-version": 2
     },
     "intgemm": {
       "baseline": "1.0.0",
