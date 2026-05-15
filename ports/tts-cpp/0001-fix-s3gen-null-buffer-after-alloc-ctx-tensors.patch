@@ -1,0 +1,50 @@
+From: QVAC SDK Pod <noreply@tether.io>
+Subject: [PATCH] chatterbox: NULL-check buffer_w after ggml_backend_alloc_ctx_tensors in load_s3gen_gguf
+
+ggml_backend_alloc_ctx_tensors() can legitimately return NULL when the
+underlying backend allocation fails (Metal heap exhaustion, jetsam-induced
+memory pressure on iOS warm relaunches, etc.).
+
+In src/chatterbox_tts.cpp, load_s3gen_gguf() does not check buffer_w and
+proceeds straight into a per-tensor ggml_backend_tensor_set() loop. With
+buffer_w == NULL, every tensor's tensor->buffer is NULL, and tensor_set
+hits a GGML_ASSERT inside the backend interface, calling ggml_abort()
+and raising SIGABRT.
+
+This is asymmetric with all 8 other ggml_backend_alloc_ctx_tensors call
+sites in tts-cpp (s3tokenizer.cpp:384, s3tokenizer.cpp:598,
+voice_encoder.cpp:266, t3_mtl.cpp:1564/1652/1704, supertonic_gguf.cpp:334,
+chatterbox_engine.cpp:361), which all NULL-check and
+fprintf-log-or-throw on failure.
+
+Reproduces on iPhone 16 (iOS 26.4.2) running tests-qvac TTS suite
+(chatterbox) with --skip-build after a prior run held the app at
+~3 GB peak (jetsam-eligible). Faulting frame is the s3gen preload
+thread spawned in tts_cpp::chatterbox::Engine::Impl::Impl().
+
+Fix: throw std::runtime_error symmetrically with the other call sites
+so the chatterbox engine constructor surfaces a clean
+"alloc s3gen weights buffer failed" error instead of aborting the
+process. This pairs with the prior NULL-guard fix in ggml-speech's
+ggml_backend_metal_buffer_type_alloc_buffer (which converts the same
+failure mode from a hard SIGSEGV into a NULL return).
+
+---
+ tts-cpp/src/chatterbox_tts.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/tts-cpp/src/chatterbox_tts.cpp b/tts-cpp/src/chatterbox_tts.cpp
+--- a/tts-cpp/src/chatterbox_tts.cpp
++++ b/tts-cpp/src/chatterbox_tts.cpp
+@@ -292,6 +292,11 @@ static model_ctx load_s3gen_gguf(const std::string & path, int n_gpu_layers, boo
+         m.tensors[name] = dst;
+     }
+     m.buffer_w = ggml_backend_alloc_ctx_tensors(m.ctx_w, m.backend);
++    if (!m.buffer_w) {
++        gguf_free(g);
++        ggml_free(tmp_ctx);
++        throw std::runtime_error("load_s3gen_gguf: ggml_backend_alloc_ctx_tensors failed for s3gen weights buffer (backend out of memory?)");
++    }
+     for (ggml_tensor * cur = ggml_get_first_tensor(m.ctx_w); cur; cur = ggml_get_next_tensor(m.ctx_w, cur)) {
+         ggml_tensor * src = ggml_get_tensor(tmp_ctx, ggml_get_name(cur));
+         ggml_backend_tensor_set(cur, ggml_get_data(src), 0, ggml_nbytes(src));

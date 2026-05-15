@@ -11,6 +11,8 @@ vcpkg_from_github(
     REF f5f914b9714bc1a48ef63cc9e79d082fd63eb085
     SHA512 5bd99c053b94909346ffec07ba882240fb1120770c0d2177e0df70bf39841136baeb72dda312465d2bd3fd2367f3cea49003bb6b9e17b22411b2905a8e1fa8d3
     HEAD_REF master
+    PATCHES
+        0001-fix-s3gen-null-buffer-after-alloc-ctx-tensors.patch
 )
 
 set(SOURCE_PATH "${WHISPER_CPP_SRC}/tts-cpp")
