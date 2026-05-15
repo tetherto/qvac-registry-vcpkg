@@ -1,0 +1,93 @@
+From: QVAC SDK Pod <noreply@tether.io>
+Subject: [PATCH] chatterbox: propagate s3gen_preload failures from Engine::Impl::Impl
+
+s3gen_preload() catches std::exception, logs to stderr, and returns 1 on
+failure (chatterbox_tts.cpp:2944-2952). The Engine::Impl constructor's
+preload thread (chatterbox_engine.cpp:181-184) discards that return
+value and joins the thread without checking, so an out-of-memory failure
+from ggml_backend_alloc_ctx_tensors leaves the global s3gen cache empty
+while the constructor returns "successfully".
+
+The first synthesize() call then re-enters s3gen_model_cache_get, gets a
+cache miss, retries load_s3gen_gguf, and re-throws the same OOM. From
+the SDK consumer's perspective this looks like a synthesize-time failure
+("engine.synthesize: load_s3gen_gguf: ggml_backend_alloc_ctx_tensors
+failed for s3gen weights buffer"), even though the engine was
+constructed-but-broken from the start. Worse, the stderr log from
+s3gen_preload is invisible on iOS (Bare runtime) so the real cause is
+lost.
+
+Capture a std::exception_ptr in the preload thread when s3gen_preload
+returns nonzero, then rethrow from the constructor after
+wait_for_preload(). Mirrors the existing bake_voice_conditioning()
+failure-cleanup style: free the gallocr and the partially-loaded model
+before throwing. The resource manager / SDK loader treats this as a
+clean loadModel failure (instead of caching a zombie engine), and the
+test report accurately attributes the failure to the load step.
+
+Pairs with the prior NULL-guard / NULL-check fixes in ggml-speech and
+tts-cpp's load_s3gen_gguf -- those convert the SIGSEGV/SIGABRT into a
+clean std::runtime_error; this patch makes sure that error is reported
+at the right callsite (loadModel, not synthesize).
+
+---
+ tts-cpp/src/chatterbox_engine.cpp | 22 +++++++++++++++++++++-
+ 1 file changed, 21 insertions(+), 1 deletion(-)
+
+diff --git a/tts-cpp/src/chatterbox_engine.cpp b/tts-cpp/src/chatterbox_engine.cpp
+--- a/tts-cpp/src/chatterbox_engine.cpp
++++ b/tts-cpp/src/chatterbox_engine.cpp
+@@ -2,6 +2,7 @@
+ 
+ #include <atomic>
+ #include <chrono>
++#include <exception>
+ #include <cstring>
+ #include <filesystem>
+ #include <stdexcept>
+@@ -42,6 +43,11 @@ struct Engine::Impl {
+     chatterbox_model     model{};
+     ggml_gallocr_t       allocr = nullptr;
+     std::thread          s3gen_preload_thread;
++    // Set by the s3gen preload thread when s3gen_preload() returns
++    // non-zero (which silently swallows the underlying std::exception
++    // from s3gen_model_cache_get / load_s3gen_gguf). Read by the Impl
++    // constructor after wait_for_preload() to decide whether to throw.
++    std::exception_ptr   s3gen_preload_err;
+ 
+     // Baked voice-conditioning state.  Populated at construction when
+     // `reference_audio` or `voice_dir` is set, then reused by every
+@@ -178,9 +184,14 @@ struct Engine::Impl {
+             throw;
+         }
+ 
+-        s3gen_preload_thread = std::thread([path = opts.s3gen_gguf_path,
++        s3gen_preload_thread = std::thread([this,
++                                            path = opts.s3gen_gguf_path,
+                                             ngpu = opts.n_gpu_layers]() {
+-            s3gen_preload(path, ngpu);
++            if (s3gen_preload(path, ngpu) != 0) {
++                s3gen_preload_err = std::make_exception_ptr(std::runtime_error(
++                    "Engine: s3gen weights preload failed for " + path +
++                    " (backend out of memory? see earlier stderr for details)"));
++            }
+         });
+ 
+         // Block until s3gen_preload finishes its Metal buffer allocation
+@@ -197,6 +208,16 @@ struct Engine::Impl {
+         // ggml-metal's shared buffer-type init is safe to use from a
+         // preload thread concurrent with construction-time teardown.
+         wait_for_preload(s3gen_preload_thread);
++
++        // If the preload thread captured an exception (s3gen_preload
++        // returned 1 -- the original throw was swallowed and stderr-logged
++        // by s3gen_preload itself), surface it as a clean construction
++        // failure rather than leaving the engine in a half-loaded state.
++        if (s3gen_preload_err) {
++            if (allocr) { ggml_gallocr_free(allocr); allocr = nullptr; }
++            free_model();
++            std::rethrow_exception(s3gen_preload_err);
++        }
+     }
+ 
+     ~Impl() {

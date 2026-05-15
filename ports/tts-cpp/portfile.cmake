@@ -13,6 +13,7 @@ vcpkg_from_github(
     HEAD_REF master
     PATCHES
         0001-fix-s3gen-null-buffer-after-alloc-ctx-tensors.patch
+        0002-fix-s3gen-preload-failure-propagation.patch
 )
 
 set(SOURCE_PATH "${WHISPER_CPP_SRC}/tts-cpp")
