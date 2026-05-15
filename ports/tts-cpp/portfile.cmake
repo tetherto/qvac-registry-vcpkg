@@ -14,6 +14,7 @@ vcpkg_from_github(
     PATCHES
         0001-fix-s3gen-null-buffer-after-alloc-ctx-tensors.patch
         0002-fix-s3gen-preload-failure-propagation.patch
+        0003-fix-voice-encoder-partials-sample-rate.patch
 )
 
 set(SOURCE_PATH "${WHISPER_CPP_SRC}/tts-cpp")

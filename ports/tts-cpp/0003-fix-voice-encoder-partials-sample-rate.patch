@@ -1,0 +1,69 @@
+From: QVAC SDK Pod <noreply@tether.io>
+Subject: [PATCH] voice_encoder: pass audio sample rate (not partial_frames) to compute_partials
+
+`voice_encoder_embed` calls `compute_partials(T_mel, partial, rate,
+sample_rate_hz, ...)`, where `sample_rate_hz` is the audio sample rate
+that the function uses to derive the partial-window step:
+
+    step = round((sample_rate_hz / rate) / partial)
+
+The call site mistakenly forwards `w.partial_frames` (= 160) as the
+`sample_rate_hz` argument:
+
+    compute_partials(T_mel, w.partial_frames, w.rate, w.partial_frames,
+                     w.overlap, w.min_coverage, n_wins, step, target_n);
+
+With sample_rate_hz=160, rate=1.3, partial=160 the formula collapses to
+`step = round(0.769) = 1`, which causes `n_wins` to grow ~50× larger
+than intended.  For a 3-second 16 kHz reference clip (T_mel = 300), the
+correct n_wins is 3, but the bug yields n_wins = 142.
+
+The LSTM working-set planned by `gallocr_reserve` scales linearly with
+`n_wins` (the batched 3D tensors `[4H, T, n_wins]` etc.), so this
+inflates the VoiceEncoder forward graph from ~30 MB to ~1.5 GB. On
+iOS this single allocation hits the per-process jetsam ceiling and
+fails with:
+
+    ggml_aligned_malloc: insufficient memory (attempted to allocate 1485.32 MB)
+    ggml_backend_cpu_buffer_type_alloc_buffer: failed to allocate buffer of size 1557470208
+
+surfacing in chatterbox_engine.cpp's `bake_voice_conditioning()` as
+"Engine: VoiceEncoder forward failed".
+
+Reference audio is unconditionally resampled to 16 kHz upstream
+(`if (sr != 16000) wav = resample_sinc(wav, sr, 16000);` in
+chatterbox_engine.cpp:314), so the audio sample rate at this point is
+constant 16000.  Pass that.
+
+This matches the original Python implementation's intent (see the
+function header comment that quotes `frame_step = int(round((sr / rate)
+/ partial))` where `sr` is the input audio sample rate).
+
+Reproduces on iPhone 16 (iOS 26.x, ggml-speech metal feature, useGPU
+disabled) running tests-qvac TTS suite (chatterbox).  Fixes the
+"Engine: VoiceEncoder forward failed" error path that surfaces via the
+ChatterboxModel stderr-capture diagnostics.
+
+---
+ tts-cpp/src/voice_encoder.cpp | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/tts-cpp/src/voice_encoder.cpp b/tts-cpp/src/voice_encoder.cpp
+--- a/tts-cpp/src/voice_encoder.cpp
++++ b/tts-cpp/src/voice_encoder.cpp
+@@ -450,7 +450,14 @@ bool voice_encoder_embed(const std::vector<float> & wav_16k,
+     const int T_mel = (int)(mel.size() / w.n_mels);
+ 
+     // 2. Partial-window layout.
++    //    `compute_partials` expects the *audio* sample rate as its 4th arg
++    //    (used to derive `step = round((sr / rate) / partial)`), not the
++    //    `partial_frames` value.  Reference audio is resampled to 16 kHz
++    //    upstream in chatterbox_engine.cpp::bake_voice_conditioning before
++    //    we ever get here, so 16000 is the correct constant.  Passing
++    //    partial_frames here collapses step to 1 and inflates n_wins
++    //    ~50×, blowing the LSTM gallocr working buffer past 1.4 GB.
+     int n_wins, step, target_n;
+-    compute_partials(T_mel, w.partial_frames, w.rate, w.partial_frames,
++    compute_partials(T_mel, w.partial_frames, w.rate, /*sample_rate_hz=*/16000,
+                      w.overlap, w.min_coverage, n_wins, step, target_n);
+     if (target_n > T_mel) mel.resize((size_t) target_n * w.n_mels, 0.0f);
