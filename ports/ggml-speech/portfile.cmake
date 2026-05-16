@@ -9,6 +9,7 @@ vcpkg_from_github(
     HEAD_REF speech
     PATCHES
         0001-fix-metal-null-buffer-on-alloc-failure.patch
+        0002-fix-metal-device-init-null-propagation.patch
 )
 
 set(GGML_METAL  OFF)
