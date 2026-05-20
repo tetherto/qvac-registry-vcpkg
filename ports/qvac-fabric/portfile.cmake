@@ -92,6 +92,35 @@ else()
   set(DL_BACKENDS OFF)
 endif()
 
+if(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64" AND "kleidiai" IN_LIST FEATURES)
+  message(STATUS "qvac-fabric: kleidiai feature ON — building with ARM KleidiAI optimized kernels")
+
+  # Pre-download Kleidiai so FetchContent doesn't need network access
+  set(KLEIDIAI_VERSION "1.16.0")
+  set(KLEIDIAI_URL "https://github.com/ARM-software/kleidiai/archive/refs/tags/v${KLEIDIAI_VERSION}.tar.gz")
+  set(KLEIDIAI_MD5 "0a9e9008adb6031f9e8cf70dff4a3321")
+  
+  file(DOWNLOAD
+    "${KLEIDIAI_URL}"
+    "${SOURCE_PATH}/kleidiai-v${KLEIDIAI_VERSION}.tar.gz"
+    EXPECTED_HASH MD5=${KLEIDIAI_MD5}
+    TLS_VERIFY ON
+    SHOW_PROGRESS
+  )
+  
+  file(ARCHIVE_EXTRACT
+    INPUT "${SOURCE_PATH}/kleidiai-v${KLEIDIAI_VERSION}.tar.gz"
+    DESTINATION "${SOURCE_PATH}/kleidiai-src"
+  )
+  
+  list(APPEND PLATFORM_OPTIONS -DGGML_CPU_KLEIDIAI=ON -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON)
+  
+
+  list(APPEND PLATFORM_OPTIONS
+    -DFETCHCONTENT_SOURCE_DIR_KLEIDIAI_DOWNLOAD=${SOURCE_PATH}/kleidiai-src/kleidiai-${KLEIDIAI_VERSION}
+  )
+endif()
+
 if (VCPKG_TARGET_IS_ANDROID AND _qvac_gpu_backends)
   list(APPEND PLATFORM_OPTIONS -DGGML_OPENCL=ON)
 endif()
