@@ -1,11 +1,22 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech with the consolidated speech-stack
-# patch series and a `qvac-speech-` lib filename prefix.
+# ggml-speech: tetherto/qvac-ext-ggml@speech, including the iOS Metal
+# NULL-safety hardening from
+# https://github.com/tetherto/qvac-ext-ggml/pull/10 (PR-10's 3 commits
+# f21ff9a0 + b7dc01c7 + 0f54d9f7) now merged into the speech branch
+# as PR-10 merge 08d39f0c (`Merge pull request #10 from
+# ishanvohra2/fix/metal-ios-null-propagation`).
+#
+# The Android backend stack still uses the GGML_CPU_ALL_VARIANTS=ON
+# + GGML_CPU_REPACK=ON shape introduced in port-version 3 (per-arch
+# CPU dlopen variants on top of the Vulkan / OpenCL MODULE .so files);
+# only the Apple Metal path changes versus port-version 3, courtesy
+# of PR-10's NULL-safety hardening on `ggml_metal_device_init` /
+# `ggml_metal_buffer_init` etc.
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 9562ed04757934cbe108bd40334027e26513509e
-    SHA512 78cd62947035fecd971b275e4abb2942d64d53e2b205d01c7e86daab7cb43851f0795db61138bba8de153d7e73aa4f66f32f7ec8b96667fddbc0f2b73c2ea104
+    REF 08d39f0c
+    SHA512 0e681f60ba0ad49b1cebda914ee065c0b29f301617970b968054089830029153f1be28012dfe2ced9c1014fe8605647ca68208544e9564b5d5f1c68dfd1e82e9
     HEAD_REF speech
 )
 
