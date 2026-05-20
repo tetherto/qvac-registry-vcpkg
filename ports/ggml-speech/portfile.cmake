@@ -4,12 +4,15 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF de7a55e3eea087bed6484607b518d60a3366acbe
-    SHA512 160588159ca6cbd99ba2ebe0269ed8ae4a0672f6e296bec37cd94d75ea11090bc525211dcbb055239c65d49c5f844f204d68790cbadf5b8b4dae8d564fc52a74
+    # NOTE: bump REF + SHA512 to the merge SHA of tetherto/qvac-ext-ggml#10
+    # ("ggml-metal: NULL-safety hardening for iOS Metal init failures") right
+    # before merging this registry PR. The placeholder REF below is the
+    # pre-merge speech HEAD and does NOT contain the Metal NULL-safety fix;
+    # do NOT merge this registry PR until upstream PR #10 has merged and
+    # this REF has been updated to point at the merge commit.
+    REF 60a172e48f699bd0a00575ef911feed9473b2187
+    SHA512 dd73291c1f37d7969b0153c212efcb23c2257edcdb7056da83db6c0af33597ceaf3776ccc756a977a8b451b9e1c9b64eb0535c05f7a34e9a3212275032b3ad65
     HEAD_REF speech
-    PATCHES
-        0001-fix-metal-null-buffer-on-alloc-failure.patch
-        0002-fix-metal-device-init-null-propagation.patch
 )
 
 set(GGML_METAL  OFF)
