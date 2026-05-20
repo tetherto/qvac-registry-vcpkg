@@ -75,12 +75,20 @@ if(VCPKG_TARGET_IS_IOS)
 endif()
 
 # Hybrid Android backend mode: GPU backends as MODULE .so loaded at runtime
-# via dlopen, CPU statically linked into the consumer's binary. Relies on the
-# `cmake: support qvac hybrid backend packaging` patch on the speech branch.
+# via dlopen, CPU built as per-arch MODULE .so variants (one per ARMv8.0/
+# 8.2/8.6/9.0/9.2 feature tier) also loaded at runtime via dlopen. The
+# downstream addon installs the resulting libqvac-speech-ggml-cpu-android_armv*
+# .so files alongside the .bare binary; the per-variant scoring in
+# ggml-cpu's `ggml_backend_cpu_aarch64_score` then picks the highest tier
+# the running device supports at first use. Pairs with the speech-branch
+# `ggml-backend: android per-arch CPU variant dlopen fallback` patch
+# (commit 9562ed04) so the variant lookup also succeeds when the consumer
+# APK keeps native .so files compressed (AGP `useLegacyPackaging=false`).
 if(VCPKG_TARGET_IS_ANDROID)
     list(APPEND PLATFORM_OPTIONS
         -DGGML_BACKEND_DL=ON
-        -DGGML_CPU_STATIC=ON
+        -DGGML_CPU_ALL_VARIANTS=ON
+        -DGGML_CPU_REPACK=ON
         -DGGML_VULKAN_DISABLE_COOPMAT=ON
         -DGGML_VULKAN_DISABLE_COOPMAT2=ON
     )
