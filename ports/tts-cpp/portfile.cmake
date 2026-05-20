@@ -1,6 +1,12 @@
 # tts-cpp: Resemble Chatterbox + Supertonic TTS in pure C++/ggml.
-# Sourced from the tts-cpp/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
+# Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
+#
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 60dc1504
+# (`Merge pull request #29 from GustavoA1604/master`), which lands
+# 907f3151 -- the "tts-cpp: Add dynamic backend selection for android"
+# change: registry-only `init_gpu_backend()` + Adreno tier policy
+# + EngineOptions::backends_dir / opencl_cache_dir.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -8,8 +14,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF f5f914b9714bc1a48ef63cc9e79d082fd63eb085
-    SHA512 5bd99c053b94909346ffec07ba882240fb1120770c0d2177e0df70bf39841136baeb72dda312465d2bd3fd2367f3cea49003bb6b9e17b22411b2905a8e1fa8d3
+    REF 60dc1504
+    SHA512 2273e95bb7fa9a4db757f675627529094d8665baffc0c1c1783a65c7670222b779ae39667325fe870dccd92037faacb44502700e923bde73149eac08e6ab8eff
     HEAD_REF master
 )
 
