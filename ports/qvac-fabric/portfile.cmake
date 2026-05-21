@@ -5,11 +5,18 @@ vcpkg_from_github(
   SHA512 9c5340bc8e1474a6a24f1f90d35db9e291bed7a420396cda0f9c36c3495d7e4dbc341b0e7ddae293f6ec5b5d30d5981ae5d2290446636aa54264b05962e1597e
 )
 
+# Upstream CMake options only — passed through to vcpkg_cmake_configure.
 vcpkg_check_features(
   OUT_FEATURE_OPTIONS FEATURE_OPTIONS
   FEATURES
     force-profiler FORCE_GGML_VK_PERF_LOGGER
     llama BUILD_LLAMA
+)
+
+# Portfile-only feature flags (drive PLATFORM_OPTIONS; not upstream cache vars).
+vcpkg_check_features(
+  OUT_FEATURE_OPTIONS _PORTFILE_FEATURE_OPTIONS
+  FEATURES
     gpu-backends BUILD_GPU_BACKENDS
     kleidiai BUILD_KLEIDIAI
 )
