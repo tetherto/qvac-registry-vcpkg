@@ -5,6 +5,7 @@ vcpkg_from_github(
   SHA512 9c5340bc8e1474a6a24f1f90d35db9e291bed7a420396cda0f9c36c3495d7e4dbc341b0e7ddae293f6ec5b5d30d5981ae5d2290446636aa54264b05962e1597e
 )
 
+# Upstream CMake options only — passed through to vcpkg_cmake_configure.
 vcpkg_check_features(
   OUT_FEATURE_OPTIONS FEATURE_OPTIONS
   FEATURES
@@ -12,20 +13,22 @@ vcpkg_check_features(
     llama BUILD_LLAMA
 )
 
-# Detect the gpu-backends feature: default-on, so existing consumers
-# (llamacpp-llm, llamacpp-embed, nmtcpp, diffusion-cpp) keep building Metal
-# (Apple) / Vulkan (Linux+Windows) / Vulkan+OpenCL+DL-hybrid (Android) without
-# changing their manifest. CPU-only consumers (e.g. @qvac/classification-ggml)
-# disable it via default-features:false (and re-add 'llama' if they need it),
-# saving the vulkan-sdk / metal / opencl build cost.
-set(_qvac_gpu_backends OFF)
-if("gpu-backends" IN_LIST FEATURES)
-  set(_qvac_gpu_backends ON)
-else()
+# Portfile-only feature flags (drive PLATFORM_OPTIONS; not upstream cache vars).
+vcpkg_check_features(
+  OUT_FEATURE_OPTIONS _PORTFILE_FEATURE_OPTIONS
+  FEATURES
+    gpu-backends BUILD_GPU_BACKENDS
+    kleidiai BUILD_KLEIDIAI
+)
+
+# gpu-backends is default-on via default-features in vcpkg.json. CPU-only
+# consumers (e.g. @qvac/classification-ggml) disable it with
+# default-features:false (and re-add 'llama' if needed).
+if(NOT BUILD_GPU_BACKENDS)
   message(STATUS "qvac-fabric: gpu-backends feature OFF — building CPU-only ggml (no Metal/Vulkan/CUDA/OpenCL)")
 endif()
 
-if (VCPKG_TARGET_IS_ANDROID AND _qvac_gpu_backends)
+if (VCPKG_TARGET_IS_ANDROID AND BUILD_GPU_BACKENDS)
   # NDK only comes with C headers.
   # Make sure C++ header exists, it will be used by ggml tensor library.
   # Need to determine installed vulkan version and download correct headers
@@ -52,7 +55,7 @@ endif()
 
 set(PLATFORM_OPTIONS)
 
-if(NOT _qvac_gpu_backends)
+if(NOT BUILD_GPU_BACKENDS)
   # Force every GPU backend off explicitly, in case upstream defaults change.
   list(APPEND PLATFORM_OPTIONS
     -DGGML_METAL=OFF
@@ -92,36 +95,17 @@ else()
   set(DL_BACKENDS OFF)
 endif()
 
-if(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64" AND "kleidiai" IN_LIST FEATURES)
+if(VCPKG_TARGET_IS_ANDROID AND BUILD_KLEIDIAI)
   message(STATUS "qvac-fabric: kleidiai feature ON — building with ARM KleidiAI optimized kernels")
-
-  # Pre-download Kleidiai so FetchContent doesn't need network access
-  set(KLEIDIAI_VERSION "1.16.0")
-  set(KLEIDIAI_URL "https://github.com/ARM-software/kleidiai/archive/refs/tags/v${KLEIDIAI_VERSION}.tar.gz")
-  set(KLEIDIAI_MD5 "0a9e9008adb6031f9e8cf70dff4a3321")
-  
-  file(DOWNLOAD
-    "${KLEIDIAI_URL}"
-    "${SOURCE_PATH}/kleidiai-v${KLEIDIAI_VERSION}.tar.gz"
-    EXPECTED_HASH MD5=${KLEIDIAI_MD5}
-    TLS_VERIFY ON
-    SHOW_PROGRESS
-  )
-  
-  file(ARCHIVE_EXTRACT
-    INPUT "${SOURCE_PATH}/kleidiai-v${KLEIDIAI_VERSION}.tar.gz"
-    DESTINATION "${SOURCE_PATH}/kleidiai-src"
-  )
-  
-  list(APPEND PLATFORM_OPTIONS -DGGML_CPU_KLEIDIAI=ON -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON)
-  
-
+  # ggml only vendors KleidiAI via FetchContent; registry vcpkg-cmake sets
+  # FETCHCONTENT_FULLY_DISCONNECTED=ON globally, so allow the download here.
   list(APPEND PLATFORM_OPTIONS
-    -DFETCHCONTENT_SOURCE_DIR_KLEIDIAI_DOWNLOAD=${SOURCE_PATH}/kleidiai-src/kleidiai-${KLEIDIAI_VERSION}
+    -DGGML_CPU_KLEIDIAI=ON
+    -DFETCHCONTENT_FULLY_DISCONNECTED=OFF
   )
 endif()
 
-if (VCPKG_TARGET_IS_ANDROID AND _qvac_gpu_backends)
+if (VCPKG_TARGET_IS_ANDROID AND BUILD_GPU_BACKENDS)
   list(APPEND PLATFORM_OPTIONS -DGGML_OPENCL=ON)
 endif()
 
