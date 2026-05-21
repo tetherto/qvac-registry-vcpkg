@@ -10,22 +10,18 @@ vcpkg_check_features(
   FEATURES
     force-profiler FORCE_GGML_VK_PERF_LOGGER
     llama BUILD_LLAMA
+    gpu-backends BUILD_GPU_BACKENDS
+    kleidiai BUILD_KLEIDIAI
 )
 
-# Detect the gpu-backends feature: default-on, so existing consumers
-# (llamacpp-llm, llamacpp-embed, nmtcpp, diffusion-cpp) keep building Metal
-# (Apple) / Vulkan (Linux+Windows) / Vulkan+OpenCL+DL-hybrid (Android) without
-# changing their manifest. CPU-only consumers (e.g. @qvac/classification-ggml)
-# disable it via default-features:false (and re-add 'llama' if they need it),
-# saving the vulkan-sdk / metal / opencl build cost.
-set(_qvac_gpu_backends OFF)
-if("gpu-backends" IN_LIST FEATURES)
-  set(_qvac_gpu_backends ON)
-else()
+# gpu-backends is default-on via default-features in vcpkg.json. CPU-only
+# consumers (e.g. @qvac/classification-ggml) disable it with
+# default-features:false (and re-add 'llama' if needed).
+if(NOT BUILD_GPU_BACKENDS)
   message(STATUS "qvac-fabric: gpu-backends feature OFF — building CPU-only ggml (no Metal/Vulkan/CUDA/OpenCL)")
 endif()
 
-if (VCPKG_TARGET_IS_ANDROID AND _qvac_gpu_backends)
+if (VCPKG_TARGET_IS_ANDROID AND BUILD_GPU_BACKENDS)
   # NDK only comes with C headers.
   # Make sure C++ header exists, it will be used by ggml tensor library.
   # Need to determine installed vulkan version and download correct headers
@@ -52,7 +48,7 @@ endif()
 
 set(PLATFORM_OPTIONS)
 
-if(NOT _qvac_gpu_backends)
+if(NOT BUILD_GPU_BACKENDS)
   # Force every GPU backend off explicitly, in case upstream defaults change.
   list(APPEND PLATFORM_OPTIONS
     -DGGML_METAL=OFF
@@ -92,36 +88,12 @@ else()
   set(DL_BACKENDS OFF)
 endif()
 
-if(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64" AND "kleidiai" IN_LIST FEATURES)
+if(VCPKG_TARGET_IS_ANDROID AND BUILD_KLEIDIAI)
   message(STATUS "qvac-fabric: kleidiai feature ON — building with ARM KleidiAI optimized kernels")
-
-  # Pre-download Kleidiai so FetchContent doesn't need network access
-  set(KLEIDIAI_VERSION "1.16.0")
-  set(KLEIDIAI_URL "https://github.com/ARM-software/kleidiai/archive/refs/tags/v${KLEIDIAI_VERSION}.tar.gz")
-  set(KLEIDIAI_MD5 "0a9e9008adb6031f9e8cf70dff4a3321")
-  
-  file(DOWNLOAD
-    "${KLEIDIAI_URL}"
-    "${SOURCE_PATH}/kleidiai-v${KLEIDIAI_VERSION}.tar.gz"
-    EXPECTED_HASH MD5=${KLEIDIAI_MD5}
-    TLS_VERIFY ON
-    SHOW_PROGRESS
-  )
-  
-  file(ARCHIVE_EXTRACT
-    INPUT "${SOURCE_PATH}/kleidiai-v${KLEIDIAI_VERSION}.tar.gz"
-    DESTINATION "${SOURCE_PATH}/kleidiai-src"
-  )
-  
-  list(APPEND PLATFORM_OPTIONS -DGGML_CPU_KLEIDIAI=ON -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON)
-  
-
-  list(APPEND PLATFORM_OPTIONS
-    -DFETCHCONTENT_SOURCE_DIR_KLEIDIAI_DOWNLOAD=${SOURCE_PATH}/kleidiai-src/kleidiai-${KLEIDIAI_VERSION}
-  )
+  list(APPEND PLATFORM_OPTIONS -DGGML_CPU_KLEIDIAI=ON)
 endif()
 
-if (VCPKG_TARGET_IS_ANDROID AND _qvac_gpu_backends)
+if (VCPKG_TARGET_IS_ANDROID AND BUILD_GPU_BACKENDS)
   list(APPEND PLATFORM_OPTIONS -DGGML_OPENCL=ON)
 endif()
 
