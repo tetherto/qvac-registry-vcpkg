@@ -13,13 +13,14 @@
 # ggml_backend_init_by_type() which works with both statically linked and
 # dynamically loaded backends.
 #
-# Pinned to the 2026-03-01 branch of the downstream fork (master-514-5792c66
-# plus the squashed qvac-registry-vcpkg port patches).
+# Pinned to 00cd2a09 -- the merge commit of
+# tetherto/qvac-ext-stable-diffusion.cpp#5, which integrates the Flux fused
+# RoPE and Q/K/V unpacking paths on top of the 2026-03-01 branch.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF b474457d6cd58499d4d7ec9ad17825eba11791de
-    SHA512 628629b4bb76660f35b46bdc8941f108b6c5e932d53c739d660c217d2d9dc0293791b7c9d8176b15377d7a8cef52cec9c5533131cab69a0c59cf2da894b2c905
+    REF 00cd2a099d984f9c484a0e9cdb5e096e94ec68d1
+    SHA512 5be72e982fa970ebebe2cf6325ef73cde7a34ec1299018e8b16340e2cd6dccda8c65de04b408d294c84013683765c84be40c42790784cb3c77d3cdc7d79b4c0a
     HEAD_REF 2026-03-01
 )
 
