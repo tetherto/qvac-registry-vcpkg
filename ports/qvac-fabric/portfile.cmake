@@ -97,7 +97,12 @@ endif()
 
 if(VCPKG_TARGET_IS_ANDROID AND BUILD_KLEIDIAI)
   message(STATUS "qvac-fabric: kleidiai feature ON — building with ARM KleidiAI optimized kernels")
-  list(APPEND PLATFORM_OPTIONS -DGGML_CPU_KLEIDIAI=ON)
+  # ggml only vendors KleidiAI via FetchContent; registry vcpkg-cmake sets
+  # FETCHCONTENT_FULLY_DISCONNECTED=ON globally, so allow the download here.
+  list(APPEND PLATFORM_OPTIONS
+    -DGGML_CPU_KLEIDIAI=ON
+    -DFETCHCONTENT_FULLY_DISCONNECTED=OFF
+  )
 endif()
 
 if (VCPKG_TARGET_IS_ANDROID AND BUILD_GPU_BACKENDS)
