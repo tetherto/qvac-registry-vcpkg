@@ -1,7 +1,7 @@
 {
   "name": "qvac-fabric",
   "version": "8189.0.2",
-  "port-version": 1,
+  "port-version": 2,
   "description": "LLM inference in C/C++",
   "homepage": "https://github.com/tetherto/qvac-fabric-llm.cpp",
   "license": "MIT",
@@ -35,6 +35,9 @@
     },
     "llama": {
       "description": "Build llama components."
+    },
+    "openmp": {
+      "description": "Enable OpenMP support for Android"
     }
   }
 }
