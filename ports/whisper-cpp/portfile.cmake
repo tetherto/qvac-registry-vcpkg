@@ -93,19 +93,30 @@ else()
   set(DL_BACKENDS OFF)
 endif()
 
-# Same spirv-headers include-shim as in the ggml-speech port: upstream
-# ggml v0.10.2 uses spv::* enums unconditionally in ggml-vulkan.cpp, and
-# ggml-vulkan's CMakeLists.txt does not call find_package(SpirvHeaders)
-# so the vcpkg-installed include prefix isn't visible to it by default.
+# spirv-headers include-shim: upstream ggml uses spv::* enums
+# unconditionally in ggml-vulkan.cpp, and ggml-vulkan's CMakeLists.txt
+# does not call find_package(SpirvHeaders), so the vcpkg-installed
+# include prefix is not visible to it by default.
+#
+# Append to VCPKG_C_FLAGS / VCPKG_CXX_FLAGS (same shape as qvac-fabric's
+# portfile, ref qvac-registry-vcpkg commit db03cfc8) so the include path
+# is merged with the triplet-supplied flags (-fPIC, -stdlib=libc++ on
+# Linux, etc.). The previous form passed -DCMAKE_CXX_FLAGS=... via
+# vcpkg_cmake_configure OPTIONS, which is a CMake cache-variable
+# override that clobbered the triplet flags wholesale and produced
+# libstdc++/libc++ ABI mismatches at link time for consumers that
+# target libc++.
+#
 # MSVC's cl.exe does not understand `-isystem` (it treats the flag as a
-# positional source file argument and tries to compile the include path),
-# so use `/I` there and the GCC/Clang `-isystem` form elsewhere.
-set(SPIRV_HEADERS_CFLAGS "")
+# positional source file argument and tries to compile the include
+# path), so use `/I` there and the GCC/Clang `-isystem` form elsewhere.
 if("vulkan" IN_LIST FEATURES)
   if(VCPKG_TARGET_IS_WINDOWS AND NOT VCPKG_TARGET_IS_MINGW)
-    set(SPIRV_HEADERS_CFLAGS "-DCMAKE_CXX_FLAGS=/I${CURRENT_INSTALLED_DIR}/include")
+    string(APPEND VCPKG_C_FLAGS " /I${CURRENT_INSTALLED_DIR}/include")
+    string(APPEND VCPKG_CXX_FLAGS " /I${CURRENT_INSTALLED_DIR}/include")
   else()
-    set(SPIRV_HEADERS_CFLAGS "-DCMAKE_CXX_FLAGS=-isystem ${CURRENT_INSTALLED_DIR}/include")
+    string(APPEND VCPKG_C_FLAGS " -isystem ${CURRENT_INSTALLED_DIR}/include")
+    string(APPEND VCPKG_CXX_FLAGS " -isystem ${CURRENT_INSTALLED_DIR}/include")
   endif()
 endif()
 
@@ -122,7 +133,6 @@ vcpkg_cmake_configure(
     -DBUILD_SHARED_LIBS=OFF
     -DGGML_BUILD_NUMBER=1
     ${PLATFORM_OPTIONS}
-    ${SPIRV_HEADERS_CFLAGS}
 )
 
 vcpkg_cmake_install()
