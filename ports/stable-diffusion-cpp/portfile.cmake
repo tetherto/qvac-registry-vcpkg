@@ -13,14 +13,14 @@
 # ggml_backend_init_by_type() which works with both statically linked and
 # dynamically loaded backends.
 #
-# Pinned to 00cd2a09 -- the merge commit of
-# tetherto/qvac-ext-stable-diffusion.cpp#5, which integrates the Flux fused
-# RoPE and Q/K/V unpacking paths on top of the 2026-03-01 branch.
+# Pinned to 747a1801 -- the merge commit of
+# tetherto/qvac-ext-stable-diffusion.cpp#6, which adds generic ESRGAN upscaler
+# backend init with device and preference APIs on the 2026-03-01 branch.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 00cd2a099d984f9c484a0e9cdb5e096e94ec68d1
-    SHA512 5be72e982fa970ebebe2cf6325ef73cde7a34ec1299018e8b16340e2cd6dccda8c65de04b408d294c84013683765c84be40c42790784cb3c77d3cdc7d79b4c0a
+    REF 747a180119c864e8cde0879f308200f028dfb9fe
+    SHA512 ad3079f2466c9182b465f7b3aca7793d01c25095732fd101a0fd19036938ec0f866b76ecc8dabda30e04c1098e34173f6a62be6c86ffca2745a6f8ecfb30b4fa
     HEAD_REF 2026-03-01
 )
 
