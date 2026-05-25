@@ -1,8 +1,14 @@
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-whisper.cpp
-  REF f3102199642e78bb2beee6b9e9537604009148b9
-  SHA512 64b102677abae7825985c946b1103cdaefc3f0d0d64f54dbdc5b38ee38a92efd553d33ed5a9f7aa5e509b0292478d8a93dbc8fd54dae7811b84a41d07f4b1c5c
+  # QVAC-19213: testing pin to validate the Adreno 740 Vulkan fix
+  # (mul_mat_vec subgroup->shmem on Qualcomm, H001-H008) end-to-end through
+  # the qvac mobile CI / device farm before merge. This commit = whisper-cpp
+  # 1.8.4.3 (f3102199, incl. QVAC-18993 Android dynamic backends) + the
+  # latest ggml upstream sync + the Adreno Vulkan fix (PR #30). Revert to
+  # REF v${VERSION} once the fix lands on a release tag.
+  REF 4273e2710e877c527a52f1efc78bf0b576662208
+  SHA512 fc57be0dd6b2725edd78f4617c967c5b83114e0dae3c4151971f7b226afb506f6b32758ece5a74c0f16b737fe756625e94dfec627745f79ec5d29e6e68b68ff9
   HEAD_REF master
 )
 
@@ -68,16 +74,17 @@ endif()
 # (libwhisper.a, libggml.a, libggml-base.a) stays static — same shape
 # as the speech-stack uses for parakeet-cpp/tts-cpp.
 #
-# The bundled ggml in this port's REF pin carries two commits from
-# QVAC-18993 that make the combo above work end-to-end on Android:
-#   eb63b2b7  ggml : allow GGML_BACKEND_DL with a static core
+# The REF pin (QVAC-19213, PR #30) is whisper-cpp 1.8.4.3 with QVAC-18993
+# already merged in, so the GGML_BACKEND_DL combo above works end-to-end on
+# Android. The two QVAC-18993 commits (now on tetherto/master as part of
+# 1.8.4.3) are:
+#   400bf929  ggml : allow GGML_BACKEND_DL with a static core
 #             (removes the FATAL_ERROR + flips PIC/GGML_BUILD on)
-#   3683de4b  ggml-backend : android per-arch CPU variant dlopen fallback
+#   c1d7a6c9  ggml-backend : android per-arch CPU variant dlopen fallback
 #             (lets ggml_backend_load_best resolve libggml-cpu-android_armv*_*.so
 #              via Android's in-APK linker when there's no on-disk lib dir)
-# Both will land on tetherto/master via whisper-cpp PR #26 (QVAC-18993);
-# after that ships + a v1.8.4.3 tag is published, the port can re-point
-# to tetherto + drop the temporary Zbig9000 pin above.
+# The QVAC-19213 REF merges tetherto/master (1.8.4.3) in on top of the ggml
+# upstream sync; re-point to REF v${VERSION} once the Adreno fix is tagged.
 if(VCPKG_TARGET_IS_ANDROID)
   set(DL_BACKENDS ON)
   list(APPEND PLATFORM_OPTIONS
