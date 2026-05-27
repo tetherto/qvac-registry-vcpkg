@@ -19,6 +19,7 @@ vcpkg_check_features(
   FEATURES
     gpu-backends BUILD_GPU_BACKENDS
     kleidiai BUILD_KLEIDIAI
+    openmp BUILD_OPENMP
 )
 
 # gpu-backends is default-on via default-features in vcpkg.json. CPU-only
@@ -105,6 +106,14 @@ if(VCPKG_TARGET_IS_ANDROID AND BUILD_KLEIDIAI)
   )
 endif()
 
+if(VCPKG_TARGET_IS_ANDROID AND BUILD_OPENMP)
+  message(STATUS "qvac-fabric: OpenMP for Android enabled")
+  list(APPEND PLATFORM_OPTIONS -DGGML_OPENMP=ON)
+else()
+  message(STATUS "qvac-fabric: OpenMP Disabled")
+  list(APPEND PLATFORM_OPTIONS -DGGML_OPENMP=OFF)
+endif()
+
 if (VCPKG_TARGET_IS_ANDROID AND BUILD_GPU_BACKENDS)
   list(APPEND PLATFORM_OPTIONS -DGGML_OPENCL=ON)
 endif()
@@ -135,7 +144,6 @@ vcpkg_cmake_configure(
   OPTIONS
     -DGGML_NATIVE=OFF
     -DGGML_CCACHE=OFF
-    -DGGML_OPENMP=OFF
     -DGGML_LLAMAFILE=OFF
     -DLLAMA_CURL=OFF
     -DLLAMA_BUILD_TESTS=OFF
