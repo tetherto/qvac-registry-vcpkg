@@ -26,6 +26,39 @@ if (NOT EXISTS "${SOURCE_PATH}/CMakeLists.txt")
         "subfolder layout in qvac-ext-lib-whisper.cpp may have changed.")
 endif()
 
+# The pinned tts-cpp CMakeLists.txt opportunistically links Accelerate on
+# Apple hosts or any BLAS implementation found through CMake's FindBLAS on
+# other hosts. That makes QVAC prebuilds inherit runner-specific dependencies
+# such as libopenblas.so.0 without the port declaring or packaging them.
+# Keep the registry build self-contained by removing that optional acceleration
+# block until tts-cpp exposes a first-class option for it.
+vcpkg_replace_string("${SOURCE_PATH}/CMakeLists.txt" [[
+if (APPLE)
+ find_library(TTS_CPP_ACCELERATE_FRAMEWORK Accelerate)
+ if (TTS_CPP_ACCELERATE_FRAMEWORK)
+ foreach(_tts_accel_target ${TTS_CPP_POINTWISE_ACCEL_TARGETS})
+ if (TARGET ${_tts_accel_target})
+ target_link_libraries(${_tts_accel_target} PRIVATE ${TTS_CPP_ACCELERATE_FRAMEWORK})
+ target_compile_definitions(${_tts_accel_target} PRIVATE TTS_CPP_USE_ACCELERATE)
+ endif()
+ endforeach()
+ endif()
+else()
+ check_include_file_cxx(cblas.h TTS_CPP_HAS_CBLAS_H)
+ find_package(BLAS)
+ if (TTS_CPP_HAS_CBLAS_H AND BLAS_FOUND)
+ foreach(_tts_cblas_target ${TTS_CPP_POINTWISE_ACCEL_TARGETS})
+ if (TARGET ${_tts_cblas_target})
+ target_link_libraries(${_tts_cblas_target} PRIVATE ${BLAS_LIBRARIES})
+ target_compile_definitions(${_tts_cblas_target} PRIVATE TTS_CPP_USE_CBLAS)
+ endif()
+ endforeach()
+ endif()
+endif()
+]] [[
+# QVAC registry builds intentionally do not auto-link host BLAS libraries.
+]])
+
 set(GGML_METAL  OFF)
 set(GGML_VULKAN OFF)
 set(GGML_CUDA   OFF)
