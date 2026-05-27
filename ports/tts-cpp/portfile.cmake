@@ -30,6 +30,8 @@ set(GGML_METAL  OFF)
 set(GGML_VULKAN OFF)
 set(GGML_CUDA   OFF)
 set(GGML_OPENCL OFF)
+set(GGML_BLAS   OFF)
+set(TTS_CPP_DISABLE_FIND_PACKAGE_BLAS ON)
 if("metal" IN_LIST FEATURES)
     set(GGML_METAL ON)
 endif()
@@ -41,6 +43,10 @@ if("cuda" IN_LIST FEATURES)
 endif()
 if("opencl" IN_LIST FEATURES)
     set(GGML_OPENCL ON)
+endif()
+if(VCPKG_TARGET_IS_OSX)
+    set(GGML_BLAS ON)
+    set(TTS_CPP_DISABLE_FIND_PACKAGE_BLAS OFF)
 endif()
 
 vcpkg_cmake_configure(
@@ -55,8 +61,8 @@ vcpkg_cmake_configure(
         -DTTS_CPP_USE_SYSTEM_GGML=ON
         -DBUILD_SHARED_LIBS=OFF
         -DGGML_NATIVE=OFF
-        -DGGML_BLAS=OFF
-        -DCMAKE_DISABLE_FIND_PACKAGE_BLAS=ON
+        -DGGML_BLAS=${GGML_BLAS}
+        -DCMAKE_DISABLE_FIND_PACKAGE_BLAS=${TTS_CPP_DISABLE_FIND_PACKAGE_BLAS}
         -DGGML_OPENMP=OFF
         -DTTS_CPP_OPENMP=OFF
         -DGGML_CCACHE=OFF
