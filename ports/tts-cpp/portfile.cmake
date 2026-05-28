@@ -2,11 +2,12 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 60dc1504
-# (`Merge pull request #29 from GustavoA1604/master`), which lands
-# 907f3151 -- the "tts-cpp: Add dynamic backend selection for android"
-# change: registry-only `init_gpu_backend()` + Adreno tier policy
-# + EngineOptions::backends_dir / opencl_cache_dir.
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp branch
+# QVAC-19213-tts-adreno-gpu HEAD afe2fd21 (in-flight PR #35): adds the
+# Adreno backend tier policy (parse_adreno_version + opencl_adreno_700plus
+# preference) on top of the master-branch backend-selection scaffolding.
+# Used by the [DO NOT MERGE] Device Farm CI run in tetherto/qvac; revert
+# this REF back to a master-branch SHA once PR #35 lands.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -14,8 +15,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 60dc1504
-    SHA512 2273e95bb7fa9a4db757f675627529094d8665baffc0c1c1783a65c7670222b779ae39667325fe870dccd92037faacb44502700e923bde73149eac08e6ab8eff
+    REF 3613786b255577e2f9806e8d6a7a6ae2c3d59bef
+    SHA512 b9154f1344d985701f5adf49fd8d98e19705a036cd9f88614c0273c54d78c456cb58268d4c9aa2132f6726bbc503b2bdec52700c529ee8dc7b452464d948beb8
     HEAD_REF master
 )
 

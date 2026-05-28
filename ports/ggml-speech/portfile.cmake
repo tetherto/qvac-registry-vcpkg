@@ -1,25 +1,15 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD c9126afc, the merge
-# commit of PR #13 ("QVAC-18992: merge ggml-org @ 19eac6f0 (v0.10.2)
-# into speech"). The merge brings in:
-#
-#   c9126afc  Merge pull request #13 from Zbig9000/QVAC-18992-merge-ggml-from-whisper-cpp
-#   e31785e4  fix(metal): restore lost 'typedef struct {' before
-#             ggml_metal_kargs_supertonic_depthwise_1d (the ggml-org
-#             v0.10.2 sync in 166c4e12 dropped the typedef header;
-#             caught by qvac CI Apple prebuild matrix via an overlay
-#             on tetherto/qvac#2270)
-#   d39c0d29  metal: stride-aware src indexing in kernel_pad_f32 /
-#             kernel_pad_reflect_1d_f32 (fixes Mac M2 PAD test failure)
-#   166c4e12  Merge ggml-org @ 19eac6f0 into speech (sync to v0.10.2)
-#
-# The Android CPU dlopen fallback (GustavoA1604 #11) carried over from
-# port-version 4 (08d39f0c) is unchanged.
+# ggml-speech: tetherto/qvac-ext-ggml@QVAC-19254-android-devicefarm-test
+# HEAD 2bb83370 -- combined Adreno test branch built off speech tip
+# c9126afc (the v0.10.2 sync) with PR #14 (Vulkan Adreno guards) and
+# PR #15 (OpenCL elementwise kernels) cherry-picked on top. Used by the
+# [DO NOT MERGE] Device Farm CI run in tetherto/qvac; revert this REF
+# back to a merged speech-branch SHA once PR #14 + PR #15 land.
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF c9126afc96145cc93892029b953f7de5abc09728
-    SHA512 e24b4bfb48a2be01d4703badee0aecb8772c5e35e76348e9de2ea693288bd23d84d1fb7c626dd63736f76bfcc442433522621998977661cf602ec90289f596a0
+    REF 2bb8337068905e1995e6b23c0d0674d7350ca907
+    SHA512 49ca71de739af7454cd8100f50f78c4e780e9c1765f53eca3bec96d90e0ce9fc4e49fc23341598028fabc0f75f831b447efdd1ce91dde397921e84b6e6138b62
     HEAD_REF speech
 )
 

@@ -22,7 +22,7 @@
     },
     "ggml-speech": {
       "baseline": "2026-05-27",
-      "port-version": 0
+      "port-version": 1
     },
     "intgemm": {
       "baseline": "1.0.0",
@@ -106,7 +106,7 @@
     },
     "tts-cpp": {
       "baseline": "2026-05-20",
-      "port-version": 3
+      "port-version": 4
     },
     "vcpkg-cmake": {
       "baseline": "2024-04-23",
