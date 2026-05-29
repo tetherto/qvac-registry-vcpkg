@@ -3,11 +3,11 @@
 # consumes the ggml-speech port.
 #
 # Pinned at tetherto/qvac-ext-lib-whisper.cpp branch
-# QVAC-19213-tts-adreno-gpu HEAD afe2fd21 (in-flight PR #35): adds the
-# Adreno backend tier policy (parse_adreno_version + opencl_adreno_700plus
-# preference) on top of the master-branch backend-selection scaffolding.
-# Used by the [DO NOT MERGE] Device Farm CI run in tetherto/qvac; revert
-# this REF back to a master-branch SHA once PR #35 lands.
+# QVAC-19213-tts-adreno-gpu HEAD 6d3751be (in-flight PR #35): Adreno
+# backend tier policy + Android Adreno-only GPU allowlist (non-Adreno
+# Android GPUs fall back to CPU instead of aborting). Used by the
+# [DO NOT MERGE] Device Farm CI run in tetherto/qvac; revert this REF
+# back to a master-branch SHA once PR #35 lands.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -15,8 +15,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 3613786b255577e2f9806e8d6a7a6ae2c3d59bef
-    SHA512 b9154f1344d985701f5adf49fd8d98e19705a036cd9f88614c0273c54d78c456cb58268d4c9aa2132f6726bbc503b2bdec52700c529ee8dc7b452464d948beb8
+    REF 6d3751bec1b1effa37be29ba80520baa63606cb3
+    SHA512 41690040f4de67bbd34a773e4924952f17c6cb57f2d3b216dadd2249e0b3825c973a5aa60336b5108a1ff67cffc582723418d4ad3663ddcb3249b31f9a803c26
     HEAD_REF master
 )
 
