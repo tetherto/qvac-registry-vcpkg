@@ -3,11 +3,11 @@
 # consumes the ggml-speech port.
 #
 # Pinned at tetherto/qvac-ext-lib-whisper.cpp branch
-# QVAC-19213-tts-adreno-gpu HEAD 5205428e (in-flight PR #35, squashed):
+# QVAC-19254-tts-adreno-gpu HEAD 5205428e (in-flight PR #36, squashed):
 # GPU scheduling for Adreno OpenCL (Supertonic + Chatterbox/S3Gen),
 # capability-gated, plus the Android Adreno-only GPU allowlist. Used by
 # the [DO NOT MERGE] Device Farm CI run in tetherto/qvac; revert this
-# REF to a master-branch SHA once PR #35 lands.
+# REF to a master-branch SHA once PR #36 lands.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
