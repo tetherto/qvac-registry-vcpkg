@@ -13,14 +13,15 @@
 # ggml_backend_init_by_type() which works with both statically linked and
 # dynamically loaded backends.
 #
-# Pinned to 747a1801 -- the merge commit of
-# tetherto/qvac-ext-stable-diffusion.cpp#6, which adds generic ESRGAN upscaler
-# backend init with device and preference APIs on the 2026-03-01 branch.
+# Pinned to 6a8ca71d -- the merge commit of
+# tetherto/qvac-ext-stable-diffusion.cpp#10, which bypasses spatial VAE tiling
+# for Wan 2.1 I2V video encode/decode on the 2026-03-01 branch (on top of #6's
+# generic ESRGAN upscaler backend init with device and preference APIs).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 747a180119c864e8cde0879f308200f028dfb9fe
-    SHA512 ad3079f2466c9182b465f7b3aca7793d01c25095732fd101a0fd19036938ec0f866b76ecc8dabda30e04c1098e34173f6a62be6c86ffca2745a6f8ecfb30b4fa
+    REF 6a8ca71dd247065b08dd57917d033622e1b0ae18
+    SHA512 a85a9af4e331d8ba40dc3ec886630a07c1bb8b6048fd9e9adcc709965d3d01f5e59f2d00c542967ff6cd5da2afac73cba7ce123df209aa18d6a6a6afe44093cf
     HEAD_REF 2026-03-01
 )
 
