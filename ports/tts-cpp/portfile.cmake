@@ -2,11 +2,10 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 60dc1504
-# (`Merge pull request #29 from GustavoA1604/master`), which lands
-# 907f3151 -- the "tts-cpp: Add dynamic backend selection for android"
-# change: registry-only `init_gpu_backend()` + Adreno tier policy
-# + EngineOptions::backends_dir / opencl_cache_dir.
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 627291c8
+# (tts-cpp: don't block-quantize S3Gen spk_embed_affine -- fixes sub-f16
+# NaN audio, PR #37), on top of the v1.8.5 sync (PR #33) and the PR #29
+# Android dynamic backend selection already on this line.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -14,8 +13,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 60dc1504
-    SHA512 2273e95bb7fa9a4db757f675627529094d8665baffc0c1c1783a65c7670222b779ae39667325fe870dccd92037faacb44502700e923bde73149eac08e6ab8eff
+    REF 627291c84595bc8ac3471982411193211bc74fa5
+    SHA512 5e6e74cfb1ae7e1dcaf55b70b4439e21fea9dfe5f575a0a085a08774cc1ff0f1b4a729f14e912a7dd8f1a049f5ac36d2bcd227e83b9798d4a7d78d65e2863fe6
     HEAD_REF master
 )
 
