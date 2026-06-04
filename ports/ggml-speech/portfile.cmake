@@ -1,24 +1,27 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 9bca9b3d, the merge
-# commit of PR #18 ("ggml-backend-reg: Adreno-aware OpenCL backend
-# selection on Android", QVAC-18993). On top of the previous pin
-# (c9126afc, PR #13's v0.10.2 sync) it adds, on Android only:
+# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 1189e4ce, the merge
+# commit of PR #19. On top of the previous pin (9bca9b3d, PR #18's
+# Adreno-aware OpenCL backend selection on Android) it adds, for the
+# Android/Adreno OpenCL backend:
 #
-#   9bca9b3d  Merge pull request #18 (Adreno OpenCL backend selection)
-#             ggml_backend_load_all_from_path() now uses the loaded
-#             Vulkan backend to detect the GPU and only keeps OpenCL for
-#             Adreno > 700; Adreno 1..700 -> CPU only (unload Vulkan);
-#             non-Adreno -> Vulkan/CPU (no OpenCL). Avoids the Adreno
-#             Vulkan compute SIGSEGV (vkCmdBindPipeline) seen on Samsung
-#             S25. Off Android the loader is byte-identical to before.
+#   PR #17  Adreno elementwise OpenCL kernels (sin/cos/abs/elu/
+#           leaky_relu) so Chatterbox S3Gen's activation ops run on the
+#           Adreno OpenCL backend instead of falling back to CPU.
+#   PR #19  Gate the Adreno mul_mat fast path on weight divisibility and
+#           expose the device version, and parse the Adreno generation
+#           from the combined OpenCL device description (regex) for
+#           robust Adreno-tier detection (fixes a GGML_ASSERT crash on
+#           odd vocab / head dimensions).
 #
-# The PR #13 Metal/PAD fixes and the Android CPU dlopen fallback
-# (GustavoA1604 #11) are unchanged.
+# The PR #18 Adreno backend-selection behaviour, the PR #13 v0.10.2 sync
+# + Metal/PAD fixes, and the Android CPU dlopen fallback (GustavoA1604
+# #11) are unchanged. Off the Android OpenCL path the library is
+# byte-identical to before.
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 9bca9b3d5cecc3329a61819f3c5d981bfefef5fb
-    SHA512 7355fab33e786714878c17866d939247360c4618d07822e45de977496f260bb99f377f7b4ce3c0ffc4595be8bb8efc3690a9feff0a067063a3599f802c9a0da8
+    REF 1189e4ce904e83b05d3a291428224acc9d1ef473
+    SHA512 18d54db547a5622791ad19e55ed888c89c7d14cd851cfbfc9a74eae24c51dee5d45e99ea0ef30addbdf932a016b3a80d46b35890b686eb65f493d1df118d6fbd
     HEAD_REF speech
 )
 
