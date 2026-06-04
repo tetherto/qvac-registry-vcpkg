@@ -1,6 +1,13 @@
 # parakeet-cpp: NVIDIA Parakeet ASR + Sortformer diarization in pure C++/ggml.
 # Sourced from the parakeet-cpp/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
+#
+# Pinned at master HEAD a34cb6da. Since the previous pin (9cf4571f, the PR #32
+# EOU-streaming mid-stream-boundary work) this adds PR #38: parse_adreno_version()
+# rewritten to a std::regex over the lowercased OpenCL device description -- it
+# ignores the "OpenCL 3.0" API-version noise in the combined description and maps
+# the Snapdragon-X "X<n>" naming to the 800 tier, for robust Adreno-generation
+# detection and backend-select diagnostics.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -8,8 +15,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 9cf4571f20d98692106387e67f81cf8fbf00967e
-    SHA512 d7c63c8d5da62ba199d67af8b5dbd7a7503e74e2599e7f2cfec5aa18b7b30d466949e222aab6cd5718725b8d5ec08d197f594623c4160290a77e64a7c4eb7454
+    REF a34cb6da6d4b7c1d7a81d8543b29b818422b6a52
+    SHA512 b0e80b06b4460267d39f7daddd9e6a25b9981fb8cd31504f85dc3d6c04871c2eff4cc86972120f0d3a280bef0bacd806da7b5e16f0e409e7ef88a6294fd99937
     HEAD_REF master
 )
 
