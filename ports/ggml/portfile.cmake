@@ -4,11 +4,13 @@
 # Fork of ggml-org/ggml (commit a8db410a) with all overlay patches
 # pre-applied, plus the merged Metal Flux RoPE and direct conv2d kernels.
 #
-# Pinned to 0ce7ad34 -- the upstream leejet/ggml base commit used by
-# leejet/stable-diffusion.cpp@2026-06-04, mirrored to
-# tetherto/qvac-ext-ggml@2026-06-05.
-# The qvac patches (IM2COL_3D, Flux RoPE, direct conv2d) will be rebased
-# on top of this base via the 2026-01-30 branch PR.
+# Pinned to 3409834f -- the merge commit of tetherto/qvac-ext-ggml#9,
+# which adds the fused Flux RoPE op, direct Metal conv2d path, and the
+# backend test/support fixes reviewed in the PR.
+#
+# Without these the Metal backend aborts mid-Wan inference with
+# `unsupported op 'IM2COL_3D'` and the test-backend-ops support/test
+# matrix advertises invalid IM2COL_3D combos that hit CPU GGML_ASSERTs.
 #
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
@@ -24,9 +26,9 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 0ce7ad348a3151e1da9f65d962044546bcaad421
-    SHA512 ec880184323565fe82a28d3d9139cab5c4197c445f36c3612ba6f6222cf0420287be0224a8aeb33b3b3b42e0e523443b4fc9dbd199b91801e67b215de457d234
-    HEAD_REF 2026-06-05
+    REF 3409834fcc3ab549bb957682dfef7045bc58f723
+    SHA512 ebbdfdcd1e6732ab37a4caa3f170ca56c2dee766524bbd4169b615337976422a4b78fceb2dbf43bec0f98e025aad54c54ad1940267e16c2808c4a90b90350487
+    HEAD_REF 2026-01-30
 )
 
 # --- GPU feature flags ---
