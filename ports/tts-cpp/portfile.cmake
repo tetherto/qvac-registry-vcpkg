@@ -2,11 +2,17 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD c1fd35d8
-# (Merge PR #19: TTS GGML support for all 23 multilingual languages --
-# MeCab/Cangjie tokenization, thread-safe lazy init), on top of the
-# S3Gen spk_embed_affine fix (PR #37), the v1.8.5 sync (PR #33) and the
-# PR #29 Android dynamic backend selection already on this line.
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 128dae42
+# (Merge PR #31: supertonic_optimizations into master --
+# QVAC-18605 rounds 1-13 Supertonic Vulkan/Metal optimisations,
+# QVAC-19254 sched + cpu_backend refactor for Adreno OpenCL, QVAC-19213
+# Adreno-generation parse fix). Brings ~34x realtime Metal / Vulkan
+# Supertonic inference (was CPU-only). EngineOptions gains 6 new fields
+# the downstream tts-ggml addon now exposes (precision, f16_attn,
+# vulkan_device, f16_weights, f16_weights_deny_list, kv_attn_type).
+# Layered on top of the previous c1fd35d8 pin (PR #19 multilingual,
+# PR #37 S3Gen spk_embed_affine fix, PR #33 v1.8.5 sync, PR #29 Android
+# dynamic backend selection).
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -14,8 +20,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF c1fd35d81a01bb433cff2779d704816155c1b297
-    SHA512 67306c98b58ce83cfa4fd1054f84e263bb601d50b872f9d6ca9e2ebbd7d924ba10fec37def6e4b17c975bbcfe4229c4f8529cd4972eac9f613aa73343eedefff
+    REF 128dae4284fae3636ef5b6272ef123401d67eab7
+    SHA512 195bfcfc74c36149fa5827f5c500c8144411b7a5709601f238773782bb5aa5c81599867f0c6f915f63e3b2c11557231d04bf2df208b5d3228e973af41e38df89
     HEAD_REF master
 )
 

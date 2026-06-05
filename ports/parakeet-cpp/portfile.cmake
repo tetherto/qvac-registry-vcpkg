@@ -2,12 +2,11 @@
 # Sourced from the parakeet-cpp/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master HEAD a34cb6da. Since the previous pin (9cf4571f, the PR #32
-# EOU-streaming mid-stream-boundary work) this adds PR #38: parse_adreno_version()
-# rewritten to a std::regex over the lowercased OpenCL device description -- it
-# ignores the "OpenCL 3.0" API-version noise in the combined description and maps
-# the Snapdragon-X "X<n>" naming to the 800 tier, for robust Adreno-generation
-# detection and backend-select diagnostics.
+# Pinned at master HEAD 128dae42 (post-PR-#31 supertonic_optimizations merge).
+# The parakeet-cpp tree is unchanged since the previous pin (a34cb6da, PR #38
+# Adreno-generation regex parse); we move this port together with whisper-cpp
+# and tts-cpp so all three registry ports source the same master commit and
+# the same archive SHA512. PR #31 only touches the tts-cpp/ tree.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -15,8 +14,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF a34cb6da6d4b7c1d7a81d8543b29b818422b6a52
-    SHA512 b0e80b06b4460267d39f7daddd9e6a25b9981fb8cd31504f85dc3d6c04871c2eff4cc86972120f0d3a280bef0bacd806da7b5e16f0e409e7ef88a6294fd99937
+    REF 128dae4284fae3636ef5b6272ef123401d67eab7
+    SHA512 195bfcfc74c36149fa5827f5c500c8144411b7a5709601f238773782bb5aa5c81599867f0c6f915f63e3b2c11557231d04bf2df208b5d3228e973af41e38df89
     HEAD_REF master
 )
 

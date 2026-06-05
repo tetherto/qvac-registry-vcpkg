@@ -1,18 +1,17 @@
 # whisper-cpp: pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD
-# a34cb6da. The only whisper-root change since the previous pin (738d2e9e,
-# the v1.8.5 sync, PR #33) is PR #34's KV-cache CPU-buffer fallback: when a
-# single K/V tensor exceeds the backend's max single-tensor size, the cache
-# is allocated from the CPU buffer-type so the K/V ops run on CPU while the
-# rest of the model stays on GPU (Adreno-740 whisper-cli fix). All other
-# master commits since that pin touch the parakeet-cpp/, tts-cpp/, or
-# vendored ggml/ trees, which this port does not build
+# 128dae42 (post-PR-#31 supertonic_optimizations merge). The whisper-root
+# tree is unchanged since the previous pin (a34cb6da, PR #34 KV-cache
+# CPU-buffer fallback); we move this port together with parakeet-cpp and
+# tts-cpp so all three registry ports source the same master commit and
+# the same archive SHA512. PR #31 only touches the tts-cpp/ tree (and the
+# tts-cpp port re-bumps for it), which this port does not build
 # (WHISPER_USE_SYSTEM_GGML=ON links the ggml-speech-installed ggml instead).
 #
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-whisper.cpp
-  REF a34cb6da6d4b7c1d7a81d8543b29b818422b6a52
-  SHA512 b0e80b06b4460267d39f7daddd9e6a25b9981fb8cd31504f85dc3d6c04871c2eff4cc86972120f0d3a280bef0bacd806da7b5e16f0e409e7ef88a6294fd99937
+  REF 128dae4284fae3636ef5b6272ef123401d67eab7
+  SHA512 195bfcfc74c36149fa5827f5c500c8144411b7a5709601f238773782bb5aa5c81599867f0c6f915f63e3b2c11557231d04bf2df208b5d3228e973af41e38df89
   HEAD_REF master
   PATCHES
     patches/0001-move-gnuinstalldirs-before-add-subdirectory-src.patch
