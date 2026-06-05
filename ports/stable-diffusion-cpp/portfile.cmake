@@ -22,8 +22,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 2aff3324fcd4ea2af0a75dc912845209bf9c327a
-    SHA512 9b9c154aad6c3e976382379aed7ceb49a19a8818b221debb5b0250bf4d8b9f12fbbc9733f7322b1caf5d276b2b89c06d5f4f31e439c0de5a729983015694e12d
+    REF 1f267562f1a1bc1f82ed1a72fa7c39b6cba7f6dc
+    SHA512 92dffd0189c3efd6e6b9a7a8d197fcfcd79d5a74f7d79efc42991d2273a646dc1586fdd1187c12a7b2e483597baa9b074ca97d0c83821715fb0bd2ddc2e4fd0c
     HEAD_REF 2026-06-04
 )
 
