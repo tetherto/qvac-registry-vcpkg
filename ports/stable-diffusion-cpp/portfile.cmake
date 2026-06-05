@@ -13,17 +13,17 @@
 # ggml_backend_init_by_type() which works with both statically linked and
 # dynamically loaded backends.
 #
-# Pinned to 2354799f -- the tip of the 2026-06-04 branch, which rebases all
+# Pinned to 2aff3324 -- the tip of the 2026-06-04 branch, which rebases all
 # qvac downstream patches (vcpkg port patches, ESRGAN upscaler device API,
 # Wan 2.1 I2V VAE tiling fix, fused Flux RoPE) onto the upstream 2026-06-04
 # base (zero Wan2.2 TI2V timesteps, chunk-K LoRA residency, img_uncond refactor).
-# Bumps ggml submodule to aegioscy/qvac-ext-ggml@c40a0fc which provides
-# GGML_OP_ROPE_FLUX with CPU + Metal kernels.
+# The ggml git submodule has been removed; ggml is provided entirely via
+# SD_USE_SYSTEM_GGML from the vcpkg ggml port (tetherto/qvac-ext-ggml).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 2354799f13d7c69e7f8e2d86b2ee97f2f21b3c10
-    SHA512 f3781cbb4e9e190df38c3fe7fa80ba69bf6f9dbafb158e0426dd4604f2f1ba794450679005a38d0f9f1dad0696e2f22b8b086b2d7d08a0f99bb4fd3b0f7ed5d8
+    REF 2aff3324fcd4ea2af0a75dc912845209bf9c327a
+    SHA512 9b9c154aad6c3e976382379aed7ceb49a19a8818b221debb5b0250bf4d8b9f12fbbc9733f7322b1caf5d276b2b89c06d5f4f31e439c0de5a729983015694e12d
     HEAD_REF 2026-06-04
 )
 

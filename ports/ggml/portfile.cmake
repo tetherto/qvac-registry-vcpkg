@@ -4,14 +4,13 @@
 # Fork of ggml-org/ggml (commit a8db410a) with all overlay patches
 # pre-applied, plus the merged Metal Flux RoPE and direct conv2d kernels.
 #
-# Pinned to c40a0fc6 -- aegioscy/qvac-ext-ggml, which provides
-# GGML_OP_ROPE_FLUX (fused Flux RoPE) with CPU + Metal kernels, direct
-# Metal conv2d path, IM2COL_3D/PAD Metal kernels for full-GPU LTX video,
-# and exports GGML_MAX_NAME + include dirs via package config for
-# system-ggml consumers.
+# Pinned to 3409834f -- the merge commit of tetherto/qvac-ext-ggml#9,
+# which adds the fused Flux RoPE op, direct Metal conv2d path, and the
+# backend test/support fixes reviewed in the PR.
 #
-# Without GGML_OP_ROPE_FLUX the Metal backend cannot use fused Flux RoPE
-# and falls back to the permute/reshape path.
+# Without these the Metal backend aborts mid-Wan inference with
+# `unsupported op 'IM2COL_3D'` and the test-backend-ops support/test
+# matrix advertises invalid IM2COL_3D combos that hit CPU GGML_ASSERTs.
 #
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
@@ -26,10 +25,10 @@
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO aegioscy/qvac-ext-ggml
-    REF c40a0fc60dd179a4146770fcdd058c77a911b323
-    SHA512 3f8d7b8b97fa12f59ad8289117eb5a46b9e73dcff35dea0266f0bd879cacf47194b0ab7efdc2f35ea0c53051ec11bcccd50508f9a534cc24757d99f668178429
-    HEAD_REF feature/ltx-metal-unified
+    REPO tetherto/qvac-ext-ggml
+    REF 3409834fcc3ab549bb957682dfef7045bc58f723
+    SHA512 ebbdfdcd1e6732ab37a4caa3f170ca56c2dee766524bbd4169b615337976422a4b78fceb2dbf43bec0f98e025aad54c54ad1940267e16c2808c4a90b90350487
+    HEAD_REF 2026-01-30
 )
 
 # --- GPU feature flags ---
