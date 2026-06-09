@@ -1,0 +1,111 @@
+{
+  "default": {
+    "abseil": {
+      "version-string": "onnxruntime",
+      "port-version": 1
+    },
+    "bergamot-translator": {
+      "version": "1.0.0"
+    },
+    "cpuinfo": {
+      "version-string": "onnxruntime"
+    },
+    "eigen3": {
+      "version-string": "onnxruntime",
+      "port-version": 1
+    },
+    "ggml": {
+      "version-date": "2026-01-30",
+      "port-version": 9
+    },
+    "ggml-speech": {
+      "version-date": "2026-06-04"
+    },
+    "intgemm": {
+      "version": "1.0.0"
+    },
+    "llama-cpp": {
+      "version": "7248.1.2"
+    },
+    "marian-dev": {
+      "version": "1.0.0"
+    },
+    "onnx": {
+      "version-string": "onnxruntime",
+      "port-version": 1
+    },
+    "onnxruntime": {
+      "version": "1.24.2",
+      "port-version": 5
+    },
+    "opencl": {
+      "version": "2024.10.24"
+    },
+    "opencl-headers": {
+      "version": "2024.10.24"
+    },
+    "parakeet-cpp": {
+      "version-date": "2026-06-04"
+    },
+    "protobuf": {
+      "version-string": "onnxruntime"
+    },
+    "pthreadpool": {
+      "version-string": "onnxruntime"
+    },
+    "pybind11": {
+      "version-string": "onnxruntime"
+    },
+    "qvac-fabric": {
+      "version": "8828.0.2",
+      "port-version": 1
+    },
+    "qvac-lib-inference-addon-cpp": {
+      "version": "1.2.1"
+    },
+    "qvac-lint-cpp": {
+      "version": "1.4.5"
+    },
+    "ruy": {
+      "version": "1.0.0"
+    },
+    "sentencepiece": {
+      "version": "0.2.0",
+      "port-version": 2
+    },
+    "simd-utils": {
+      "version": "1.0.0"
+    },
+    "ssplit": {
+      "version": "1.0.0"
+    },
+    "stable-diffusion-cpp": {
+      "version-date": "2026-06-04",
+      "port-version": 1
+    },
+    "tokenizers-cpp": {
+      "version": "0.1.1",
+      "port-version": 2
+    },
+    "tts-cpp": {
+      "version-date": "2026-06-03",
+      "port-version": 1
+    },
+    "vcpkg-cmake": {
+      "version-date": "2024-04-23"
+    },
+    "vcpkg-cmake-config": {
+      "version-date": "2024-05-23"
+    },
+    "vcpkg-cmake-get-vars": {
+      "version-date": "2024-09-22"
+    },
+    "whisper-cpp": {
+      "version": "1.8.5",
+      "port-version": 2
+    },
+    "xnnpack": {
+      "version-string": "onnxruntime"
+    }
+  }
+}
