@@ -23,9 +23,11 @@
 #   cuda   -> GGML_CUDA=ON
 #   opencl -> GGML_OPENCL=ON
 
+# Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-06-06
+# (REF pinned to that branch's tip commit for reproducibility).
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
-    URL "file:///Users/user030/Documents/qvac-ext-ggml"
+    URL "git@github.com:tetherto/qvac-ext-ggml.git"
     REF 5112783438c017e4421770afb893978724992e62
 )
 
