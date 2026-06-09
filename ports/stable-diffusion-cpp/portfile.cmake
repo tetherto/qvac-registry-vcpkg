@@ -19,12 +19,10 @@
 # base (zero Wan2.2 TI2V timesteps, chunk-K LoRA residency, img_uncond refactor).
 # The ggml git submodule has been removed; ggml is provided entirely via
 # SD_USE_SYSTEM_GGML from the vcpkg ggml port (tetherto/qvac-ext-ggml).
-vcpkg_from_github(
+vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 1f267562f1a1bc1f82ed1a72fa7c39b6cba7f6dc
-    SHA512 92dffd0189c3efd6e6b9a7a8d197fcfcd79d5a74f7d79efc42991d2273a646dc1586fdd1187c12a7b2e483597baa9b074ca97d0c83821715fb0bd2ddc2e4fd0c
-    HEAD_REF 2026-06-04
+    URL "file:///Users/user030/Documents/qvac-ext-stable-diffusion.cpp"
+    REF c7d38179a2b6373ef50737ebadf0bb9078397595
 )
 
 set(SD_FLASH_ATTN OFF)
