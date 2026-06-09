@@ -25,10 +25,14 @@
 
 # Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-06-06
 # (REF pinned to that branch's tip commit for reproducibility).
+#
+# b5ba72ee adds the ggml_conv_1d/dw im2col-type fix (derive from a->type like
+# conv_2d) so F32 conv weights (e.g. LTX audio VAE) flow through the F32 path
+# instead of aborting on the CPU im2col_f16 F16 assert.
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
     URL "git@github.com:tetherto/qvac-ext-ggml.git"
-    REF 5112783438c017e4421770afb893978724992e62
+    REF b5ba72ee03a2d0179561d4cec89eb0fa5a31eb29
 )
 
 # --- GPU feature flags ---
