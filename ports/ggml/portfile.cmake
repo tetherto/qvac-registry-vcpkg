@@ -23,12 +23,10 @@
 #   cuda   -> GGML_CUDA=ON
 #   opencl -> GGML_OPENCL=ON
 
-vcpkg_from_github(
+vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO tetherto/qvac-ext-ggml
-    REF 3409834fcc3ab549bb957682dfef7045bc58f723
-    SHA512 ebbdfdcd1e6732ab37a4caa3f170ca56c2dee766524bbd4169b615337976422a4b78fceb2dbf43bec0f98e025aad54c54ad1940267e16c2808c4a90b90350487
-    HEAD_REF 2026-01-30
+    URL "https://github.com/tetherto/qvac-ext-ggml.git"
+    REF 2026-06-06-temp-2
 )
 
 # --- GPU feature flags ---
