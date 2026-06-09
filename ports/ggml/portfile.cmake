@@ -26,7 +26,7 @@
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
     URL "https://github.com/tetherto/qvac-ext-ggml.git"
-    REF 2026-06-06-temp-2
+    REF 5112783438c017e4421770afb893978724992e62
 )
 
 # --- GPU feature flags ---
