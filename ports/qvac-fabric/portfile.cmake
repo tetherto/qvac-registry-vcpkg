@@ -2,10 +2,10 @@ vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-fabric-llm.cpp
   # TEST (test/ocr-metal-conv2d-dw): build the Metal CONV_2D_DW kernel branch
-  # (PR tetherto/qvac-fabric-llm.cpp#148) on top of v8828.0.2, to exercise the
+  # (PR tetherto/qvac-fabric-llm.cpp#148) rebased on temp-8828, to exercise the
   # DocTR depthwise speedup on Device Farm before the kernel is merged/tagged.
-  REF e758cf16d6dc651db6f28b0b2732dc78eff3615d
-  SHA512 b368d69caf4c186691ca05190e2c67b67f2569b4f0202d39aac67d0cebf3ab1df836b76a5f5cd0d438a7c1fd33076b4544b39ea7fd9d7715fca4f1abeb855f22
+  REF 2f898ddcfc68d40b1dc9bbb3e7815be0bee87017
+  SHA512 0a16f02ee4e90a379c27c5290e6cd62eda2a1458d0b3579829974d5d4a9187e31bc7b143786000736a51efb55449de5c05b549394683203cfd3e46060f0407ca
 )
 
 # Upstream CMake options only — passed through to vcpkg_cmake_configure.
