@@ -1,8 +1,8 @@
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-fabric-llm.cpp
-  REF v${VERSION}
-  SHA512 c829b583f95d23d386aa3148112f2cc3215390200faafce5c1dbe786c77185187af374a4a4d6a916088147d5671e381a39071bb9e6d6b3e0e860890264a345df
+  REF 9b1742570e09127d9723f67f93d16c3c5e4fffc1
+  SHA512 3464c70c88c715ed6a020fbe97a31f3f18ded7c586200ebd31fa0be2ec68b1d54abd6a811d2dabc9d880ba78e45cebf15fabd7eff621266b962c00abb0145656
 )
 
 # Upstream CMake options only — passed through to vcpkg_cmake_configure.
@@ -86,7 +86,15 @@ endif()
 # to dispatch the variants at runtime; the existing #ifdef guard around
 # `ggml_backend_load_all_from_path()` in ggml-backend-reg.cpp keeps the search
 # scoped to the consumer's own prebuilds dir.
-if(VCPKG_TARGET_IS_ANDROID)
+if(VCPKG_TARGET_IS_ANDROID OR (VCPKG_TARGET_IS_LINUX AND BUILD_GPU_BACKENDS))
+  # Desktop Linux also needs GGML_BACKEND_DL=ON so that multiple GPU backends
+  # (Vulkan + HIP/ROCm) can coexist as separately-loaded modules, the same way
+  # Android dispatches CPU variants at runtime. Without DL the Linux build links
+  # a single static GPU backend and a second one (HIP) cannot be stacked.
+  # GGML_NATIVE is incompatible with DL, so CPU variants are dispatched via
+  # GGML_CPU_ALL_VARIANTS instead. Consumers must ship the core ggml/llama libs
+  # alongside their backend modules so the dynamically-linked .bare can resolve
+  # them at load time.
   set(DL_BACKENDS ON)
   list(APPEND PLATFORM_OPTIONS
     -DGGML_BACKEND_DL=ON
@@ -126,6 +134,20 @@ if(BUILD_GPU_BACKENDS AND NOT VCPKG_TARGET_IS_OSX AND NOT VCPKG_TARGET_IS_IOS)
     string(APPEND VCPKG_C_FLAGS " -isystem ${CURRENT_INSTALLED_DIR}/include")
     string(APPEND VCPKG_CXX_FLAGS " -isystem ${CURRENT_INSTALLED_DIR}/include")
   endif()
+endif()
+
+# Under GGML_BACKEND_DL the per-microarch backends ship as standalone
+# libqvac-ggml-*.so modules that the consumer dlopen's at runtime. Built with
+# -stdlib=libc++ they otherwise carry a runtime NEEDED dependency on the system
+# libc++.so.1 / libc++abi.so.1, so they silently fail to dlopen on any target
+# without libc++ installed (e.g. stock ubuntu-24.04 — no CPU backend registers,
+# inference aborts). Statically link the C++ runtime into the modules so they
+# are self-contained, matching how the addons link themselves. The module<->addon
+# boundary is the C ggml-backend ABI, so per-module libc++ copies never exchange
+# C++ objects. Linux only: Apple/iOS use Metal frameworks, Android ships
+# libc++_shared via the NDK STL, Windows uses the MSVC runtime.
+if(VCPKG_TARGET_IS_LINUX)
+  string(APPEND VCPKG_LINKER_FLAGS " -static-libstdc++")
 endif()
 
 set(LLAMA_OPTIONS)
