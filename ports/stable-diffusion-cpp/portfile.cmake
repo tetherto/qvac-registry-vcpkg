@@ -24,7 +24,7 @@
 # (tetherto/qvac-ext-ggml@2026-06-06).
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
-    URL "git@github.com:tetherto/qvac-ext-stable-diffusion.cpp.git"
+    URL "https://github.com/tetherto/qvac-ext-stable-diffusion.cpp.git"
     REF a7f646d21baa4ba9b4763f07e70b2ffe9afca73d
 )
 

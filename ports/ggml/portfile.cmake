@@ -31,7 +31,7 @@
 # instead of aborting on the CPU im2col_f16 F16 assert.
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
-    URL "git@github.com:tetherto/qvac-ext-ggml.git"
+    URL "https://github.com/tetherto/qvac-ext-ggml.git"
     REF b5ba72ee03a2d0179561d4cec89eb0fa5a31eb29
 )
 
