@@ -1,8 +1,8 @@
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-bergamot-translator
-  REF b6788a8
-  SHA512 21c65ae927c2d2ddb85914d66bcceb6e54dd62b3c25118ef69fb3d66e51d4bc24ea52a4f05ff4b68d01c634bb4b1c42af537ba1d50e56c4b07535845dd293995
+  REF 28cdbe7
+  SHA512 e73e288fb3e3997b3f20633ada24689f97d95626ef5653ff07831e919ff6bb5002a674c26cb59ddd92b8e056f37a7d82bd9e59d7bd0b52d96fea284fa167b59e
   PATCHES
     remove_build_type_flag.patch
 )

@@ -1,6 +1,6 @@
 {
   "name": "bergamot-translator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A C++ library for client-side machine translation using Bergamot/Marian",
   "homepage": "https://github.com/tetherto/qvac-ext-bergamot-translator",
   "license": "MPL-2.0",
