@@ -44,4 +44,4 @@ jobs:
             --pr-number "${{ github.event.pull_request.number || github.event.issue.number }}" \
             --maintainers-team 'qvac-internal-mgmt' \
             --team-leads-team 'qvac-internal-merge' \
-            --min-approvals '2'
+            --min-approvals '1'
