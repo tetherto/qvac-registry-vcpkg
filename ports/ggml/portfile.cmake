@@ -23,8 +23,13 @@
 #   cuda   -> GGML_CUDA=ON
 #   opencl -> GGML_OPENCL=ON
 
-# Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-06-06
+# Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-06-06-ltx
 # (REF pinned to that branch's tip commit for reproducibility).
+#
+# 2026-06-06-ltx = the LTX delta branch: its base (2026-06-06) carries the
+# reviewed Metal/video kernels (IM2COL_3D/PAD, fused RoPE-flux, conv2d) on top
+# of leejet/ggml v0.12.0, and the -ltx tip adds the two genuinely-new commits
+# (graph_leaf public API export + the conv_1d im2col-type fix below).
 #
 # b5ba72ee adds the ggml_conv_1d/dw im2col-type fix (derive from a->type like
 # conv_2d) so F32 conv weights (e.g. LTX audio VAE) flow through the F32 path

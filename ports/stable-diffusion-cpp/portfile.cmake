@@ -14,14 +14,15 @@
 # dynamically loaded backends.
 #
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
-# 2026-06-04 (REF pinned to that branch's tip commit for reproducibility).
+# 2026-06-04-ltx (REF pinned to that branch's tip commit for reproducibility).
 #
-# df47d5e is the tip of 2026-06-04: all qvac downstream patches (vcpkg port
-# patches, ESRGAN upscaler device API, Wan 2.1 I2V VAE tiling fix, fused Flux
-# RoPE, ggml public leaf-API migration, the CLI GPU-default tweak, and the
-# MSVC /bigobj fix for C1128) rebased onto the upstream 2026-06-04 base. The
-# ggml git submodule has been removed; ggml is provided entirely via
-# SD_USE_SYSTEM_GGML from the vcpkg ggml port (tetherto/qvac-ext-ggml@2026-06-06).
+# df47d5e is the tip of 2026-06-04-ltx: the LTX/custom-ggml commits on top of
+# the 2026-06-04 base. The base carries the general qvac patches (vcpkg port
+# patches, ESRGAN upscaler device API, Wan 2.1 I2V VAE tiling fix), while
+# -ltx adds fused Flux RoPE, the ggml public leaf-API migration, the CLI
+# GPU-default tweak, and the MSVC /bigobj fix for C1128. The ggml git submodule
+# has been removed; ggml is provided entirely via SD_USE_SYSTEM_GGML from the
+# vcpkg ggml port (tetherto/qvac-ext-ggml@2026-06-06-ltx).
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
     URL "https://github.com/tetherto/qvac-ext-stable-diffusion.cpp.git"
