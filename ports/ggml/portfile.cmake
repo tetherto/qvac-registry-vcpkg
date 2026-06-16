@@ -1,16 +1,13 @@
 # ggml vcpkg overlay port
 #
 # Builds the ggml tensor library from tetherto/qvac-ext-ggml.
-# Fork of ggml-org/ggml (commit a8db410a) with all overlay patches
-# pre-applied, plus the merged Metal Flux RoPE and direct conv2d kernels.
+# Fork of leejet/ggml (v0.12.0) carrying the reviewed Metal/video kernels
+# (IM2COL_3D, PAD, fused Flux RoPE, direct conv2d) plus the LTX delta pinned
+# from the 2026-06-06-ltx branch (see the REF block below for specifics).
 #
-# Pinned to 3409834f -- the merge commit of tetherto/qvac-ext-ggml#9,
-# which adds the fused Flux RoPE op, direct Metal conv2d path, and the
-# backend test/support fixes reviewed in the PR.
-#
-# Without these the Metal backend aborts mid-Wan inference with
-# `unsupported op 'IM2COL_3D'` and the test-backend-ops support/test
-# matrix advertises invalid IM2COL_3D combos that hit CPU GGML_ASSERTs.
+# Without these kernels the Metal backend aborts mid-video inference with
+# `unsupported op 'IM2COL_3D'` and the test-backend-ops support/test matrix
+# advertises invalid IM2COL_3D combos that hit CPU GGML_ASSERTs.
 #
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
