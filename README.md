@@ -74,3 +74,4 @@ Exact versions and baselines are defined in `versions/baseline.json`.
 | 2 | Add this registry in `vcpkg-configuration.json` with `kind: "git"`, `repository`: `https://github.com/tetherto/qvac-registry-vcpkg.git`, and a `baseline` (e.g. `main` or a commit/tag). |
 | 3 | List needed packages in `"packages"` or use `["*"]` to allow all. |
 | 4 | Add the ports you need in your `vcpkg.json` or install them via the vcpkg CLI. |
+
