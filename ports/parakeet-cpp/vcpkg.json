@@ -1,7 +1,7 @@
 {
   "name": "parakeet-cpp",
-  "version-date": "2026-06-10",
-  "description": "Parakeet (NVIDIA FastConformer ASR + Sortformer diarization) inference in pure C++/ggml. Ships CTC, TDT, EOU and Sortformer engines under one Engine umbrella, plus the cross-engine StreamEvent API (VadStateChanged / EndOfTurn). Sourced from tetherto/qvac-ext-lib-whisper.cpp's parakeet-cpp/ subfolder; consumes the ggml-speech port.",
+  "version-date": "2026-06-18",
+  "description": "Parakeet (NVIDIA FastConformer ASR + Sortformer diarization) inference in pure C++/ggml. Ships CTC, TDT, EOU and Sortformer engines under one Engine umbrella, plus the cross-engine StreamEvent API (VadStateChanged / EndOfTurn). Sourced from tetherto/qvac-ext-lib-whisper.cpp's parakeet-cpp/ subfolder; consumes the ggml-speech port. This pin (master b95ad447) brings QVAC-20556 Parakeet on Mali-Vulkan GPU (PR #51): encoder reformulation (broadcast mul_mat to mul + sum_rows) and the Sortformer head on CPU with CPU-resident weight copies.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/parakeet-cpp",
   "license": "MIT",
   "dependencies": [
