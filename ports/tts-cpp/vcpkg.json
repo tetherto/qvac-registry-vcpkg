@@ -1,7 +1,7 @@
 {
   "name": "tts-cpp",
-  "version-date": "2026-06-12",
-  "description": "Text-to-speech inference in pure C++/ggml. Ships Resemble Chatterbox (Turbo + Multilingual variants) and Supertonic engines under a unified Engine API. Sourced from tetherto/qvac-ext-lib-whisper.cpp's tts-cpp/ subfolder. This pin brings QVAC-19305 Supertonic v3 support (PR #42): 31 languages, 8-head text cross-attention, stable name aliases + bridge for the renumbered v3 ONNX node ids, v1/v2 GGUF backward-compat, and a convert-time bridge assertion. It also lands the v3 numerical-parity fixes (ConvNeXt dilations + classifier-free guidance) and Supertonic-aware quantization so q4_0/q8_0 GGUFs build and run (pwconv squeeze/expand surgery + Q4_0 dequant-at-load). Consumes the ggml-speech port.",
+  "version-date": "2026-06-18",
+  "description": "Text-to-speech inference in pure C++/ggml. Ships Resemble Chatterbox (Turbo + Multilingual variants) and Supertonic engines under a unified Engine API. Sourced from tetherto/qvac-ext-lib-whisper.cpp's tts-cpp/ subfolder. This pin brings PR #43 (QVAC-19557 chatterbox memory) on top of master 40c95c6e (which already carries QVAC-19305 Supertonic v3): streamed GGUF loads (no full-file host staging), EngineOptions::kv_cache_type (f32|f16|q8_0 T3 KV cache; q8_0 ~27% of f32) with a load-time capability probe + F32 fallback and a Vulkan q8_0->f32 guard, and removal of the last direct ggml-cpu backend-library symbol references so static tts-cpp links cleanly under Android GGML_BACKEND_DL=ON (lets the tts-ggml tts-cpp overlay be removed). Consumes the ggml-speech port.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/tts-cpp",
   "license": "MIT",
   "dependencies": [

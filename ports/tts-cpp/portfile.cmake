@@ -2,15 +2,22 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 24eeb028
-# (QVAC-19305 Supertonic v3 support, PR #42), layered on top of the previous
-# 1c75d6e9 pin (QVAC-19253 Supertonic + Chatterbox on Adreno-Vulkan, PR #41).
-# Adds Supertonic v3: 31 languages, 8-head text cross-attention, stable name
-# aliases + bridge for the renumbered v3 ONNX node ids, v1/v2 GGUF backward-
-# compat, and a convert-time bridge assertion. Lands the v3 numerical-parity
-# fixes (ConvNeXt dilations + classifier-free guidance) and the Supertonic-
-# aware quantization that makes q4_0/q8_0 GGUFs build and run (pwconv squeeze/
-# expand surgery + Q4_0 dequant-at-load).
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@a7b36cbe
+# (PR #43 QVAC-19557 chatterbox memory work, rebased onto master 40c95c6e —
+# which already carries QVAC-19305 Supertonic v3 (PR #42), the per-sentence
+# S3Gen streaming (QVAC-20484 PR #47), and QVAC-20556 Parakeet Mali-Vulkan
+# (PR #51)).  PR #43 adds, on top of that base:
+# - streamed GGUF tensor loads (no full-file host staging; removes the
+#   +0.5..1 GB transient per chatterbox model load that jetsam-killed the
+#   iOS SDK tests)
+# - selectable chatterbox KV-cache dtype (EngineOptions::kv_cache_type =
+#   f32|f16|q8_0) on a token-major KV slab; q8_0 stores the cache at ~27%
+#   of f32 and decodes 20-30% faster on Metal, with a load-time capability
+#   probe + F32 fallback and a Vulkan q8_0->f32 guard (coopmat2 FA fault)
+# - removes the last direct ggml_backend_is_cpu / ggml_get_type_traits_cpu
+#   references (routed via the backend registry + ggml_quantize_chunk),
+#   keeping the static tts-cpp link safe under Android GGML_BACKEND_DL=ON.
+#   This lets the qvac packages/tts-ggml temporary tts-cpp overlay be removed.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -18,8 +25,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 24eeb0281d672416249d22ce1fb5c7ba69c92e21
-    SHA512 c66cd54900d6c3536adee0f4e92726c432d42f01b1f8a949bb1dfd9002eca4347d0de4e59609b7f5522fe3bb7b7cae5e42bc6c06279e43c125808e9bdf7d523d
+    REF a7b36cbed420574b385ea5ac5af0428634b9f872
+    SHA512 04fbc7cbbc614bf6b49f2f742804f55912a844dd9e0c1fc8ccaa16097578e6712abf732d6e3cc74c48b8313c92a157f4ed25968932171cc9fad7bee1ba064ffd
     HEAD_REF master
 )
 
