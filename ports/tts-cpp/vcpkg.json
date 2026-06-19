@@ -1,8 +1,7 @@
 {
   "name": "tts-cpp",
-  "version-date": "2026-06-18",
-  "port-version": 1,
-  "description": "Text-to-speech inference in pure C++/ggml. Ships Resemble Chatterbox (Turbo + Multilingual variants) and Supertonic engines under a unified Engine API. Sourced from tetherto/qvac-ext-lib-whisper.cpp's tts-cpp/ subfolder. This pin (master HEAD b95ad447) brings QVAC-20616 end-of-speech robustness (PR #53): alignment-based EOS plus a heuristic stop controller so the Chatterbox multilingual model stops at end-of-utterance instead of rambling random tokens past the text; and QVAC-20557 Supertonic Android GPU (PR #54): Adreno OpenCL + Xclipse/Mali Vulkan, which also reroutes the direct CPU-backend calls (ggml_backend_is_cpu / ggml_get_type_traits_cpu) to ggml-base + a registry shim so the addon dlopen's cleanly on Android. Consumes the ggml-speech port.",
+  "version-date": "2026-06-19",
+  "description": "Text-to-speech inference in pure C++/ggml. Ships Resemble Chatterbox (Turbo + Multilingual variants) and Supertonic engines under a unified Engine API. Sourced from tetherto/qvac-ext-lib-whisper.cpp's tts-cpp/ subfolder. This pin (master a679c7e7) brings QVAC-19557 chatterbox iOS-memory work (PR #43): streamed GGUF loads (no full-file host staging) and selectable KV-cache dtype (EngineOptions::kv_cache_type = f32|f16|q8_0; q8_0 ~27% of f32) with a capability probe + F32 fallback and a Vulkan q8_0->f32 guard. Layered on the b95ad447 base — QVAC-20616 end-of-speech robustness (PR #53) and QVAC-20557 Supertonic Android GPU (PR #54: Adreno OpenCL + Xclipse/Mali Vulkan, which also routes the CPU-backend calls through ggml-base + a registry shim for Android dlopen). Consumes the ggml-speech port.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/tts-cpp",
   "license": "MIT",
   "dependencies": [

@@ -2,9 +2,14 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD b95ad447, layered on
-# top of the previous 24eeb028 pin (QVAC-19305 Supertonic v3, PR #42). Brings
-# the two TTS-relevant master merges since:
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master a679c7e7 (PR #43 merged):
+# QVAC-19557 chatterbox iOS-memory work — streamed GGUF tensor loads (no
+# full-file host staging), selectable chatterbox KV-cache dtype
+# (EngineOptions::kv_cache_type = f32|f16|q8_0) on a token-major slab with a
+# load-time capability probe + F32 fallback and a Vulkan q8_0->f32 guard.
+#
+# Layered on the previous b95ad447 pin (QVAC-19305 Supertonic v3 PR #42 base),
+# which brought the two TTS-relevant master merges:
 #   - QVAC-20616 [TTS GGML] end-of-speech robustness (PR #53): alignment-based
 #     EOS stop (ports the AlignmentStreamAnalyzer cross-attention signal via an
 #     in-graph attention probe) plus a heuristic stop controller (EOS
@@ -27,8 +32,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF b95ad4472dcd414ea88597e562d37efd53227ebc
-    SHA512 81fefc90352c9f69bcd82c84aeb0d2333e21496796cc6288907dda21fbc20ac0e42225f686c857c5abadf3067bf7fb6eac750ba31a48df731486fce92dbaa1dd
+    REF a679c7e7b08645920e5e1f986968845089220209
+    SHA512 2292bea98c580b3a4f2403c00067e8ee3286b64003838632c040be3edd3d60dbf0f48b0afa8f34a1b3b2f751ccc8efa7e2532afc6a4cbf6ef9613f52cf4f06fa
     HEAD_REF master
 )
 
