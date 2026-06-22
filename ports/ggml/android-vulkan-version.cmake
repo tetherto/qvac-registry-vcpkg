@@ -1,6 +1,6 @@
 # Detect the Vulkan version shipped with the Android NDK by parsing
-# vulkan_core.h from the NDK sysroot.  Sets `vulkan_version` in the
-# caller's scope (e.g. "1.3.275").
+# vulkan_core.h from the NDK sysroot. Sets `vulkan_version` and
+# `vulkan_headers_sha512` in the caller's scope.
 function(detect_ndk_vulkan_version)
     string(TOLOWER "${CMAKE_HOST_SYSTEM_NAME}" host_system_name_lower)
 
@@ -30,8 +30,17 @@ function(detect_ndk_vulkan_version)
     if(version_match)
         set(major "${CMAKE_MATCH_2}")
         set(minor "${CMAKE_MATCH_3}")
-        set(vulkan_version "${major}.${minor}.${header_version_3}" PARENT_SCOPE)
+        set(vulkan_version "${major}.${minor}.${header_version_3}")
     else()
         message(FATAL_ERROR "Could not extract VK_HEADER_VERSION_COMPLETE from ${vulkan_core_h}")
     endif()
+
+    if(vulkan_version STREQUAL "1.3.275")
+        set(vulkan_headers_sha512 "adebfc61501e67367d366a8b17833d064f925ada6480641ef3c128bbda3852087e02d67a09e90b2c188a47494b7e47a87db0d039465858e765e89dc6c2b370d7")
+    else()
+        message(FATAL_ERROR "No pinned SHA512 for Vulkan-Headers v${vulkan_version}; update android-vulkan-version.cmake before downloading")
+    endif()
+
+    set(vulkan_version "${vulkan_version}" PARENT_SCOPE)
+    set(vulkan_headers_sha512 "${vulkan_headers_sha512}" PARENT_SCOPE)
 endfunction()

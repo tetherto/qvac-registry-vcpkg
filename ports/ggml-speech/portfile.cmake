@@ -57,13 +57,13 @@ if(VCPKG_TARGET_IS_ANDROID AND "vulkan" IN_LIST FEATURES)
     detect_ndk_vulkan_version()
     message(STATUS "NDK Vulkan version: ${vulkan_version}")
 
-    file(DOWNLOAD
-        "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v${vulkan_version}.tar.gz"
-        "${SOURCE_PATH}/vulkan-hpp-${vulkan_version}.tar.gz"
-        TLS_VERIFY ON
+    vcpkg_download_distfile(VULKAN_HEADERS_ARCHIVE
+        URLS "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v${vulkan_version}.tar.gz"
+        FILENAME "vulkan-hpp-${vulkan_version}.tar.gz"
+        SHA512 "${vulkan_headers_sha512}"
     )
     file(ARCHIVE_EXTRACT
-        INPUT "${SOURCE_PATH}/vulkan-hpp-${vulkan_version}.tar.gz"
+        INPUT "${VULKAN_HEADERS_ARCHIVE}"
         DESTINATION "${SOURCE_PATH}"
         PATTERNS "*.hpp"
     )
