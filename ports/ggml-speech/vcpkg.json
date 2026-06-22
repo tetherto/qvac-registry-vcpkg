@@ -25,7 +25,7 @@
     },
     {
       "name": "vulkan",
-      "platform": "windows | linux | android"
+      "platform": "(windows | linux | android) & !riscv64"
     }
   ],
   "features": {
@@ -53,5 +53,6 @@
         }
       ]
     }
-  }
+  },
+  "port-version": 1
 }

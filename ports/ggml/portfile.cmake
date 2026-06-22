@@ -113,6 +113,24 @@ if(VCPKG_TARGET_IS_ANDROID)
     )
 endif()
 
+# --- riscv64: build a portable CPU-scalar (no vector) ggml ---
+# Most riscv64 hardware in the wild (e.g. StarFive JH7110 / SiFive U74) does
+# not implement the "V" (vector) extension. ggml's CPU backend otherwise
+# auto-selects -march=rv64gc..._v_... and enables RVV intrinsics, which emit
+# vector instructions that fault on these cores. Vulkan is likewise pointless
+# here (no GPU, glslc usually unavailable). Build a scalar rv64gc ggml.
+if(VCPKG_TARGET_ARCHITECTURE STREQUAL "riscv64")
+    set(GGML_VULKAN OFF)
+    list(APPEND PLATFORM_OPTIONS
+        -DGGML_RVV=OFF
+        -DGGML_RV_ZFH=OFF
+        -DGGML_RV_ZVFH=OFF
+        -DGGML_RV_ZICBOP=OFF
+        -DGGML_RV_ZIHINTPAUSE=OFF
+    )
+endif()
+
+
 # --- Configure & build ---
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
