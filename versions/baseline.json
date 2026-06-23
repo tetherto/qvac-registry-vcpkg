@@ -28,6 +28,10 @@
       "baseline": "2026-06-15",
       "port-version": 0
     },
+    "hip": {
+      "baseline": "7.13.0",
+      "port-version": 0
+    },
     "intgemm": {
       "baseline": "1.0.0",
       "port-version": 0
@@ -74,7 +78,7 @@
     },
     "qvac-fabric": {
       "baseline": "9341.0.0",
-      "port-version": 0
+      "port-version": 1
     },
     "qvac-lib-inference-addon-cpp": {
       "baseline": "1.2.1",
