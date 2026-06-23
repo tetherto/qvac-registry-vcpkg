@@ -1,7 +1,7 @@
 {
   "name": "tts-cpp",
-  "version-date": "2026-06-19",
-  "description": "Text-to-speech inference in pure C++/ggml. Ships Resemble Chatterbox (Turbo + Multilingual variants) and Supertonic engines under a unified Engine API. Sourced from tetherto/qvac-ext-lib-whisper.cpp's tts-cpp/ subfolder. This pin (master a679c7e7) brings QVAC-19557 chatterbox iOS-memory work (PR #43): streamed GGUF loads (no full-file host staging) and selectable KV-cache dtype (EngineOptions::kv_cache_type = f32|f16|q8_0; q8_0 ~27% of f32) with a capability probe + F32 fallback and a Vulkan q8_0->f32 guard. Layered on the b95ad447 base — QVAC-20616 end-of-speech robustness (PR #53) and QVAC-20557 Supertonic Android GPU (PR #54: Adreno OpenCL + Xclipse/Mali Vulkan, which also routes the CPU-backend calls through ggml-base + a registry shim for Android dlopen). Consumes the ggml-speech port.",
+  "version-date": "2026-06-22",
+  "description": "Text-to-speech inference in pure C++/ggml. Ships Resemble Chatterbox (Turbo + Multilingual variants) and Supertonic engines under a unified Engine API. Sourced from tetherto/qvac-ext-lib-whisper.cpp's tts-cpp/ subfolder. This pin brings QVAC-21118 [TTS GGML] chunk-streaming CFM-step floor (PR #62): for the Multilingual model's standard 10-step CFM the streaming path floors a low stream_cfm_steps to n_timesteps, fixing the saturation/clipping + per-chunk wobble (batch --cfm-steps knob and Turbo meanflow untouched). This pin is master HEAD 1cc2d383 (PR #62). Layered on a679c7e7 (QVAC-19557 chatterbox iOS-memory: streamed GGUF loads + selectable KV-cache dtype) and the b95ad447 base (QVAC-20616 EOS robustness PR #53 + QVAC-20557 Supertonic Android GPU PR #54). Consumes the ggml-speech port.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/tts-cpp",
   "license": "MIT",
   "dependencies": [

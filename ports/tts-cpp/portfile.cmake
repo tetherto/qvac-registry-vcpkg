@@ -2,7 +2,15 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master a679c7e7 (PR #43 merged):
+# QVAC-21118 [TTS GGML] chunk-streaming CFM-step floor (qvac-ext-lib-whisper.cpp
+# PR #62): for the Multilingual model (standard 10-step CFM) the chunk-streaming
+# path floors a low stream_cfm_steps to the model's n_timesteps, fixing the
+# saturation/clipping + per-chunk "wobble" that a meanflow-era low step count
+# caused (the batch --cfm-steps knob and Turbo's meanflow 2-step sampler are
+# untouched).
+#
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 1cc2d383 (PR #62
+# merged).  Layered on the previous a679c7e7 pin (PR #43 merged):
 # QVAC-19557 chatterbox iOS-memory work — streamed GGUF tensor loads (no
 # full-file host staging), selectable chatterbox KV-cache dtype
 # (EngineOptions::kv_cache_type = f32|f16|q8_0) on a token-major slab with a
@@ -32,8 +40,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF a679c7e7b08645920e5e1f986968845089220209
-    SHA512 2292bea98c580b3a4f2403c00067e8ee3286b64003838632c040be3edd3d60dbf0f48b0afa8f34a1b3b2f751ccc8efa7e2532afc6a4cbf6ef9613f52cf4f06fa
+    REF 1cc2d383d5c3058533c5cd22b02270c68dc61d09
+    SHA512 fcf9f78eab8df799234a017df77334ec133006062d436846deed243fef5e22908c5d6455bb8d9b8d767c6b193f6bb241cfeaed33ea1303cf4fa306a0ed38dd01
     HEAD_REF master
 )
 
