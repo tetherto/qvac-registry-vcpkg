@@ -2,15 +2,20 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# QVAC-21118 [TTS GGML] chunk-streaming CFM-step floor (qvac-ext-lib-whisper.cpp
-# PR #62): for the Multilingual model (standard 10-step CFM) the chunk-streaming
-# path floors a low stream_cfm_steps to the model's n_timesteps, fixing the
-# saturation/clipping + per-chunk "wobble" that a meanflow-era low step count
-# caused (the batch --cfm-steps knob and Turbo's meanflow 2-step sampler are
-# untouched).
+# QVAC-19557 [TTS GGML] S3TokenizerV2 host-mirror elimination
+# (qvac-ext-lib-whisper.cpp PR #65): the voice-conditioning bake loaded the
+# S3TokenizerV2 encoder weights (~458 MB F32) into a host std::vector mirror AND
+# the backend (Metal) weight buffer at once (~900 MB dual-resident), the
+# dominant contributor to the chatterbox first-synth peak that jetsam-killed the
+# iOS SDK e2e.  build_encoder_ctx now streams each encoder tensor straight from
+# the GGUF into its backend tensor (8 MiB chunks, no host mirror); weights are
+# bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
+# (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 1cc2d383 (PR #62
-# merged).  Layered on the previous a679c7e7 pin (PR #43 merged):
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 46921668 (PR #65
+# merged).  Layered on the previous 1cc2d383 pin (QVAC-21118 PR #62: chunk-
+# streaming CFM-step floor for the Multilingual standard 10-step CFM) and the
+# a679c7e7 pin (PR #43 merged):
 # QVAC-19557 chatterbox iOS-memory work — streamed GGUF tensor loads (no
 # full-file host staging), selectable chatterbox KV-cache dtype
 # (EngineOptions::kv_cache_type = f32|f16|q8_0) on a token-major slab with a
@@ -40,8 +45,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 1cc2d383d5c3058533c5cd22b02270c68dc61d09
-    SHA512 fcf9f78eab8df799234a017df77334ec133006062d436846deed243fef5e22908c5d6455bb8d9b8d767c6b193f6bb241cfeaed33ea1303cf4fa306a0ed38dd01
+    REF 469216689265505d338511ea391eee76ae826906
+    SHA512 f1f9ec1af46f3aff4be03ddb3b973babb2e4c59d7f2c93cf69fa27e64fba80343069733a3070490380460955b49e5c2448fcbe902d6622a08ded70a7b8461122
     HEAD_REF master
 )
 
