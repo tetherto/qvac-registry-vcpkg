@@ -22,11 +22,11 @@
     },
     "ggml": {
       "baseline": "2026-01-30",
-      "port-version": 8
+      "port-version": 9
     },
     "ggml-speech": {
       "baseline": "2026-06-15",
-      "port-version": 0
+      "port-version": 1
     },
     "hip": {
       "baseline": "7.13.0",
