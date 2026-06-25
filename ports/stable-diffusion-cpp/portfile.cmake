@@ -26,10 +26,11 @@
 # builds (SD_USE_SYSTEM_GGML defaults to OFF there), but this port builds with
 # -DSD_USE_SYSTEM_GGML=ON so ggml is provided by the vcpkg ggml port
 # (tetherto/qvac-ext-ggml@2026-06-06).
-vcpkg_from_git(
+vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    URL "https://github.com/tetherto/qvac-ext-stable-diffusion.cpp.git"
+    REPO tetherto/qvac-ext-stable-diffusion.cpp
     REF 385c33265a4d8c535180849e95ac1e67733c9f1f
+    SHA512 13a7ae0d533a9e75ce630253ffa3151152a3f4aa1679e0d7370d290055c0f6a37b6d6700b477ac01c769cba826624615e0adf485478000497843961b763d78f0
 )
 
 set(SD_FLASH_ATTN OFF)

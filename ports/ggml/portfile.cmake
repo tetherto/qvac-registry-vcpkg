@@ -31,10 +31,11 @@
 # im2col-type fix (derive from a->type like conv_2d) so F32 conv weights
 # (e.g. LTX audio VAE) flow through the F32 path instead of aborting on the CPU
 # im2col_f16 F16 assert.
-vcpkg_from_git(
+vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    URL "https://github.com/tetherto/qvac-ext-ggml.git"
+    REPO tetherto/qvac-ext-ggml
     REF 805e8e1b0329c9a6a11968bb31a81b03362a9f35
+    SHA512 bc66b383f81ed92ac8097292ec806f232517efca536a16d95f0cf59887438840d46e1e218074c2be393dc81217ced36691555c0ed999180d7030d3d4e2ae5d0d
 )
 
 # --- GPU feature flags ---
