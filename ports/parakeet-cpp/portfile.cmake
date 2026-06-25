@@ -2,10 +2,11 @@
 # Sourced from the parakeet-cpp/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master HEAD 1c75d6e9 (QVAC-19253 Supertonic + Chatterbox on
-# Adreno-Vulkan, PR #41); we move this port together with whisper-cpp and
-# tts-cpp so all three registry ports source the same master commit and the
-# same archive SHA512.
+# Pinned at master HEAD b95ad447, layered on top of the previous 1c75d6e9 pin
+# (QVAC-19253 Adreno-Vulkan, PR #41). Brings QVAC-20556 Parakeet on Mali-Vulkan
+# GPU (PR #51): encoder reformulation (broadcast mul_mat -> mul + sum_rows) plus
+# the Sortformer head on CPU with CPU-resident weight copies. Same master commit
+# and archive SHA512 as the tts-cpp port (2026-06-18 / b95ad447).
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -13,8 +14,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 1c75d6e9d5f07a50d6b0e8b6cff48444df4594b3
-    SHA512 bd74d7831f3fdaad9bc5e366662e8c49a847db3ed7f66c4a8a94c10f1f7eee7c8fea58f91f1c8bc43da3ef64e1a4510aef6e376b5c7242711e256e14701f9e07
+    REF b95ad4472dcd414ea88597e562d37efd53227ebc
+    SHA512 81fefc90352c9f69bcd82c84aeb0d2333e21496796cc6288907dda21fbc20ac0e42225f686c857c5abadf3067bf7fb6eac750ba31a48df731486fce92dbaa1dd
     HEAD_REF master
 )
 

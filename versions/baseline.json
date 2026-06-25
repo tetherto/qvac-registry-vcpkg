@@ -4,6 +4,10 @@
       "baseline": "onnxruntime",
       "port-version": 1
     },
+    "benchmark": {
+      "baseline": "1.9.1",
+      "port-version": 0
+    },
     "bergamot-translator": {
       "baseline": "1.0.1",
       "port-version": 0
@@ -21,7 +25,11 @@
       "port-version": 3
     },
     "ggml-speech": {
-      "baseline": "2026-06-09",
+      "baseline": "2026-06-15",
+      "port-version": 0
+    },
+    "hip": {
+      "baseline": "7.13.0",
       "port-version": 0
     },
     "intgemm": {
@@ -42,7 +50,7 @@
     },
     "onnxruntime": {
       "baseline": "1.24.2",
-      "port-version": 5
+      "port-version": 6
     },
     "opencl": {
       "baseline": "2024.10.24",
@@ -69,7 +77,7 @@
       "port-version": 0
     },
     "qvac-fabric": {
-      "baseline": "8828.1.1",
+      "baseline": "9341.1.0",
       "port-version": 0
     },
     "qvac-lib-inference-addon-cpp": {
@@ -105,7 +113,7 @@
       "port-version": 2
     },
     "tts-cpp": {
-      "baseline": "2026-06-12",
+      "baseline": "2026-06-24",
       "port-version": 0
     },
     "vcpkg-cmake": {
@@ -126,7 +134,7 @@
     },
     "xnnpack": {
       "baseline": "onnxruntime",
-      "port-version": 0
+      "port-version": 1
     }
   }
 }

@@ -1,13 +1,14 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD bec032cd (merge of PR #14,
-# QVAC-19213 Adreno-Vulkan shared-memory fix). Bumps the speech-stack ggml pin
-# to the current speech-branch tip on top of the previous pin (1189e4ce, PR #19
-# Adreno mul_mat gating + Adreno-generation regex parse).
+# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 7bb9f229 (merge of PR #24,
+# QVAC-19305 ggml-metal drain residency sets at device free instead of
+# asserting -- fixes the SIGABRT at process exit on macOS 15+ Metal teardown).
+# Bumps the speech-stack ggml pin from bec032cd; also picks up PR #22
+# (ggml-opencl bci-whispercpp correctness on Adreno + Samsung Xclipse GPUs).
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF bec032cd2d1235591b6a60d1efd809385b152292
-    SHA512 381bcfa9095fc10034ff31a6fb6a4d373f297d261237e2fd273add60c3db32ce5ac235afef3c4e17e10932f8c95eee7c4df5550b301c781e53ee69638b930518
+    REF 7bb9f22903be150bbbdec50b12437337b660242b
+    SHA512 2f88da4b0d9fc5a2817fa9758f64a5bc02f59e3a5e7032bbdbf77c65e11054b72e3d9e3b46ae5d2c71684af9c5930c99b224c4f6cd0ed12c9219ab7618a787ae
     HEAD_REF speech
 )
 

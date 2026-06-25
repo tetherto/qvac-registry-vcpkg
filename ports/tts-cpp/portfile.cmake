@@ -2,15 +2,42 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 24eeb028
-# (QVAC-19305 Supertonic v3 support, PR #42), layered on top of the previous
-# 1c75d6e9 pin (QVAC-19253 Supertonic + Chatterbox on Adreno-Vulkan, PR #41).
-# Adds Supertonic v3: 31 languages, 8-head text cross-attention, stable name
-# aliases + bridge for the renumbered v3 ONNX node ids, v1/v2 GGUF backward-
-# compat, and a convert-time bridge assertion. Lands the v3 numerical-parity
-# fixes (ConvNeXt dilations + classifier-free guidance) and the Supertonic-
-# aware quantization that makes q4_0/q8_0 GGUFs build and run (pwconv squeeze/
-# expand surgery + Q4_0 dequant-at-load).
+# QVAC-19557 [TTS GGML] S3TokenizerV2 host-mirror elimination
+# (qvac-ext-lib-whisper.cpp PR #65): the voice-conditioning bake loaded the
+# S3TokenizerV2 encoder weights (~458 MB F32) into a host std::vector mirror AND
+# the backend (Metal) weight buffer at once (~900 MB dual-resident), the
+# dominant contributor to the chatterbox first-synth peak that jetsam-killed the
+# iOS SDK e2e.  build_encoder_ctx now streams each encoder tensor straight from
+# the GGUF into its backend tensor (8 MiB chunks, no host mirror); weights are
+# bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
+# (under the ~3 GB budget); warm tests unchanged.
+#
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 46921668 (PR #65
+# merged).  Layered on the previous 1cc2d383 pin (QVAC-21118 PR #62: chunk-
+# streaming CFM-step floor for the Multilingual standard 10-step CFM) and the
+# a679c7e7 pin (PR #43 merged):
+# QVAC-19557 chatterbox iOS-memory work — streamed GGUF tensor loads (no
+# full-file host staging), selectable chatterbox KV-cache dtype
+# (EngineOptions::kv_cache_type = f32|f16|q8_0) on a token-major slab with a
+# load-time capability probe + F32 fallback and a Vulkan q8_0->f32 guard.
+#
+# Layered on the previous b95ad447 pin (QVAC-19305 Supertonic v3 PR #42 base),
+# which brought the two TTS-relevant master merges:
+#   - QVAC-20616 [TTS GGML] end-of-speech robustness (PR #53): alignment-based
+#     EOS stop (ports the AlignmentStreamAnalyzer cross-attention signal via an
+#     in-graph attention probe) plus a heuristic stop controller (EOS
+#     confidence, n-gram repetition, text-length budget) and per-language
+#     calibration, so the Chatterbox multilingual model stops at end-of-
+#     utterance instead of rambling for ~20s of random tokens past the text.
+#   - QVAC-20557 Supertonic Android GPU (PR #54): Adreno OpenCL + Xclipse/Mali
+#     Vulkan. This also reroutes Supertonic's direct CPU-backend calls that are
+#     unlinkable under GGML_BACKEND_DL=ON --
+#     ggml_get_type_traits_cpu()->from_float -> ggml_quantize_chunk()
+#     (ggml-base, always linked) and ggml_backend_is_cpu() ->
+#     tts_cpp::detail::backend_is_cpu() (registry shim) -- so the tts-ggml
+#     addon dlopen's cleanly on Android. It is the upstream successor to the
+#     f7d4d6c fix that the tts-ggml package-local overlay was carrying; with
+#     this pin published, that overlay can be dropped.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -18,8 +45,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 24eeb0281d672416249d22ce1fb5c7ba69c92e21
-    SHA512 c66cd54900d6c3536adee0f4e92726c432d42f01b1f8a949bb1dfd9002eca4347d0de4e59609b7f5522fe3bb7b7cae5e42bc6c06279e43c125808e9bdf7d523d
+    REF 469216689265505d338511ea391eee76ae826906
+    SHA512 f1f9ec1af46f3aff4be03ddb3b973babb2e4c59d7f2c93cf69fa27e64fba80343069733a3070490380460955b49e5c2448fcbe902d6622a08ded70a7b8461122
     HEAD_REF master
 )
 
