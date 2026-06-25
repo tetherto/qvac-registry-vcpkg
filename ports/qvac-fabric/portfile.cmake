@@ -1,8 +1,8 @@
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-fabric-llm.cpp
-  REF v${VERSION}
-  SHA512 e016077df98ca4dd84ad8151d6e0289930e2819d403bab16e69b14272521fbc08ebeb7a54e6343554c8b8283641365a146c0d7dc2ba7ca55ee65a5106cf1cddd
+  REF 9b09664e189a422a5e4c05ea3d97cc66e9e42751
+  SHA512 ce813dcbf88a47732bbff7616ca763e757c3d32b3000a0368b0be9462163877284d6ceca221cc840bec8736375788b9df0f57a56c00b6fcb16e6cc2993dcc5f7
 )
 
 # Upstream CMake options only — passed through to vcpkg_cmake_configure.
@@ -20,7 +20,6 @@ vcpkg_check_features(
     gpu-backends BUILD_GPU_BACKENDS
     kleidiai BUILD_KLEIDIAI
     openmp BUILD_OPENMP
-    hip-backend BUILD_HIP_BACKEND
 )
 
 # gpu-backends is default-on via default-features in vcpkg.json. CPU-only
@@ -87,15 +86,7 @@ endif()
 # to dispatch the variants at runtime; the existing #ifdef guard around
 # `ggml_backend_load_all_from_path()` in ggml-backend-reg.cpp keeps the search
 # scoped to the consumer's own prebuilds dir.
-if(VCPKG_TARGET_IS_ANDROID OR (VCPKG_TARGET_IS_LINUX AND BUILD_GPU_BACKENDS))
-  # Desktop Linux also needs GGML_BACKEND_DL=ON so that multiple GPU backends
-  # (Vulkan + HIP/ROCm) can coexist as separately-loaded modules, the same way
-  # Android dispatches CPU variants at runtime. Without DL the Linux build links
-  # a single static GPU backend and a second one (HIP) cannot be stacked.
-  # GGML_NATIVE is incompatible with DL, so CPU variants are dispatched via
-  # GGML_CPU_ALL_VARIANTS instead. Consumers must ship the core ggml/llama libs
-  # alongside their backend modules so the dynamically-linked .bare can resolve
-  # them at load time.
+if(VCPKG_TARGET_IS_ANDROID)
   set(DL_BACKENDS ON)
   list(APPEND PLATFORM_OPTIONS
     -DGGML_BACKEND_DL=ON
@@ -103,40 +94,6 @@ if(VCPKG_TARGET_IS_ANDROID OR (VCPKG_TARGET_IS_LINUX AND BUILD_GPU_BACKENDS))
     -DGGML_CPU_REPACK=ON)
 else()
   set(DL_BACKENDS OFF)
-endif()
-
-# HIP/ROCm backend — opt-in via the 'hip-backend' feature (Linux + AMD only).
-# Only @qvac/vla-ggml requests it, so every other consumer builds with no HIP
-# and gains no ROCm dependency. Builds libqvac-ggml-hip.so as a standalone DL
-# module alongside Vulkan (GGML_BACKEND_DL is already ON above), so the addon
-# dlopen's whichever GPU backend BackendSelection picks at runtime. The `hip`
-# feature-dependency port forwards the system ROCm's find_package() configs.
-#
-# FAIL-SAFE: enable GGML_HIP only when a ROCm SDK is actually present. On a build
-# host without ROCm we skip HIP and build Vulkan/CPU only — the build never
-# hard-fails, and at runtime a missing HIP module just isn't loaded (the DL
-# loader skips it) so BackendSelection falls back to Vulkan/CPU. Targets gfx1151
-# (Strix Halo / Radeon 8060S); the HIP compiler + ROCM_PATH come from the build env.
-# linux-x64 only: AMD GPU hosts (Strix Halo / gfx1151) are x86_64, and the ROCm
-# dist is x64. On other arches (e.g. linux-arm64) HIP is skipped even if the
-# feature is requested — no ROCm requirement, no build break.
-if(VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "x64" AND BUILD_GPU_BACKENDS AND BUILD_HIP_BACKEND)
-  # DETERMINISTIC: requesting hip-backend REQUIRES a ROCm SDK at build time. We
-  # must NOT silently skip when ROCm is absent — a host-dependent skip yields a
-  # no-HIP package with the SAME vcpkg ABI as a real HIP build, which the binary
-  # cache then conflates (cache poisoning: a no-ROCm build caches a no-HIP
-  # package that ROCm-equipped builds then restore). So ROCm present => HIP;
-  # ROCm absent => hard error (don't request hip-backend on a host without ROCm).
-  # The RUNTIME fail-safe is unchanged: an absent HIP module / non-AMD target is
-  # simply not loaded and BackendSelection falls back to Vulkan/CPU.
-  if(NOT (DEFINED ENV{ROCM_PATH} AND EXISTS "$ENV{ROCM_PATH}/lib/cmake/hip/hip-config.cmake"))
-    message(FATAL_ERROR "qvac-fabric: hip-backend feature requires a ROCm SDK — set ROCM_PATH to a ROCm/TheRock install containing lib/cmake/hip/hip-config.cmake. Do not request hip-backend on a host without ROCm.")
-  endif()
-  message(STATUS "qvac-fabric: hip-backend ON — building GGML_HIP (gfx1151)")
-  list(APPEND PLATFORM_OPTIONS
-    -DGGML_HIP=ON
-    -DAMDGPU_TARGETS=gfx1151
-    -DCMAKE_HIP_ARCHITECTURES=gfx1151)
 endif()
 
 if(VCPKG_TARGET_IS_ANDROID AND BUILD_KLEIDIAI)
@@ -169,20 +126,6 @@ if(BUILD_GPU_BACKENDS AND NOT VCPKG_TARGET_IS_OSX AND NOT VCPKG_TARGET_IS_IOS)
     string(APPEND VCPKG_C_FLAGS " -isystem ${CURRENT_INSTALLED_DIR}/include")
     string(APPEND VCPKG_CXX_FLAGS " -isystem ${CURRENT_INSTALLED_DIR}/include")
   endif()
-endif()
-
-# Under GGML_BACKEND_DL the per-microarch backends ship as standalone
-# libqvac-ggml-*.so modules that the consumer dlopen's at runtime. Built with
-# -stdlib=libc++ they otherwise carry a runtime NEEDED dependency on the system
-# libc++.so.1 / libc++abi.so.1, so they silently fail to dlopen on any target
-# without libc++ installed (e.g. stock ubuntu-24.04 — no CPU backend registers,
-# inference aborts). Statically link the C++ runtime into the modules so they
-# are self-contained, matching how the addons link themselves. The module<->addon
-# boundary is the C ggml-backend ABI, so per-module libc++ copies never exchange
-# C++ objects. Linux only: Apple/iOS use Metal frameworks, Android ships
-# libc++_shared via the NDK STL, Windows uses the MSVC runtime.
-if(VCPKG_TARGET_IS_LINUX)
-  string(APPEND VCPKG_LINKER_FLAGS " -static-libstdc++")
 endif()
 
 set(LLAMA_OPTIONS)
