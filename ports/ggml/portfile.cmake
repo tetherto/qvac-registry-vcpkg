@@ -2,8 +2,8 @@
 #
 # Builds the ggml tensor library from tetherto/qvac-ext-ggml.
 # Fork of leejet/ggml (v0.12.0) carrying the reviewed Metal/video kernels
-# (IM2COL_3D, PAD, fused Flux RoPE, direct conv2d) plus the LTX delta pinned
-# from the 2026-06-06-ltx branch (see the REF block below for specifics).
+# (IM2COL_3D, PAD, fused Flux RoPE, direct conv2d) plus the merged LTX compute
+# set, pinned from the 2026-06-06 branch (see the REF block below for specifics).
 #
 # Without these kernels the Metal backend aborts mid-video inference with
 # `unsupported op 'IM2COL_3D'` and the test-backend-ops support/test matrix
