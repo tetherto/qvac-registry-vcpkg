@@ -20,21 +20,21 @@
 #   cuda   -> GGML_CUDA=ON
 #   opencl -> GGML_OPENCL=ON
 
-# Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-06-06-ltx
+# Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-06-06
 # (REF pinned to that branch's tip commit for reproducibility).
 #
-# 2026-06-06-ltx = the LTX delta branch: its base (2026-06-06) carries the
-# reviewed Metal/video kernels (IM2COL_3D/PAD, fused RoPE-flux, conv2d) on top
-# of leejet/ggml v0.12.0, and the -ltx tip adds the two genuinely-new commits
-# (graph_leaf public API export + the conv_1d im2col-type fix below).
-#
-# b5ba72ee adds the ggml_conv_1d/dw im2col-type fix (derive from a->type like
-# conv_2d) so F32 conv weights (e.g. LTX audio VAE) flow through the F32 path
-# instead of aborting on the CPU im2col_f16 F16 assert.
+# 805e8e1b is the tip of 2026-06-06 — the merge of #23 (2026-06-06-ltx) into the
+# canonical 2026-06-06 line. On top of leejet/ggml v0.12.0 it carries the full
+# merged compute set: the reviewed Metal/video kernels (IM2COL_3D/PAD, fused
+# Flux RoPE, direct conv2d), the coopmat1 flash-attn f32-accumulation fixes, the
+# ggml_graph_leaf/leafs/n_leafs public API export, and the ggml_conv_1d/dw
+# im2col-type fix (derive from a->type like conv_2d) so F32 conv weights
+# (e.g. LTX audio VAE) flow through the F32 path instead of aborting on the CPU
+# im2col_f16 F16 assert.
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
     URL "https://github.com/tetherto/qvac-ext-ggml.git"
-    REF b5ba72ee03a2d0179561d4cec89eb0fa5a31eb29
+    REF 805e8e1b0329c9a6a11968bb31a81b03362a9f35
 )
 
 # --- GPU feature flags ---

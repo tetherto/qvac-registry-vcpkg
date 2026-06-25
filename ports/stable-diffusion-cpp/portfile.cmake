@@ -16,17 +16,20 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # 2026-06-04-ltx (REF pinned to that branch's tip commit for reproducibility).
 #
-# df47d5e is the tip of 2026-06-04-ltx: the LTX/custom-ggml commits on top of
+# 385c332 is the tip of 2026-06-04-ltx: the LTX/custom-ggml commits on top of
 # the 2026-06-04 base. The base carries the general qvac patches (vcpkg port
 # patches, ESRGAN upscaler device API, Wan 2.1 I2V VAE tiling fix), while
 # -ltx adds fused Flux RoPE, the ggml public leaf-API migration, the CLI
-# GPU-default tweak, and the MSVC /bigobj fix for C1128. The ggml git submodule
-# has been removed; ggml is provided entirely via SD_USE_SYSTEM_GGML from the
-# vcpkg ggml port (tetherto/qvac-ext-ggml@2026-06-06-ltx).
+# GPU-default tweak, and the MSVC /bigobj fix for C1128.
+#
+# The vendored ggml submodule is kept on this branch for standalone (non-vcpkg)
+# builds (SD_USE_SYSTEM_GGML defaults to OFF there), but this port builds with
+# -DSD_USE_SYSTEM_GGML=ON so ggml is provided by the vcpkg ggml port
+# (tetherto/qvac-ext-ggml@2026-06-06).
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
     URL "https://github.com/tetherto/qvac-ext-stable-diffusion.cpp.git"
-    REF df47d5e28e8ea4e36e228df71d70654b07f9d84b
+    REF 385c33265a4d8c535180849e95ac1e67733c9f1f
 )
 
 set(SD_FLASH_ATTN OFF)
