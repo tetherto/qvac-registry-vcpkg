@@ -120,6 +120,22 @@ if(VCPKG_TARGET_IS_ANDROID)
     )
 endif()
 
+# --- Vulkan backend include path ---
+# ggml-vulkan.cpp includes <spirv/unified1/spirv.hpp> from the spirv-headers
+# dependency, but vcpkg does not automatically thread the installed include dir
+# into ggml's per-backend compile commands, so the Vulkan backend fails to build
+# with "fatal error: 'spirv/unified1/spirv.hpp' file not found" (notably on
+# Android). Inject the installed include dir explicitly, mirroring qvac-fabric.
+if("vulkan" IN_LIST FEATURES AND NOT VCPKG_TARGET_IS_OSX AND NOT VCPKG_TARGET_IS_IOS)
+    if(VCPKG_TARGET_IS_WINDOWS AND NOT VCPKG_TARGET_IS_MINGW)
+        string(APPEND VCPKG_C_FLAGS " /I${CURRENT_INSTALLED_DIR}/include")
+        string(APPEND VCPKG_CXX_FLAGS " /I${CURRENT_INSTALLED_DIR}/include")
+    else()
+        string(APPEND VCPKG_C_FLAGS " -isystem ${CURRENT_INSTALLED_DIR}/include")
+        string(APPEND VCPKG_CXX_FLAGS " -isystem ${CURRENT_INSTALLED_DIR}/include")
+    endif()
+endif()
+
 # --- Configure & build ---
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
