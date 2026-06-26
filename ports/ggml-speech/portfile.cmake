@@ -1,14 +1,15 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 7bb9f229 (merge of PR #24,
-# QVAC-19305 ggml-metal drain residency sets at device free instead of
-# asserting -- fixes the SIGABRT at process exit on macOS 15+ Metal teardown).
-# Bumps the speech-stack ggml pin from bec032cd; also picks up PR #22
-# (ggml-opencl bci-whispercpp correctness on Adreno + Samsung Xclipse GPUs).
+# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD f5727c32 (merge of PR #30,
+# QVAC-20557 ggml-cpu: fix the SVE ggml_vec_dot_f32 leftover-tail accumulator
+# drop, svmad_f32_m -> svmla_f32_m). Removes the ~12 kHz Nyquist comb the SVE
+# HiFT/ISTFT conv_transpose_1d inner dot produced on Tensor/Pixel CPU. Bumps
+# the speech-stack ggml pin from 7bb9f229; NEON/x86/RISC-V and all non-CPU
+# backends are byte-identical.
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 7bb9f22903be150bbbdec50b12437337b660242b
-    SHA512 2f88da4b0d9fc5a2817fa9758f64a5bc02f59e3a5e7032bbdbf77c65e11054b72e3d9e3b46ae5d2c71684af9c5930c99b224c4f6cd0ed12c9219ab7618a787ae
+    REF f5727c32d878edb47e097be4b48e669e23c6d847
+    SHA512 6624175aa35ac9954421e5286f9d9555b1d0c7597739bb12724c0097f0196acfef50b0fc879ae19f1bb7804034681a9694809d4f995a8ea4e889e01415eb7bcc
     HEAD_REF speech
 )
 
