@@ -120,20 +120,21 @@ if(VCPKG_TARGET_IS_ANDROID)
     )
 endif()
 
-# --- Vulkan backend include path ---
-# ggml-vulkan.cpp includes <spirv/unified1/spirv.hpp> from the spirv-headers
-# dependency, but vcpkg does not automatically thread the installed include dir
-# into ggml's per-backend compile commands, so the Vulkan backend fails to build
-# with "fatal error: 'spirv/unified1/spirv.hpp' file not found" (notably on
-# Android). Inject the installed include dir explicitly, mirroring qvac-fabric.
-if("vulkan" IN_LIST FEATURES AND NOT VCPKG_TARGET_IS_OSX AND NOT VCPKG_TARGET_IS_IOS)
-    if(VCPKG_TARGET_IS_WINDOWS AND NOT VCPKG_TARGET_IS_MINGW)
-        string(APPEND VCPKG_C_FLAGS " /I${CURRENT_INSTALLED_DIR}/include")
-        string(APPEND VCPKG_CXX_FLAGS " /I${CURRENT_INSTALLED_DIR}/include")
-    else()
-        string(APPEND VCPKG_C_FLAGS " -isystem ${CURRENT_INSTALLED_DIR}/include")
-        string(APPEND VCPKG_CXX_FLAGS " -isystem ${CURRENT_INSTALLED_DIR}/include")
-    endif()
+# --- Vulkan: wire spirv-headers into the ggml-vulkan target ---
+# src/ggml-vulkan/ggml-vulkan.cpp unconditionally includes
+# <spirv/unified1/spirv.hpp>, but the upstream ggml-vulkan CMakeLists.txt never
+# finds spirv-headers nor wires its include dir into the ggml-vulkan target, so
+# the Vulkan backend fails to build with "fatal error: 'spirv/unified1/spirv.hpp'
+# file not found" (notably on Android). Patch the CMakeLists to find the
+# spirv-headers dependency (declared in vcpkg.json's vulkan feature) and link its
+# imported target, which brings the include dir in scope for just that target.
+# TODO: push the equivalent fix upstream and drop this patch.
+if("vulkan" IN_LIST FEATURES)
+    vcpkg_apply_patches(
+        SOURCE_PATH "${SOURCE_PATH}"
+        PATCHES
+            "${CMAKE_CURRENT_LIST_DIR}/patches/0001-ggml-vulkan-find-spirv-headers.patch"
+    )
 endif()
 
 # --- Configure & build ---
