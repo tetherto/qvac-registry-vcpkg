@@ -12,8 +12,12 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 46921668 (PR #65
-# merged).  Layered on the previous 1cc2d383 pin (QVAC-21118 PR #62: chunk-
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 586268bf (PR #67
+# merged: QVAC-20557 run Chatterbox correctly on ARM Mali Vulkan via an
+# is_arm_mali-gated unfused CFM attention -- zero change off ARM Mali, CPU
+# output byte-identical).  Layered on the 46921668 pin (PR #65 merged,
+# QVAC-19557 S3TokenizerV2 host-mirror elimination, described above), the
+# 1cc2d383 pin (QVAC-21118 PR #62: chunk-
 # streaming CFM-step floor for the Multilingual standard 10-step CFM) and the
 # a679c7e7 pin (PR #43 merged):
 # QVAC-19557 chatterbox iOS-memory work — streamed GGUF tensor loads (no
@@ -45,8 +49,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 469216689265505d338511ea391eee76ae826906
-    SHA512 f1f9ec1af46f3aff4be03ddb3b973babb2e4c59d7f2c93cf69fa27e64fba80343069733a3070490380460955b49e5c2448fcbe902d6622a08ded70a7b8461122
+    REF 586268bfd8863b1b27e2e21305238d397921b747
+    SHA512 3922e709d034544e8e4c334c121a64f46ff4ee039997f6bb4cc9be4069cb4811e6eafe9b3ee991b1ba94b8b0d376c1d2990d48c7ab7ef7085650b64445f9e732
     HEAD_REF master
 )
 

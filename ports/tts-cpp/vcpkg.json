@@ -1,13 +1,13 @@
 {
   "name": "tts-cpp",
-  "version-date": "2026-06-24",
-  "description": "Text-to-speech inference in pure C++/ggml. Ships Resemble Chatterbox (Turbo + Multilingual variants) and Supertonic engines under a unified Engine API. Sourced from tetherto/qvac-ext-lib-whisper.cpp's tts-cpp/ subfolder. This pin (master HEAD 46921668, PR #65) brings QVAC-19557 S3TokenizerV2 host-mirror elimination: build_encoder_ctx streams the ~458 MB encoder weights straight from the GGUF into the backend buffer (8 MiB chunks, no host std::vector mirror), dropping the ~900 MB dual-residency that dominated the chatterbox first-synth peak — on-device the iOS first-test peak falls 3184->2772 MB (under the ~3 GB jetsam budget; weights bit-identical). Layered on 1cc2d383 (QVAC-21118 chunk-streaming CFM-step floor, PR #62), a679c7e7 (QVAC-19557 streamed GGUF loads + selectable KV-cache dtype, PR #43), and the b95ad447 base (QVAC-20616 EOS robustness PR #53 + QVAC-20557 Supertonic Android GPU PR #54). Consumes the ggml-speech port.",
+  "version-date": "2026-06-26",
+  "description": "Text-to-speech inference in pure C++/ggml. Ships Resemble Chatterbox (Turbo + Multilingual variants) and Supertonic engines under a unified Engine API. Sourced from tetherto/qvac-ext-lib-whisper.cpp's tts-cpp/ subfolder. This pin (master HEAD 586268bf, PR #67) brings QVAC-20557 run Chatterbox correctly on ARM Mali Vulkan via an is_arm_mali-gated unfused CFM attention (admits Chatterbox T3+S3Gen to Mali and routes the CFM attention to unfused soft_max+matmul there, fixing the f32 flash_attn_ext miscompute that drove f0 to NaN and broke the audio; zero change off ARM Mali, CPU output byte-identical). Layered on 46921668 (PR #65, QVAC-19557 S3TokenizerV2 host-mirror elimination: build_encoder_ctx streams the ~458 MB encoder weights straight from the GGUF into the backend buffer in 8 MiB chunks, no host std::vector mirror, dropping the ~900 MB dual-residency; weights bit-identical), 1cc2d383 (QVAC-21118 chunk-streaming CFM-step floor, PR #62), a679c7e7 (QVAC-19557 streamed GGUF loads + selectable KV-cache dtype, PR #43), and the b95ad447 base (QVAC-20616 EOS robustness PR #53 + QVAC-20557 Supertonic Android GPU PR #54). Consumes the ggml-speech port.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/tts-cpp",
   "license": "MIT",
   "dependencies": [
     {
       "name": "ggml-speech",
-      "version>=": "2026-06-15"
+      "version>=": "2026-06-26"
     },
     {
       "name": "vcpkg-cmake",
