@@ -2,6 +2,12 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# QVAC-21335 [TTS GGML] MeCab support for Chatterbox MTL Japanese
+# (qvac-ext-lib-whisper.cpp PR #72): tts-cpp detects vcpkg's include/mecab
+# header layout, guards MSVC builds against Windows min/max macros, and links
+# the mecab CMake target so static Windows builds propagate the right MeCab
+# compile definitions.
+#
 # QVAC-16579 [TTS GGML] LavaSR neural speech enhancement
 # (qvac-ext-lib-whisper.cpp PR #68): opt-in CPU/GGML post-process that
 # bandwidth-extends synthesized PCM to 48 kHz via the LavaSR Vocos enhancer
@@ -21,9 +27,12 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 4c8767a2 (PR #68
-# merged: QVAC-16579 LavaSR enhancer, described above -- exactly one commit
-# ahead of the prior 586268bf pin, so it carries the ARM Mali fix below).
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 28f37eae (PR #72
+# merged: QVAC-21335 MeCab support for Chatterbox MTL Japanese, described
+# above).
+# Layered on the 4c8767a2 pin (PR #68 merged: QVAC-16579 LavaSR enhancer,
+# described above -- exactly one commit ahead of the prior 586268bf pin, so it
+# carries the ARM Mali fix below).
 # Layered on the 586268bf pin (PR #67 merged: QVAC-20557 run Chatterbox
 # correctly on ARM Mali Vulkan via an is_arm_mali-gated unfused CFM attention
 # -- zero change off ARM Mali, CPU output byte-identical), the 46921668 pin
@@ -61,8 +70,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 4c8767a2cb98f91bb6dd8ce240cc5863231b1eb1
-    SHA512 760ab5282c4c27a445578cafb0e4647edabe1c218c00c332dea6207e402c6731a863774ab0dbc1e2846a482742632bf00d17b6b256090335a472fbf44bb54f3b
+    REF 28f37eae209efeb2859c013901d6ff341af97840
+    SHA512 b771171d0efdc3690fd0fd4d5c2724cb8cd00483f9a867648b2d973f2edd935f26dfe1ddec23f0bc73ce02b026dc7c5195337cb0bfb508add30fdd568c3d8684
     HEAD_REF master
 )
 

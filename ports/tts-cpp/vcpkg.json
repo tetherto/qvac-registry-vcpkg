@@ -1,7 +1,7 @@
 {
   "name": "tts-cpp",
-  "version-date": "2026-06-29",
-  "description": "Text-to-speech inference in pure C++/ggml. Ships Resemble Chatterbox (Turbo + Multilingual variants) and Supertonic engines under a unified Engine API. Sourced from tetherto/qvac-ext-lib-whisper.cpp's tts-cpp/ subfolder. This pin (master HEAD 4c8767a2, PR #68) adds QVAC-16579 LavaSR neural speech enhancement: an opt-in CPU/GGML post-process that bandwidth-extends synthesized PCM to 48 kHz via the LavaSR Vocos enhancer (ConvNeXt backbone + ISTFT spec head) converted to a single GGUF -- new public tts_cpp::lavasr::Enhancer API, DSP core (Lanczos resampler, STFT/ISTFT, Slaney mel, FastLR merge), f32+f16 GGUF loader, and onnxruntime-parity tests; the denoiser stage is a planned follow-up; fully backward compatible. Exactly one commit ahead of 586268bf, so it carries that ARM Mali fix. Layered on 586268bf (PR #67, QVAC-20557 run Chatterbox correctly on ARM Mali Vulkan via an is_arm_mali-gated unfused CFM attention; zero change off ARM Mali, CPU output byte-identical), 46921668 (PR #65, QVAC-19557 S3TokenizerV2 host-mirror elimination: build_encoder_ctx streams the ~458 MB encoder weights straight from the GGUF into the backend buffer in 8 MiB chunks, no host std::vector mirror, dropping the ~900 MB dual-residency; weights bit-identical), 1cc2d383 (QVAC-21118 chunk-streaming CFM-step floor, PR #62), a679c7e7 (QVAC-19557 streamed GGUF loads + selectable KV-cache dtype, PR #43), and the b95ad447 base (QVAC-20616 EOS robustness PR #53 + QVAC-20557 Supertonic Android GPU PR #54). Consumes the ggml-speech port.",
+  "version-date": "2026-06-30",
+  "description": "Text-to-speech inference in pure C++/ggml. Ships Resemble Chatterbox (Turbo + Multilingual variants) and Supertonic engines under a unified Engine API. Sourced from tetherto/qvac-ext-lib-whisper.cpp's tts-cpp/ subfolder. This pin (master HEAD 28f37eae, PR #72) adds QVAC-21335 MeCab build support for Chatterbox MTL Japanese preprocessing: vcpkg include/mecab header detection, MSVC NOMINMAX guard, and static Windows MeCab target linking. Layered on 4c8767a2 (PR #68, QVAC-16579 LavaSR enhancer), 586268bf (PR #67, QVAC-20557 ARM Mali Vulkan Chatterbox), 46921668 (PR #65, QVAC-19557 S3TokenizerV2 host-mirror elimination), 1cc2d383 (QVAC-21118 chunk-streaming CFM-step floor), a679c7e7 (QVAC-19557 streamed GGUF loads + selectable KV-cache dtype), and the b95ad447 base (QVAC-20616 EOS robustness PR #53 + QVAC-20557 Supertonic Android GPU PR #54). Consumes the ggml-speech and mecab ports.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/tts-cpp",
   "license": "MIT",
   "dependencies": [
@@ -9,6 +9,7 @@
       "name": "ggml-speech",
       "version>=": "2026-06-26"
     },
+    "mecab",
     {
       "name": "vcpkg-cmake",
       "host": true
