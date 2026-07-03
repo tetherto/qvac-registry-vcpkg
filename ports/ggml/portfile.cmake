@@ -12,7 +12,7 @@
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
 #   lib/libggml.a, lib/libggml-base.a, lib/libggml-cpu.a, …
-#   lib/cmake/ggml/  (CMake package config)
+#   share/ggml/      (CMake package config)
 #
 # GPU backend selection via vcpkg features:
 #   metal  -> GGML_METAL=ON  (macOS/iOS, default-feature on Apple platforms)
@@ -20,24 +20,28 @@
 #   cuda   -> GGML_CUDA=ON
 #   opencl -> GGML_OPENCL=ON
 
-# Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-06-06
+# Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-07-03
 # (REF pinned to that branch's tip commit for reproducibility).
 #
-# ae42bd74 is the tip of 2026-06-06 — the merge of #31 (2026-06-06-deps) into the
-# canonical 2026-06-06 line. #31 wires spirv-headers into the ggml-vulkan target
-# (find_package(SPIRV-Headers) + link the imported target) so the Vulkan backend
-# finds <spirv/unified1/spirv.hpp>; this replaces the package-local overlay patch.
-# On top of leejet/ggml v0.12.0 it carries the full merged compute set: the
-# reviewed Metal/video kernels (IM2COL_3D/PAD, fused Flux RoPE, direct conv2d),
-# the coopmat1 flash-attn f32-accumulation fixes, the ggml_graph_leaf/leafs/
-# n_leafs public API export, and the ggml_conv_1d/dw im2col-type fix (derive from
-# a->type like conv_2d) so F32 conv weights (e.g. LTX audio VAE) flow through the
-# F32 path instead of aborting on the CPU im2col_f16 F16 assert.
+# b84554ae is the tip of 2026-07-03 — a clone of the
+# 2026-06-06-on-fabric-ggml-adreno-teardown branch. On top of leejet/ggml
+# v0.12.0 it carries the full merged compute set: the reviewed Metal/video
+# kernels (IM2COL_3D/PAD, fused Flux RoPE, direct conv2d), the coopmat1
+# flash-attn f32-accumulation fixes, the ggml_graph_leaf/leafs/n_leafs public
+# API export, and the ggml_conv_1d/dw im2col-type fix (derive from a->type like
+# conv_2d) so F32 conv weights (e.g. LTX audio VAE) flow through the F32 path
+# instead of aborting on the CPU im2col_f16 F16 assert.
+#
+# This fabric-based branch also preserves qvac-fabric-llm.cpp's Adreno OpenCL
+# Q4_0 preallocated transpose-buffer path and serialized OpenCL SOA tensor
+# uploads, and cherry-picks e90151ab (ggml-opencl: release sub-buffers before
+# parent buffers on teardown) to fix the Adreno/QCOM Scudo "invalid chunk state"
+# abort on repeated Q4_0 load/unload cycles.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF ae42bd744155ce386a8f25e1972e43bc0cb5d773
-    SHA512 c488df7b1df38c640050e13eff2d5155b1f3e03411b06b75f6ff142f3a7b82bf0cd1cd83d9e487d39ca842b8f7b46de734d45b5e6c7bf9832637eee6737c1fe8
+    REF b84554ae3e7d1d292476c502c10c4e42b1f2ec1b
+    SHA512 00c35a020c515ceff6dbeba29cf1890912facbafbb4f81989969acfcfec84a3d99883ac9300e3c3c10cc4b650540e0e595541fac1d7415c66137fb1015d01f3f
 )
 
 # --- GPU feature flags ---
@@ -123,6 +127,10 @@ if(VCPKG_TARGET_IS_ANDROID)
 endif()
 
 # --- Configure & build ---
+# Only build Release. The fabric branch installs its CMake package config once
+# under share/ggml, matching the release-only consumers in this package family.
+set(VCPKG_BUILD_TYPE release)
+
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
@@ -148,6 +156,7 @@ vcpkg_cmake_install()
 # MODULE target but does NOT install them via cmake install().
 if(VCPKG_TARGET_IS_ANDROID)
     file(GLOB _backend_sos
+        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libqvac-diffusion-ggml-*.so"
         "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libqvac-ggml-*.so"
         "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libggml-*.so"
     )
@@ -157,7 +166,7 @@ if(VCPKG_TARGET_IS_ANDROID)
 endif()
 
 # Fix up the CMake package config installed by ggml's own build system.
-vcpkg_cmake_config_fixup(PACKAGE_NAME ggml CONFIG_PATH lib/cmake/ggml)
+vcpkg_cmake_config_fixup(PACKAGE_NAME ggml CONFIG_PATH share/ggml)
 
 # ggml installs a .pc to share/pkgconfig; move it to lib/pkgconfig and fix
 # absolute paths so vcpkg's post-build checks pass.

@@ -14,23 +14,29 @@
 # dynamically loaded backends.
 #
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
-# 2026-06-04 (REF pinned to the merge commit for reproducibility).
+# 2026-07-03 (REF pinned to the branch tip for reproducibility).
 #
-# 11717d2 is the tip of 2026-06-04 — the merge of #13 (2026-06-04-ltx) into the
-# 2026-06-04 base. The base carries the general qvac patches (vcpkg port
-# patches, ESRGAN upscaler device API, Wan 2.1 I2V VAE tiling fix), while the
-# merged -ltx delta adds fused Flux RoPE, the ggml public leaf-API migration,
-# the CLI GPU-default tweak, and the MSVC /bigobj fix for C1128.
+# 385c3326 is the tip of 2026-07-03 — a clone of 2026-06-04-ltx: the merge of
+# #13 (2026-06-04-ltx) into the 2026-06-04 base. The base carries the general
+# qvac patches (vcpkg port patches, ESRGAN upscaler device API, Wan 2.1 I2V VAE
+# tiling fix), while the merged -ltx delta adds fused Flux RoPE, the ggml public
+# leaf-API migration, the CLI GPU-default tweak, the MSVC /bigobj fix for C1128,
+# and exposes sd_ctx_params_t::backend for explicit backend pinning.
 #
 # The vendored ggml submodule is kept on the -ltx branch for standalone
 # (non-vcpkg) builds (SD_USE_SYSTEM_GGML defaults to OFF there), but this port
 # builds with -DSD_USE_SYSTEM_GGML=ON so ggml is provided by the vcpkg ggml port
-# (tetherto/qvac-ext-ggml@2026-06-06).
+# (tetherto/qvac-ext-ggml@2026-07-03).
+#
+# resolve-backend-registry-alias.patch lets sd_resolve_backend_name() match a
+# backend by its ggml registry name (e.g. "Vulkan0") in addition to device type.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 11717d225f13eb21f0a7fe5c8c5c7d733b1203a7
-    SHA512 554e9f51fa63ab0a528f7c33cfd8823144fd8ea36f7a2d4e8388adb5bb554e08fa7d66d989f1a26eee7ebdf6276bf0c0a9eacf9f4fe13bba676350e78dc3a8fd
+    REF 385c33265a4d8c535180849e95ac1e67733c9f1f
+    SHA512 13a7ae0d533a9e75ce630253ffa3151152a3f4aa1679e0d7370d290055c0f6a37b6d6700b477ac01c769cba826624615e0adf485478000497843961b763d78f0
+    PATCHES
+        resolve-backend-registry-alias.patch
 )
 
 set(SD_FLASH_ATTN OFF)
