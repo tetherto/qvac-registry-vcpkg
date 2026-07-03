@@ -1,15 +1,16 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD f5727c32 (merge of PR #30,
-# QVAC-20557 ggml-cpu: fix the SVE ggml_vec_dot_f32 leftover-tail accumulator
-# drop, svmad_f32_m -> svmla_f32_m). Removes the ~12 kHz Nyquist comb the SVE
-# HiFT/ISTFT conv_transpose_1d inner dot produced on Tensor/Pixel CPU. Bumps
-# the speech-stack ggml pin from 7bb9f229; NEON/x86/RISC-V and all non-CPU
-# backends are byte-identical.
+# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 11581cd5 (merge of PR #35,
+# QVAC-21617 ggml-vulkan: optimize parakeet/whisper Vulkan on ARM Mali). Two
+# ARM/Mali-gated changes: disable KHR_cooperative_matrix (Mali's coopmat matmul
+# is ~5x slower than the scalar path for our encoder shapes) and use the medium
+# (64x64) matmul tile instead of large (128x128) on ARM (few shader cores leave
+# tall-K/small-N GEMMs underutilized). Bumps the speech-stack ggml pin from
+# f5727c32; off ARM (desktop NVIDIA/AMD/Intel, Adreno, Apple) byte-identical.
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF f5727c32d878edb47e097be4b48e669e23c6d847
-    SHA512 6624175aa35ac9954421e5286f9d9555b1d0c7597739bb12724c0097f0196acfef50b0fc879ae19f1bb7804034681a9694809d4f995a8ea4e889e01415eb7bcc
+    REF 11581cd56162606d678aca58a7fbc0013bcd228d
+    SHA512 27d15be0fab79aaeec942f5e4889a7d42d46fe6689360c8cc152fb5c74f1643b8e6ce30e090d0c01bb6a0a4a5c38dd137852f2e5cdc35c154c997f722e576268
     HEAD_REF speech
 )
 
