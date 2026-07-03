@@ -22,7 +22,7 @@
     },
     "ggml": {
       "baseline": "2026-07-03",
-      "port-version": 0
+      "port-version": 1
     },
     "ggml-speech": {
       "baseline": "2026-07-03",
@@ -106,7 +106,7 @@
     },
     "stable-diffusion-cpp": {
       "baseline": "2026-07-03",
-      "port-version": 0
+      "port-version": 1
     },
     "tokenizers-cpp": {
       "baseline": "0.1.1",
