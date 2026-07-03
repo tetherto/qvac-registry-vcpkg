@@ -2,6 +2,20 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# QVAC-16579 [TTS GGML] LavaSR denoiser forward (UL-UNAS)
+# (qvac-ext-lib-whisper.cpp PR #78): implements the second LavaSR stage scaffolded
+# in PR #76 -- the UL-UNAS GRU U-Net denoiser that cleans noisy speech before the
+# Vocos enhancer bandwidth-extends it. tts_cpp::lavasr::Denoiser::load() +
+# denoise() now run the full CPU/GGML forward: ERB-band feature encoder, grouped
+# depthwise-separable conv encoder/decoder with affine PReLU, a DPGRNN dual-path
+# grouped-GRU bottleneck, and causal time-frequency attention, wrapped by the
+# StftProcessor STFT/ISTFT + 63-frame / 21-hop squared-Hann overlap-add pipeline.
+# Ships the f32 + f16 GGUF loader, the ONNX->GGUF converter (now with fail-fast
+# topology + source-md5 provenance checks), and onnxruntime parity tests at both
+# the neural-core (spec->spec) and full-pipeline (pcm->pcm) levels. Backward
+# compatible: with no denoiser config the output is byte-identical to the prior
+# pin. This activates the denoiser slot the tts-ggml addon already wires.
+#
 # QVAC-21783 [TTS GGML] Chatterbox MTL Chinese (zh) support
 # (qvac-ext-lib-whisper.cpp PR #77): add "zh" to
 # mtl_tokenizer::supported_languages() so Chatterbox MTL accepts Chinese
@@ -60,10 +74,14 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 9ea1a5e0 (PR #77
-# merged: QVAC-21783 Chatterbox MTL Chinese (zh) support, described above --
-# exactly one commit ahead of the d149258 pin (PR #71, QVAC-19557 chatterbox-mtl
-# Metal q8 KV-on-GPU real fix), which it carries).
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 6c64f18f (PR #78
+# merged: QVAC-16579 LavaSR denoiser forward, described above -- exactly one
+# commit ahead of the 9ea1a5e0 pin (PR #77, QVAC-21783 Chatterbox MTL Chinese
+# (zh) support), which it carries).
+# Layered on the 9ea1a5e0 pin (PR #77 merged: QVAC-21783 Chatterbox MTL Chinese
+# (zh) support, described above -- exactly one commit ahead of the d149258 pin
+# (PR #71, QVAC-19557 chatterbox-mtl Metal q8 KV-on-GPU real fix), which it
+# carries).
 # Layered on the 032cee10 pin (PR #76 merged: QVAC-16579 LavaSR denoiser
 # scaffold, described above).
 # Layered on the ce9ee96f pin (PR #69 merged: QVAC-21483 output-frequency
@@ -114,8 +132,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 9ea1a5e0d2fa88df8e400c8a30b3a7b794bd8738
-    SHA512 bdd83c188742c4b1236e8d2d3d6d6623a36b2d61f6c7d901791e7d72ac2ff14dc68151d88c02115850bfdf82e1b742102ce1dfe039c4424fb655f3f5c547506d
+    REF 6c64f18fb22dc3d1a05672bb3d211370f4b5f5ae
+    SHA512 30519cdba2f443dc92a6538d4af2b1a380c9c2b2eca1a785b9cbcce7546c0a95738ee215c9eb642d0466f3fe374decda3cc58b69095047a5ffc2a860e0baaaa1
     HEAD_REF master
 )
 
