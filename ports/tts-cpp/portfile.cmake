@@ -2,6 +2,17 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# QVAC-21783 [TTS GGML] Chatterbox MTL Chinese (zh) support
+# (qvac-ext-lib-whisper.cpp PR #77): add "zh" to
+# mtl_tokenizer::supported_languages() so Chatterbox MTL accepts Chinese
+# instead of rejecting it at load ("language 'zh' not in the multilingual
+# tokenizer's tier-1 set"). Chinese now flows through the existing Cangjie
+# (hanzi -> code) preprocessing path; encode() throws a clear error if zh is
+# enabled without a Cangjie5_TC TSV (cangjie_tsv_path / CHATTERBOX_CANGJIE_TSV),
+# so misconfiguration fails loudly rather than silently degrading. Test-only
+# CMake wiring registers the zh multilingual synth case when the Cangjie TSV is
+# present. Zero behaviour change for the other languages / non-zh callers.
+#
 # QVAC-16579 [TTS GGML] LavaSR denoiser stage (scaffold)
 # (qvac-ext-lib-whisper.cpp PR #76): lands the file/API structure for the second
 # LavaSR stage -- the UL-UNAS GRU U-Net denoiser that cleans noisy input before
@@ -49,8 +60,12 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 032cee10 (PR #76
-# merged: QVAC-16579 LavaSR denoiser scaffold, described above).
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 9ea1a5e0 (PR #77
+# merged: QVAC-21783 Chatterbox MTL Chinese (zh) support, described above --
+# exactly one commit ahead of the d149258 pin (PR #71, QVAC-19557 chatterbox-mtl
+# Metal q8 KV-on-GPU real fix), which it carries).
+# Layered on the 032cee10 pin (PR #76 merged: QVAC-16579 LavaSR denoiser
+# scaffold, described above).
 # Layered on the ce9ee96f pin (PR #69 merged: QVAC-21483 output-frequency
 # selection, described above -- three commits back; in between master also took
 # the whisper.cpp v1.9.1 upstream sync (PR #73, QVAC-21582) and a parakeet-cpp
@@ -99,8 +114,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF d149258cfbf6da8740f8e83677db5a0cd7c778eb
-    SHA512 6c90cd361acf73f8a927c75fb6d496aef9fae3fd509f3b307926c54bb2ad560d4f8d6a11a587a8dd184e9a503cab30e6098155b56c7e2570cbe4685ef73d4319
+    REF 9ea1a5e0d2fa88df8e400c8a30b3a7b794bd8738
+    SHA512 bdd83c188742c4b1236e8d2d3d6d6623a36b2d61f6c7d901791e7d72ac2ff14dc68151d88c02115850bfdf82e1b742102ce1dfe039c4424fb655f3f5c547506d
     HEAD_REF master
 )
 
