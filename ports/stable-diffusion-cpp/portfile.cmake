@@ -16,9 +16,9 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # 2026-07-03 (REF pinned to the branch tip for reproducibility).
 #
-# 17f731c is the tip of qvac/slim-tokenizer-assets — 2026-07-03 plus one
-# size-reduction commit that stops embedding unused Gemma2/GPT-OSS tokenizer
-# vocab assets in static QVAC diffusion-cpp prebuilds.
+# 5832f9a is the tip of 2026-07-03 after merging the size-reduction change
+# that stops embedding unused Gemma2/GPT-OSS tokenizer vocab assets in static
+# QVAC diffusion-cpp prebuilds.
 #
 # fe394ca was the tip of 2026-07-03 — 2026-06-04-ltx (the merge of #13 into the
 # 2026-06-04 base) plus one commit. The base carries the general qvac patches
@@ -36,8 +36,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 17f731cfb2dd00cf8e0a58bab0e438e074cbbe97
-    SHA512 a680917b01113c8828510aab210de2b3a810020a9e99ad7d33185778bf56e0bdd551b8fe525d15085f344330ed2ef77b464aec60f8d536de0800c1beb906f384
+    REF 5832f9ac192d12c115aa7cf0b3838d6148a61828
+    SHA512 f2ec4302a2a38a5de1131535136c49fb5bfb3116d0db95f2cbef24d537b5e0d03857a5362ab9bb30a338537a3378e895b80c2370a925b9165581a3b4c361eed3
 )
 
 set(SD_FLASH_ATTN OFF)

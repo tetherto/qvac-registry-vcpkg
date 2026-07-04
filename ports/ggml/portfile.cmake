@@ -23,9 +23,9 @@
 # Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-07-03
 # (REF pinned to that branch's tip commit for reproducibility).
 #
-# 665ead5 is the tip of qvac/slim-vulkan-shader-assets — 2026-07-03 plus one
-# size-reduction commit that defaults Adreno Vulkan shaders to Android-only and
-# replaces unused TBQ/PQ shader payloads with no-op bodies.
+# b0d6be4 is the tip of 2026-07-03 after merging the size-reduction change
+# that defaults Adreno Vulkan shaders to Android-only and replaces unused
+# TBQ/PQ shader payloads with no-op bodies.
 #
 # b84554ae was the tip of 2026-07-03 — a clone of the
 # 2026-06-06-on-fabric-ggml-adreno-teardown branch. On top of leejet/ggml
@@ -44,8 +44,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 665ead58a9ea13e04e1643ecc200b36bb137ea1b
-    SHA512 3152968df09e99c7344095b1fa36346268da1a2a2f1572439eb9dacbe5cf70eb0d87dcf2582049b9227449fcb2fb58cba4f207b6e3b35648db1e343b246d1c74
+    REF b0d6be4fc8059985852bdc3cd5fe00271f30db1d
+    SHA512 fab67416e60239dbcc9b34ed66bfc4310b55171528be3d283bac6117e936caf990f70a77a15850ce1983991c34f959aa858e33bdd5f7502e28257f819deb032e
 )
 
 # --- GPU feature flags ---
