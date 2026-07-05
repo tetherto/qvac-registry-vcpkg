@@ -23,7 +23,10 @@
 # Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-07-03
 # (REF pinned to that branch's tip commit for reproducibility).
 #
-# b0d6be4 is the tip of 2026-07-03 after merging the size-reduction change
+# 9089ce6 extends the size-reduction shader filter to also replace unused
+# TQ1/TQ2/MXFP4/NVFP4 Vulkan shader payloads with no-op bodies.
+#
+# b0d6be4 was the tip of 2026-07-03 after merging the size-reduction change
 # that defaults Adreno Vulkan shaders to Android-only and replaces unused
 # TBQ/PQ shader payloads with no-op bodies.
 #
@@ -44,8 +47,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF b0d6be4fc8059985852bdc3cd5fe00271f30db1d
-    SHA512 fab67416e60239dbcc9b34ed66bfc4310b55171528be3d283bac6117e936caf990f70a77a15850ce1983991c34f959aa858e33bdd5f7502e28257f819deb032e
+    REF 9089ce63e8bfcedf2ad2226032b8eb2627b42e14
+    SHA512 eca4f8de7bee47848b629fe7f230f546823dd4f68bfba35762607b109b6cf8bbd82734dac46e7219eef61313ad49ac426b1fe703593a9c8346cf5f637ae6a8ee
 )
 
 # --- GPU feature flags ---
