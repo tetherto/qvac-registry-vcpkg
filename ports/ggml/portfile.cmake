@@ -23,6 +23,9 @@
 # Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-07-03
 # (REF pinned to that branch's tip commit for reproducibility).
 #
+# 50cf563 is the 2026-07-03 branch head after merging the size-reduction
+# commits below.
+#
 # ea8cf04 extends the size-reduction shader filter to also replace unused
 # Vulkan training, backward, loss, and outer-product shader payloads with
 # no-op bodies.
@@ -51,8 +54,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF ea8cf042a3934c04b935331243c9ef8b5b4ff84e
-    SHA512 08fc8cfe6f1064d79325e90bfacfbcd18e356a75d29fea68134d1e77e652ab275efa62b72949145d41a7ac9480181a31d39bc5ebcdbbb698432cc3cc9e1dbe51
+    REF 50cf5630ac66c2d8584cd1299b1c89c684fc82d9
+    SHA512 a98bb4042f858652aecf0fec7682d456e503140e2e9d92a0b7ba84ac7204cb9287066a73dabb0da5b950c3a0a80886476f6670734e0921e3fed620d555cbbe90
 )
 
 # --- GPU feature flags ---
