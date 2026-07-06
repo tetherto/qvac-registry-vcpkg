@@ -1,6 +1,7 @@
 {
   "name": "whisper-cpp",
   "version": "1.9.1",
+  "port-version": 1,
   "description": "High-performance inference of OpenAI's Whisper automatic speech recognition (ASR) model",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp",
   "license": "MIT",
@@ -8,7 +9,7 @@
     {
       "name": "ggml-speech",
       "default-features": false,
-      "version>=": "2026-06-26"
+      "version>=": "2026-07-03"
     },
     {
       "name": "vcpkg-cmake",

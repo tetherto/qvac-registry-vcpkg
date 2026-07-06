@@ -14,23 +14,30 @@
 # dynamically loaded backends.
 #
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
-# 2026-06-04 (REF pinned to the merge commit for reproducibility).
+# 2026-07-03 (REF pinned to the branch tip for reproducibility).
 #
-# 11717d2 is the tip of 2026-06-04 — the merge of #13 (2026-06-04-ltx) into the
-# 2026-06-04 base. The base carries the general qvac patches (vcpkg port
-# patches, ESRGAN upscaler device API, Wan 2.1 I2V VAE tiling fix), while the
-# merged -ltx delta adds fused Flux RoPE, the ggml public leaf-API migration,
-# the CLI GPU-default tweak, and the MSVC /bigobj fix for C1128.
+# 5832f9a is the tip of 2026-07-03 after merging the size-reduction change
+# that stops embedding unused Gemma2/GPT-OSS tokenizer vocab assets in static
+# QVAC diffusion-cpp prebuilds.
+#
+# fe394ca was the tip of 2026-07-03 — 2026-06-04-ltx (the merge of #13 into the
+# 2026-06-04 base) plus one commit. The base carries the general qvac patches
+# (vcpkg port patches, ESRGAN upscaler device API, Wan 2.1 I2V VAE tiling fix),
+# while the merged -ltx delta adds fused Flux RoPE, the ggml public leaf-API
+# migration, the CLI GPU-default tweak, the MSVC /bigobj fix for C1128, and
+# exposes sd_ctx_params_t::backend for explicit backend pinning. The extra commit
+# lets sd_resolve_backend_name() match a backend by its ggml registry name (e.g.
+# "Vulkan0") in addition to device type.
 #
 # The vendored ggml submodule is kept on the -ltx branch for standalone
 # (non-vcpkg) builds (SD_USE_SYSTEM_GGML defaults to OFF there), but this port
 # builds with -DSD_USE_SYSTEM_GGML=ON so ggml is provided by the vcpkg ggml port
-# (tetherto/qvac-ext-ggml@2026-06-06).
+# (tetherto/qvac-ext-ggml@2026-07-03).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 11717d225f13eb21f0a7fe5c8c5c7d733b1203a7
-    SHA512 554e9f51fa63ab0a528f7c33cfd8823144fd8ea36f7a2d4e8388adb5bb554e08fa7d66d989f1a26eee7ebdf6276bf0c0a9eacf9f4fe13bba676350e78dc3a8fd
+    REF 5832f9ac192d12c115aa7cf0b3838d6148a61828
+    SHA512 f2ec4302a2a38a5de1131535136c49fb5bfb3116d0db95f2cbef24d537b5e0d03857a5362ab9bb30a338537a3378e895b80c2370a925b9165581a3b4c361eed3
 )
 
 set(SD_FLASH_ATTN OFF)
