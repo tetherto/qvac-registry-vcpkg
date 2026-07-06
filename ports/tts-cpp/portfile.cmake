@@ -2,7 +2,7 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# QVAC-16579 [TTS GGML] LavaSR denoiser forward (UL-UNAS)
+# [TTS GGML] LavaSR denoiser forward (UL-UNAS)
 # (qvac-ext-lib-whisper.cpp PR #78): implements the second LavaSR stage scaffolded
 # in PR #76 -- the UL-UNAS GRU U-Net denoiser that cleans noisy speech before the
 # Vocos enhancer bandwidth-extends it. tts_cpp::lavasr::Denoiser::load() +
@@ -16,7 +16,7 @@
 # compatible: with no denoiser config the output is byte-identical to the prior
 # pin. This activates the denoiser slot the tts-ggml addon already wires.
 #
-# QVAC-21783 [TTS GGML] Chatterbox MTL Chinese (zh) support
+# [TTS GGML] Chatterbox MTL Chinese (zh) support
 # (qvac-ext-lib-whisper.cpp PR #77): add "zh" to
 # mtl_tokenizer::supported_languages() so Chatterbox MTL accepts Chinese
 # instead of rejecting it at load ("language 'zh' not in the multilingual
@@ -27,7 +27,7 @@
 # CMake wiring registers the zh multilingual synth case when the Cangjie TSV is
 # present. Zero behaviour change for the other languages / non-zh callers.
 #
-# QVAC-16579 [TTS GGML] LavaSR denoiser stage (scaffold)
+# [TTS GGML] LavaSR denoiser stage (scaffold)
 # (qvac-ext-lib-whisper.cpp PR #76): lands the file/API structure for the second
 # LavaSR stage -- the UL-UNAS GRU U-Net denoiser that cleans noisy input before
 # the Vocos enhancer bandwidth-extends it. New public API
@@ -39,7 +39,7 @@
 # pin. This publishes the symbols so the tts-ggml addon can wire the denoiser
 # slot ahead of the implementation.
 #
-# QVAC-21483 [TTS GGML] output-frequency selection
+# [TTS GGML] output-frequency selection
 # (qvac-ext-lib-whisper.cpp PR #69): EngineOptions::output_sample_rate on both
 # the Chatterbox and Supertonic engines (plus the public tts_cpp resampler and
 # CLI flags). The vocoder still emits at the model's native rate; when a
@@ -49,13 +49,13 @@
 # drift. 0 keeps the native rate (zero behaviour change). This is the engine API
 # the tts-ggml addon calls to honour the SDK output-rate option.
 #
-# QVAC-21335 [TTS GGML] MeCab support for Chatterbox MTL Japanese
+# [TTS GGML] MeCab support for Chatterbox MTL Japanese
 # (qvac-ext-lib-whisper.cpp PR #72): tts-cpp detects vcpkg's include/mecab
 # header layout, guards MSVC builds against Windows min/max macros, and links
 # the mecab CMake target so static Windows builds propagate the right MeCab
 # compile definitions.
 #
-# QVAC-16579 [TTS GGML] LavaSR neural speech enhancement
+# [TTS GGML] LavaSR neural speech enhancement
 # (qvac-ext-lib-whisper.cpp PR #68): opt-in CPU/GGML post-process that
 # bandwidth-extends synthesized PCM to 48 kHz via the LavaSR Vocos enhancer
 # (ConvNeXt backbone + ISTFT spec head), converted to a single GGUF. New public
@@ -64,7 +64,7 @@
 # and onnxruntime-parity tests. Backward compatible: with no enhancer config the
 # output is byte-identical to the prior pin. The denoiser stage is a follow-up.
 #
-# QVAC-19557 [TTS GGML] S3TokenizerV2 host-mirror elimination
+# [TTS GGML] S3TokenizerV2 host-mirror elimination
 # (qvac-ext-lib-whisper.cpp PR #65): the voice-conditioning bake loaded the
 # S3TokenizerV2 encoder weights (~458 MB F32) into a host std::vector mirror AND
 # the backend (Metal) weight buffer at once (~900 MB dual-resident), the
@@ -75,48 +75,48 @@
 # (under the ~3 GB budget); warm tests unchanged.
 #
 # Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 6c64f18f (PR #78
-# merged: QVAC-16579 LavaSR denoiser forward, described above -- exactly one
-# commit ahead of the 9ea1a5e0 pin (PR #77, QVAC-21783 Chatterbox MTL Chinese
+# merged: LavaSR denoiser forward, described above -- exactly one
+# commit ahead of the 9ea1a5e0 pin (PR #77, Chatterbox MTL Chinese
 # (zh) support), which it carries).
-# Layered on the 9ea1a5e0 pin (PR #77 merged: QVAC-21783 Chatterbox MTL Chinese
+# Layered on the 9ea1a5e0 pin (PR #77 merged: Chatterbox MTL Chinese
 # (zh) support, described above -- exactly one commit ahead of the d149258 pin
-# (PR #71, QVAC-19557 chatterbox-mtl Metal q8 KV-on-GPU real fix), which it
+# (PR #71, chatterbox-mtl Metal q8 KV-on-GPU real fix), which it
 # carries).
-# Layered on the 032cee10 pin (PR #76 merged: QVAC-16579 LavaSR denoiser
+# Layered on the 032cee10 pin (PR #76 merged: LavaSR denoiser
 # scaffold, described above).
-# Layered on the ce9ee96f pin (PR #69 merged: QVAC-21483 output-frequency
+# Layered on the ce9ee96f pin (PR #69 merged: output-frequency
 # selection, described above -- three commits back; in between master also took
-# the whisper.cpp v1.9.1 upstream sync (PR #73, QVAC-21582) and a parakeet-cpp
-# ggml_backend_sched compute-routing change (PR #74, QVAC-18192), neither of
+# the whisper.cpp v1.9.1 upstream sync (PR #73) and a parakeet-cpp
+# ggml_backend_sched compute-routing change (PR #74), neither of
 # which touches the tts-cpp public API or CMake target).
-# Layered on the 28f37eae pin (PR #72 merged: QVAC-21335 MeCab support for
+# Layered on the 28f37eae pin (PR #72 merged: MeCab support for
 # Chatterbox MTL Japanese, described above -- exactly one commit behind, so it
 # carries the MeCab support).
-# Layered on the 4c8767a2 pin (PR #68 merged: QVAC-16579 LavaSR enhancer,
+# Layered on the 4c8767a2 pin (PR #68 merged: LavaSR enhancer,
 # described above -- exactly one commit ahead of the prior 586268bf pin, so it
 # carries the ARM Mali fix below).
-# Layered on the 586268bf pin (PR #67 merged: QVAC-20557 run Chatterbox
+# Layered on the 586268bf pin (PR #67 merged: run Chatterbox
 # correctly on ARM Mali Vulkan via an is_arm_mali-gated unfused CFM attention
 # -- zero change off ARM Mali, CPU output byte-identical), the 46921668 pin
 # (PR #65 merged,
-# QVAC-19557 S3TokenizerV2 host-mirror elimination, described above), the
-# 1cc2d383 pin (QVAC-21118 PR #62: chunk-
+# S3TokenizerV2 host-mirror elimination, described above), the
+# 1cc2d383 pin (PR #62: chunk-
 # streaming CFM-step floor for the Multilingual standard 10-step CFM) and the
 # a679c7e7 pin (PR #43 merged):
-# QVAC-19557 chatterbox iOS-memory work — streamed GGUF tensor loads (no
+# chatterbox iOS-memory work — streamed GGUF tensor loads (no
 # full-file host staging), selectable chatterbox KV-cache dtype
 # (EngineOptions::kv_cache_type = f32|f16|q8_0) on a token-major slab with a
 # load-time capability probe + F32 fallback and a Vulkan q8_0->f32 guard.
 #
-# Layered on the previous b95ad447 pin (QVAC-19305 Supertonic v3 PR #42 base),
+# Layered on the previous b95ad447 pin (Supertonic v3 PR #42 base),
 # which brought the two TTS-relevant master merges:
-#   - QVAC-20616 [TTS GGML] end-of-speech robustness (PR #53): alignment-based
+# - [TTS GGML] end-of-speech robustness (PR #53): alignment-based
 #     EOS stop (ports the AlignmentStreamAnalyzer cross-attention signal via an
 #     in-graph attention probe) plus a heuristic stop controller (EOS
 #     confidence, n-gram repetition, text-length budget) and per-language
 #     calibration, so the Chatterbox multilingual model stops at end-of-
 #     utterance instead of rambling for ~20s of random tokens past the text.
-#   - QVAC-20557 Supertonic Android GPU (PR #54): Adreno OpenCL + Xclipse/Mali
+# - Supertonic Android GPU (PR #54): Adreno OpenCL + Xclipse/Mali
 #     Vulkan. This also reroutes Supertonic's direct CPU-backend calls that are
 #     unlinkable under GGML_BACKEND_DL=ON --
 #     ggml_get_type_traits_cpu()->from_float -> ggml_quantize_chunk()

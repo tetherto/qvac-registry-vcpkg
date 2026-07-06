@@ -3,7 +3,7 @@
 # consumes the ggml-speech port.
 #
 # Pinned at master HEAD b95ad447, layered on top of the previous 1c75d6e9 pin
-# (QVAC-19253 Adreno-Vulkan, PR #41). Brings QVAC-20556 Parakeet on Mali-Vulkan
+# (Adreno-Vulkan, PR #41). Brings Parakeet on Mali-Vulkan
 # GPU (PR #51): encoder reformulation (broadcast mul_mat -> mul + sum_rows) plus
 # the Sortformer head on CPU with CPU-resident weight copies. Same master commit
 # and archive SHA512 as the tts-cpp port (2026-06-18 / b95ad447).

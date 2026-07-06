@@ -1,5 +1,5 @@
 # whisper-cpp: pinned at tetherto/qvac-ext-lib-whisper.cpp@master
-# cb91a378 (QVAC-21582 — Pull latest from upstream whisper.cpp (v1.9.1) (#73)).
+# cb91a378 (Pull latest from upstream whisper.cpp (v1.9.1) (#73)).
 # This port moves together with parakeet-cpp and tts-cpp so all three registry
 # ports source the same master commit and the same archive SHA512.
 #

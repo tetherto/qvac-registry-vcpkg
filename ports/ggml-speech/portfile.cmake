@@ -1,5 +1,5 @@
 # ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 11581cd5 (merge of PR #35,
-# QVAC-21617 ggml-vulkan: optimize parakeet/whisper Vulkan on ARM Mali). Two
+# ggml-vulkan: optimize parakeet/whisper Vulkan on ARM Mali). Two
 # ARM/Mali-gated changes: disable KHR_cooperative_matrix (Mali's coopmat matmul
 # is ~5x slower than the scalar path for our encoder shapes) and use the medium
 # (64x64) matmul tile instead of large (128x128) on ARM (few shader cores leave
