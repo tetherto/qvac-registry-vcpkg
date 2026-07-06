@@ -11,7 +11,7 @@
 #
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
-#   lib/libggml.a, lib/libggml-base.a, lib/libggml-cpu.a, …
+#   lib/libggml.a, lib/libggml-base.a, lib/libggml-cpu.a, ...
 #   share/ggml/      (CMake package config)
 #
 # GPU backend selection via vcpkg features:
@@ -23,14 +23,18 @@
 # Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-07-03
 # (REF pinned to that branch's tip commit for reproducibility).
 #
-# 9089ce6 extends the size-reduction shader filter to also replace unused
-# TQ1/TQ2/MXFP4/NVFP4 Vulkan shader payloads with no-op bodies.
+# ea8cf04 extends the size-reduction shader filter to also replace unused
+# Vulkan training, backward, loss, and outer-product shader payloads with
+# no-op bodies.
+#
+# 9089ce6 replaced unused TQ1/TQ2/MXFP4/NVFP4 Vulkan shader payloads with
+# no-op bodies.
 #
 # b0d6be4 was the tip of 2026-07-03 after merging the size-reduction change
 # that defaults Adreno Vulkan shaders to Android-only and replaces unused
 # TBQ/PQ shader payloads with no-op bodies.
 #
-# b84554ae was the tip of 2026-07-03 — a clone of the
+# b84554ae was the tip of 2026-07-03 - a clone of the
 # 2026-06-06-on-fabric-ggml-adreno-teardown branch. On top of leejet/ggml
 # v0.12.0 it carries the full merged compute set: the reviewed Metal/video
 # kernels (IM2COL_3D/PAD, fused Flux RoPE, direct conv2d), the coopmat1
@@ -47,8 +51,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 9089ce63e8bfcedf2ad2226032b8eb2627b42e14
-    SHA512 eca4f8de7bee47848b629fe7f230f546823dd4f68bfba35762607b109b6cf8bbd82734dac46e7219eef61313ad49ac426b1fe703593a9c8346cf5f637ae6a8ee
+    REF ea8cf042a3934c04b935331243c9ef8b5b4ff84e
+    SHA512 08fc8cfe6f1064d79325e90bfacfbcd18e356a75d29fea68134d1e77e652ab275efa62b72949145d41a7ac9480181a31d39bc5ebcdbbb698432cc3cc9e1dbe51
 )
 
 # --- GPU feature flags ---
@@ -69,7 +73,7 @@ set(GGML_CUDA_COMPILER_OPTION "")
 
 if("cuda" IN_LIST FEATURES)
     set(GGML_CUDA ON)
-    # Locate nvcc explicitly — /usr/local/cuda/bin may not be on the PATH that
+    # Locate nvcc explicitly - /usr/local/cuda/bin may not be on the PATH that
     # vcpkg's isolated cmake process inherits.
     find_program(NVCC_EXECUTABLE nvcc
         PATHS /usr/local/cuda/bin /usr/local/cuda-12.8/bin
@@ -121,7 +125,7 @@ if(VCPKG_TARGET_IS_IOS)
 endif()
 
 # Hybrid backend mode for Android: GPU backends (Vulkan, OpenCL) are MODULE
-# .so files loaded at runtime via dlopen — no libOpenCL.so NEEDED dependency.
+# .so files loaded at runtime via dlopen - no libOpenCL.so NEEDED dependency.
 # The CPU backend is statically linked (GGML_CPU_STATIC) so that SD can call
 # ggml_set_f32, ggml_backend_cpu_init, etc. directly at link time.
 if(VCPKG_TARGET_IS_ANDROID)
