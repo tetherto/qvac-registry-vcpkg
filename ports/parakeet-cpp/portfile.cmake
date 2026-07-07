@@ -2,11 +2,14 @@
 # Sourced from the parakeet-cpp/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master HEAD b95ad447, layered on top of the previous 1c75d6e9 pin
-# (Adreno-Vulkan, PR #41). Brings Parakeet on Mali-Vulkan
-# GPU (PR #51): encoder reformulation (broadcast mul_mat -> mul + sum_rows) plus
-# the Sortformer head on CPU with CPU-resident weight copies. Same master commit
-# and archive SHA512 as the tts-cpp port (2026-06-18 / b95ad447).
+# Pinned at master HEAD 1d9ca83, layered on top of the previous b95ad447 pin
+# (Mali-Vulkan, PR #51). Routes Parakeet compute through a shared
+# ggml_backend_sched with the CPU backend last (PR #74): encoder, subsampling
+# and the Sortformer head gain per-op CPU fallback for ops the active GPU
+# backend cannot run; the cached encoder graph stays on a persistent gallocr
+# (Adreno cached-graph reuse) and the TDT decoder stays on direct compute.
+# Same master commit and archive SHA512 as the tts-cpp port (2026-07-06 /
+# 1d9ca83).
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -14,8 +17,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF b95ad4472dcd414ea88597e562d37efd53227ebc
-    SHA512 81fefc90352c9f69bcd82c84aeb0d2333e21496796cc6288907dda21fbc20ac0e42225f686c857c5abadf3067bf7fb6eac750ba31a48df731486fce92dbaa1dd
+    REF 1d9ca83be9ef37bec7a9e2738adb0033ca01739b
+    SHA512 c53e8f5d4741136f4309f40455194f95cf492697732fcc696eff61a3d1f432f1547c20f856161120e9fbb8270f0d94254ca1f331c3116a104f4459b1f296d013
     HEAD_REF master
 )
 
