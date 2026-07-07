@@ -2,6 +2,11 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# [TTS GGML] T3 per-op GPU->CPU fallback via shared sched_dispatch
+# (qvac-ext-lib-whisper.cpp PR #81): closes the last GPU-unsupported-op
+# abort gap in T3 (Chatterbox Turbo/MTL); folds S3Gen/Supertonic onto the
+# same shared helper.
+#
 # [TTS GGML] LavaSR denoiser forward (UL-UNAS)
 # (qvac-ext-lib-whisper.cpp PR #78): implements the second LavaSR stage scaffolded
 # in PR #76 -- the UL-UNAS GRU U-Net denoiser that cleans noisy speech before the
@@ -132,8 +137,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 1d9ca83be9ef37bec7a9e2738adb0033ca01739b
-    SHA512 c53e8f5d4741136f4309f40455194f95cf492697732fcc696eff61a3d1f432f1547c20f856161120e9fbb8270f0d94254ca1f331c3116a104f4459b1f296d013
+    REF d16d785330d1e352e755099b9585f48f0bd34e89
+    SHA512 2e65a221bc3df9d97225e155321e9add13206cbafc265681de4e051a0c20071c37b329f2a18f810974ab5cc25f9d1fde89f79f8e5086f71101e6aa7d36e8f5e6
     HEAD_REF master
 )
 
