@@ -65,7 +65,7 @@
       "port-version": 0
     },
     "parakeet-cpp": {
-      "baseline": "2026-07-06",
+      "baseline": "2026-07-07",
       "port-version": 0
     },
     "protobuf": {
