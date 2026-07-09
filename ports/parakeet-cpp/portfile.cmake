@@ -2,7 +2,10 @@
 # Sourced from the parakeet-cpp/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master HEAD 1d9ca83, layered on top of the previous b95ad447 pin
+# Pinned at feat/parakeet-cpu-repack-q4 a4648f96 (CPU repack of quantized encoder
+# GEMM weights: q4_0/q8_0 -> interleaved 4x8/8x8 layouts, closing the CPU-side
+# q4_0 speed penalty; PR #87), layered on the master df54e37 pin (PR #83) and
+# the previous b95ad447 pin
 # (Mali-Vulkan, PR #51). Routes Parakeet compute through a shared
 # ggml_backend_sched with the CPU backend last (PR #74): encoder, subsampling
 # and the Sortformer head gain per-op CPU fallback for ops the active GPU
@@ -17,8 +20,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF df54e37d294bc1e43ea8bb23e3116e6b66826b3c
-    SHA512 7682476e279d505ee03e3f230ffefcc356d8361f21a9e87c22854ff6098d943b41ab8442e260ade3f27d4236eaabe0aa72c067aaf368a4e1a0808ea3732cb9d2
+    REF a4648f9631a1634469594ebe1cd20cc3416ddcd6
+    SHA512 3085213f4303c54b29382aa71bdc9f7c4f09bdc4290b494e7ec87bd69740bd51546ab78d04b172a8d3c6d6fb6def837773bb55cbb94e4918a55f0a1cf88feafc
     HEAD_REF master
 )
 
