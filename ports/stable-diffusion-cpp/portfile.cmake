@@ -16,9 +16,11 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # 2026-07-03 (REF pinned to the branch tip for reproducibility).
 #
-# 5832f9a is the tip of 2026-07-03 after merging the size-reduction change
-# that stops embedding unused Gemma2/GPT-OSS tokenizer vocab assets in static
-# QVAC diffusion-cpp prebuilds.
+# f02a0b5 is the tip of 2026-07-03 after merging PR #19. It includes the
+# 5832f9a size-reduction baseline plus Ideogram 4 support: Qwen3-VL
+# conditioning, the Ideogram 4 runner, and
+# sd_ctx_params_t::uncond_diffusion_model_path for loading the standalone
+# unconditional CFG diffusion weights.
 #
 # fe394ca was the tip of 2026-07-03 — 2026-06-04-ltx (the merge of #13 into the
 # 2026-06-04 base) plus one commit. The base carries the general qvac patches
@@ -36,8 +38,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 5832f9ac192d12c115aa7cf0b3838d6148a61828
-    SHA512 f2ec4302a2a38a5de1131535136c49fb5bfb3116d0db95f2cbef24d537b5e0d03857a5362ab9bb30a338537a3378e895b80c2370a925b9165581a3b4c361eed3
+    REF f02a0b5502e0e2e446549d2ceb837a9951b51883
+    SHA512 da17ed79d069b3ed5cb921ba67f6ed7d3dd62104a574044449f3c3145cbc60259c52b4953115b5723e7737172edb70aebcc57c9f364625be95843a75344c026e
 )
 
 set(SD_FLASH_ATTN OFF)
