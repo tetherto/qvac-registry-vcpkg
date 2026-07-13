@@ -203,6 +203,9 @@ vcpkg_cmake_configure(
     -DGGML_CCACHE=OFF
     -DGGML_LLAMAFILE=OFF
     -DLLAMA_CURL=OFF
+    # Addons do not use Fabric's HTTP downloader. Disable its opportunistic
+    # OpenSSL linkage so exported llama targets stay self-contained.
+    -DLLAMA_OPENSSL=OFF
     -DLLAMA_BUILD_TESTS=OFF
     -DLLAMA_BUILD_TOOLS=OFF
     -DLLAMA_BUILD_EXAMPLES=OFF
