@@ -1,16 +1,19 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 11581cd5 (merge of PR #35,
-# ggml-vulkan: optimize parakeet/whisper Vulkan on ARM Mali). Two
-# ARM/Mali-gated changes: disable KHR_cooperative_matrix (Mali's coopmat matmul
-# is ~5x slower than the scalar path for our encoder shapes) and use the medium
-# (64x64) matmul tile instead of large (128x128) on ARM (few shader cores leave
-# tall-K/small-N GEMMs underutilized). Bumps the speech-stack ggml pin from
-# f5727c32; off ARM (desktop NVIDIA/AMD/Intel, Adreno, Apple) byte-identical.
-
+# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 2b8a56eb (merge of PR #40,
+# guard row-per-workgroup Vulkan shaders against padded-dispatch OOB writes).
+# The Vulkan backend rounds row-wise dispatches up to a multiple of 512
+# workgroups; norm, l2_norm, rms_norm_back, sum_rows/mean and cumsum lacked
+# the row bound check soft_max/argmax already had, so phantom workgroups wrote
+# whole rows past the dst tensor whenever nrows > 512. In parakeet EOU this
+# garbled the first utterance of any Vulkan transcription longer than 512
+# encoder frames (~41 s). Bumps the speech-stack ggml pin from 11581cd5; also
+# picks up PR #41 (LavaSR denoiser/enhancer Vulkan kernels + fusions, Xclipse
+# 920) and PR #39 (fused OpenCL LavaSR ops). Non-Vulkan backends and short
+# inputs byte-identical.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 11581cd56162606d678aca58a7fbc0013bcd228d
-    SHA512 27d15be0fab79aaeec942f5e4889a7d42d46fe6689360c8cc152fb5c74f1643b8e6ce30e090d0c01bb6a0a4a5c38dd137852f2e5cdc35c154c997f722e576268
+    REF 2b8a56eb8b2c1e02267dc4e901ff7106def08da0
+    SHA512 f11101f6fdef985d2ccdce38d16774efbc81a655da9bfbea4523f8451cb32da347ab7312201f969980261358bafa6b631b386e59037ebab6bcf1bde35adb8968
     HEAD_REF speech
 )
 
