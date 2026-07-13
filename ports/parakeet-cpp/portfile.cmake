@@ -2,7 +2,7 @@
 # Sourced from the parakeet-cpp/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at feat/parakeet-cpu-repack-q4 a4648f96 (CPU repack of quantized encoder
+# Pinned at master HEAD 2e2f4d5 (PR #87 merge: CPU repack of quantized encoder
 # GEMM weights: q4_0/q8_0 -> interleaved 4x8/8x8 layouts, closing the CPU-side
 # q4_0 speed penalty; PR #87), layered on the master df54e37 pin (PR #83) and
 # the previous b95ad447 pin
@@ -20,8 +20,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF a4648f9631a1634469594ebe1cd20cc3416ddcd6
-    SHA512 070ac7f6a8d7ef69f35e418b5a509682da75b4afc70e41ce0dbef9de10dfad8088c1fac02626ce19c77fb0c10681e8ef1e03d7428ed519f6d8572a4eacf14cce
+    REF 2e2f4d5024bc15b17c8fdf5c646023145cf5010b
+    SHA512 d64ef5b4582719792e4463295eeb13f38b981d2555b0640cf1dad73ebb2a6da0b7cedd86b6d3250a78ce9a3e773712193e203966d450149cb2402914e7bfe6c7
     HEAD_REF master
 )
 
