@@ -2,17 +2,19 @@
 # Sourced from the parakeet-cpp/ subfolder of tetherto/qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master HEAD 2e2f4d5 (PR #87 merge: CPU repack of quantized encoder
-# GEMM weights: q4_0/q8_0 -> interleaved 4x8/8x8 layouts, closing the CPU-side
-# q4_0 speed penalty; PR #87), layered on the master df54e37 pin (PR #83) and
-# the previous b95ad447 pin
-# (Mali-Vulkan, PR #51). Routes Parakeet compute through a shared
-# ggml_backend_sched with the CPU backend last (PR #74): encoder, subsampling
-# and the Sortformer head gain per-op CPU fallback for ops the active GPU
-# backend cannot run; the cached encoder graph stays on a persistent gallocr
-# (Adreno cached-graph reuse) and the TDT decoder stays on direct compute.
-# Same master commit and archive SHA512 as the tts-cpp port (2026-07-06 /
-# 1d9ca83).
+# Pinned at master ecac5bb7 (PR #85), layered on top of the 2e2f4d5 pin
+# (PR #87: CPU repack of quantized encoder GEMM weights, q4_0/q8_0 ->
+# interleaved 4x8/8x8 layouts, closing the CPU-side q4_0 speed penalty) and
+# the previous df54e37 pin (TDT multi-layer LSTM state, PR #83). Runs the EOU
+# RNN-T decoder as ggml graphs on GPU backends (Metal / CUDA / Vulkan):
+# span-batched joint scoring 16 frames per launch, persistent LSTM/pred state
+# and full-window enc-projection on device, on-device argmax, on-device <EOU>
+# state reset. Scalar host decode stays for CPU and ggml-opencl. RTX 4000
+# Vulkan RTF for EOU drops 0.0052 -> 0.0031 (decoder ~54 -> ~14.5 ms per 20 s
+# file). Requires ggml-speech >= 2026-07-13 (qvac-ext-ggml PR #40): Vulkan
+# row-wise shader OOB-write guards, without which the EOU encoder garbles the
+# first utterance of any file longer than 512 encoder frames (~41 s) on
+# Vulkan.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -20,8 +22,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 2e2f4d5024bc15b17c8fdf5c646023145cf5010b
-    SHA512 d64ef5b4582719792e4463295eeb13f38b981d2555b0640cf1dad73ebb2a6da0b7cedd86b6d3250a78ce9a3e773712193e203966d450149cb2402914e7bfe6c7
+    REF ecac5bb729dd6e1c4e09da01353085d1c9c0ec37
+    SHA512 c08933c72c986780f91537854320638f3341fb348a99853fc6c9ec23bc359fe05c79bce4df8032ea1c102c4aa347adbb84c27c994f95c7964fc5c69895fdb136
     HEAD_REF master
 )
 
