@@ -2,6 +2,16 @@
 # Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# [TTS GGML] Chatterbox S3Gen configurable CFG rate
+# (qvac-ext-lib-whisper.cpp PR #88, QVAC-21908): exposes the S3Gen
+# classifier-free-guidance rate as a caller option (EngineOptions::s3gen_cfg_rate
+# and s3gen_synthesize_opts::cfg_rate; sentinel -1 keeps the model's GGUF-baked
+# rate, 0 disables CFG -- skipping the cond+uncond batch-2 pass and roughly
+# halving S3Gen compute -- and >0 overrides). Adds a --cfg-rate CLI flag and a
+# pure apply_cfg_rate_env_override helper (strtod-validated, sentinel-respecting)
+# with unit tests. Backward compatible: with the -1 sentinel the output is
+# byte-identical to the prior pin.
+#
 # [TTS GGML] LavaSR enhancer on a ggml compute graph (GPU + faster CPU)
 # (qvac-ext-lib-whisper.cpp PR #82): runs the LavaSR Vocos enhancer's ConvNeXt
 # backbone + ISTFT spec head through a ggml compute graph instead of the scalar
@@ -92,10 +102,11 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 1cbea2b7 (PR #82
-# merged: LavaSR enhancer on a ggml compute graph, described above -- the current
-# master tip, one commit ahead of the d16d7853 pin (PR #81, T3 per-op GPU->CPU
-# fallback), which it carries).
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 05879fc (PR #88
+# merged: Chatterbox S3Gen configurable CFG rate, described above -- the current
+# master tip). Carries the 1cbea2b7 pin (PR #82 merged: LavaSR enhancer on a
+# ggml compute graph, described below), one commit ahead of the d16d7853 pin
+# (PR #81, T3 per-op GPU->CPU fallback), which it carries.
 # Layered on the 9ea1a5e0 pin (PR #77 merged: Chatterbox MTL Chinese
 # (zh) support, described above -- exactly one commit ahead of the d149258 pin
 # (PR #71, chatterbox-mtl Metal q8 KV-on-GPU real fix), which it
@@ -150,8 +161,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 1cbea2b7202d9a4be47f39dc46d61384f66804d2
-    SHA512 0e2767b4f9cef3ac9c7cef0be4d154af504e015379cb58b16be5bb5b1fa0064022193f50e3e05785727b8b80cac18706a70f1c6b609db849ee27e014c87041f4
+    REF 05879fc88bfb74cfd15c386d5dd09aeac852d62a
+    SHA512 46fcd030e8cb1e9c62f933cd20424caa389dcd270751d562451b054a304787f9f524520c1e5efbba4ada2827af4b110652cdc60dfcb15bc97cb8ac47c80548d0
     HEAD_REF master
 )
 
