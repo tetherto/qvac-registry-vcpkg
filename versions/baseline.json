@@ -66,7 +66,7 @@
     },
     "parakeet-cpp": {
       "baseline": "2026-07-13",
-      "port-version": 0
+      "port-version": 1
     },
     "protobuf": {
       "baseline": "onnxruntime",
@@ -118,7 +118,7 @@
     },
     "tts-cpp": {
       "baseline": "2026-07-13",
-      "port-version": 1
+      "port-version": 2
     },
     "vcpkg-cmake": {
       "baseline": "2024-04-23",
@@ -134,7 +134,7 @@
     },
     "whisper-cpp": {
       "baseline": "1.9.1",
-      "port-version": 2
+      "port-version": 3
     },
     "xnnpack": {
       "baseline": "onnxruntime",
