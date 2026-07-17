@@ -16,6 +16,12 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # 2026-07-03 (REF pinned to the branch tip for reproducibility).
 #
+# 6250dac is the tip of 2026-07-03 after merging PR #21: it fixes the Wan VAE
+# temporal upsample to match the reference first-chunk "Rep" semantics (run
+# time_conv with causal zero padding on chunk 0, trim the first doubled frame,
+# seed the temporal feat cache), restoring decode parity with the PyTorch
+# reference (cosine 1.000000 / 79 dB PSNR, was 0.9959 / 27 dB).
+#
 # 9f587ad is the tip of 2026-07-03 after merging PR #20 (Ideogram review
 # fixes) on top of PR #19: it registers/applies optional Ideogram weight_scale
 # tensors with the correct FP8 ordering (xW * weight_scale + b), stages only the
@@ -44,8 +50,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 9f587ad78704fa5d5b83a9f1327704b951dd2ec6
-    SHA512 b15cfeeaa72f00a6ff1d8dfe0d677872efa55abda7d8dc44821e9644efcfbb38f41d6a4b3015a29faa328115ca3f4a477ba9cb994407098dfc61655622623609
+    REF 6250dac2b4a22976a3e0d6f096229174b7c6e5a9
+    SHA512 d4fa1b20421a189d1416d55b7cd80e6b3f8af7357a5abb9fd4776d8a6924842d90b903396252846ee6a8a182d084b46bd306b2f4fe15b56a41ce410e839bf223
 )
 
 set(SD_FLASH_ATTN OFF)
