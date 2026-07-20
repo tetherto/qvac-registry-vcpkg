@@ -1,19 +1,16 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 2b8a56eb (merge of PR #40,
-# guard row-per-workgroup Vulkan shaders against padded-dispatch OOB writes).
-# The Vulkan backend rounds row-wise dispatches up to a multiple of 512
-# workgroups; norm, l2_norm, rms_norm_back, sum_rows/mean and cumsum lacked
-# the row bound check soft_max/argmax already had, so phantom workgroups wrote
-# whole rows past the dst tensor whenever nrows > 512. In parakeet EOU this
-# garbled the first utterance of any Vulkan transcription longer than 512
-# encoder frames (~41 s). Bumps the speech-stack ggml pin from 11581cd5; also
-# picks up PR #41 (LavaSR denoiser/enhancer Vulkan kernels + fusions, Xclipse
-# 920) and PR #39 (fused OpenCL LavaSR ops). Non-Vulkan backends and short
-# inputs byte-identical.
+# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD d7e27ac7 (merge of PR #42,
+# Adreno OpenCL decode speedups for whisper base/small q8_0). Fixes the
+# FLASH_ATTN Adreno miscompute (zero-init the partial-KV local tiles and clamp
+# the score before exp, killing the decoder self-attn NaN) and adds a q8_0 SOA
+# get_rows kernel plus faster f16 GEMV/GEMM paths; FA-on-GPU decode routing is
+# opt-in via GGML_OPENCL_FA_ADRENO (default routes Adreno FLASH_ATTN to CPU).
+# Bumps the speech-stack ggml pin from 2b8a56eb; non-OpenCL backends and
+# non-Adreno devices byte-identical.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 2b8a56eb8b2c1e02267dc4e901ff7106def08da0
-    SHA512 f11101f6fdef985d2ccdce38d16774efbc81a655da9bfbea4523f8451cb32da347ab7312201f969980261358bafa6b631b386e59037ebab6bcf1bde35adb8968
+    REF d7e27ac765e0ef210a06eb8533b52b08b96c3ffd
+    SHA512 d26b0152ce24a0ea16ec93aed6b10faa7f329ceddae951f6a40d99a48e486cd8f6a38451bc430d7464a090437fe6818f5fe40897d099225556e8cb11b05138c0
     HEAD_REF speech
 )
 

@@ -1,13 +1,13 @@
 # whisper-cpp: pinned at tetherto/qvac-ext-lib-whisper.cpp@master
-# cb91a378 (Pull latest from upstream whisper.cpp (v1.9.1) (#73)).
+# d95e742b (fused-QKV decoder repack fix for Adreno OpenCL base/small q8_0 (#91)).
 # This port moves together with parakeet-cpp and tts-cpp so all three registry
 # ports source the same master commit and the same archive SHA512.
 #
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-whisper.cpp
-  REF cb91a37862c52e7954539512e632819e9358585d
-  SHA512 a2ffbb061dbab4741ac05967eb9b348d200a9e2e2b44532f82534ef01566fe37b74d10735d380f8bf32a8e7c662a3c05be62ae662c018dce828d63f836461d6b
+  REF d95e742b51eb27b5d9e6f75bddf2a001de13a135
+  SHA512 da851ba21dc8c64ccdff6f95aa7da9d1c39e23d2d2c1b3a3e48218e932b15f9c7ee38fb2c1e826d8a60499ed2ec2b90f0715cb04245b00daadbfc7ec6b9080c7
   HEAD_REF master
   PATCHES
     patches/0001-move-gnuinstalldirs-before-add-subdirectory-src.patch
