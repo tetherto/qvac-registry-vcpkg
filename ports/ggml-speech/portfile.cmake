@@ -1,17 +1,6 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 1383d5e2 (merge of PR #43,
-# QVAC-21921: ACE-Step Oobleck VAE custom ops -- GGML_OP_SNAKE and
-# GGML_OP_COL2IM_1D, CPU + Metal). These are the ops the audiogen-cpp engine's
-# Oobleck VAE needs; without them audiogen-cpp fails to build/link. Carries the
-# previous d7e27ac7 pin unchanged, so every other consumer (tts-cpp,
-# parakeet-cpp, whisper-cpp) is byte-identical.
-#
-# Previous pin d7e27ac7 (merge of PR #42, Adreno OpenCL decode speedups for
-# whisper base/small q8_0). Fixes the FLASH_ATTN Adreno miscompute (zero-init
-# the partial-KV local tiles and clamp the score before exp, killing the
-# decoder self-attn NaN) and adds a q8_0 SOA get_rows kernel plus faster f16
-# GEMV/GEMM paths; FA-on-GPU decode routing is opt-in via GGML_OPENCL_FA_ADRENO
-# (default routes Adreno FLASH_ATTN to CPU). Non-OpenCL backends and non-Adreno
-# devices byte-identical.
+# ggml-speech: tetherto/qvac-ext-ggml@speech. Adds the ACE-Step Oobleck VAE
+# custom ops (snake, col2im_1d) on top of the prior pin; other consumers
+# byte-identical.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
@@ -144,7 +133,7 @@ if(VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
     )
 endif()
 
-# PR #13 (v0.10.2 sync) introduces an unconditional
+# The v0.10.2 ggml sync introduces an unconditional
 # `#include <spirv/unified1/spirv.hpp>` in src/ggml-vulkan/ggml-vulkan.cpp,
 # but the upstream ggml-vulkan CMakeLists.txt never finds spirv-headers nor
 # wires its include dir into the ggml-vulkan target. Apply a small patch

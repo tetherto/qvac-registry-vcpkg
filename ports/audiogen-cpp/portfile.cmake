@@ -1,20 +1,6 @@
-# audiogen-cpp: ACE-Step music generation in pure C++/ggml.
-# Sourced from the engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp;
-# consumes the ggml-speech port for the custom snake / col2im_1d ops the
-# ACE-Step Oobleck VAE needs.
-#
-# [AudioGen GGML] native ACE-Step music generation
-# (qvac-ext-lib-whisper.cpp PR #98 merged, QVAC-21921): the ACE-Step
-# text-to-music pipeline (Qwen3-Embedding text encoder -> ace-lm language model
-# -> DiT diffusion transformer -> Oobleck VAE) behind the shared Engine API,
-# alongside engines/tts and engines/parakeet. Runs on CPU and, when built with
-# the matching ggml-speech GPU feature (Metal on Apple, etc.), on the GPU
-# backend; the VAE decode/encode rely on the GGML_OP_SNAKE and GGML_OP_COL2IM_1D
-# custom ops published by ggml-speech >= 2026-07-22.
-#
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 0f832db3 (PR #98
-# merged: native ACE-Step music generation on CPU, plus the engines/ folder
-# refactor that groups tts / parakeet / audiogen under engines/).
+# audiogen-cpp: ACE-Step music generation in pure C++/ggml, from the
+# engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp. Consumes ggml-speech
+# for the custom snake / col2im_1d ops the Oobleck VAE needs.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)

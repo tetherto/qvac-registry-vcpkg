@@ -1,7 +1,7 @@
 {
   "name": "audiogen-cpp",
   "version-date": "2026-07-22",
-  "description": "ACE-Step music generation in pure C++/ggml. Text-to-music via the ACE-Step pipeline (Qwen3-Embedding text encoder -> ace-lm language model -> DiT diffusion transformer -> Oobleck VAE) behind the same unified Engine API as the tts-cpp and parakeet-cpp engines. Sourced from tetherto/qvac-ext-lib-whisper.cpp's engines/audiogen/ subfolder (master HEAD 0f832db3, PR #98 merged, QVAC-21921 -- the same PR that grouped tts / parakeet / audiogen under engines/). Runs on CPU and, when built with a ggml-speech GPU feature (Metal on Apple, Vulkan/OpenCL/CUDA elsewhere), on the GPU backend. Consumes the ggml-speech port for the custom GGML_OP_SNAKE and GGML_OP_COL2IM_1D ops the Oobleck VAE decode/encode need (ggml-speech >= 2026-07-22).",
+  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/audiogen",
   "license": "MIT",
   "dependencies": [
