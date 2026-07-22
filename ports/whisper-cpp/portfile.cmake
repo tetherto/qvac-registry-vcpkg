@@ -1,17 +1,20 @@
 # whisper-cpp: pinned at tetherto/qvac-ext-lib-whisper.cpp@master
-# d95e742b (fused-QKV decoder repack fix for Adreno OpenCL base/small q8_0 (#91)).
+# post repo-reorg (QIP #94, PR stack #93/#95/#102): whisper now lives under
+# third_party/whisper.cpp as an upstream git subtree with a declared QVAC
+# delta (see PATCHES.md there). The GNUInstallDirs ordering patch this port
+# used to carry is absorbed into that delta, so PATCHES is gone.
 # This port moves together with parakeet-cpp and tts-cpp so all three registry
 # ports source the same master commit and the same archive SHA512.
 #
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-whisper.cpp
-  REF d95e742b51eb27b5d9e6f75bddf2a001de13a135
-  SHA512 da851ba21dc8c64ccdff6f95aa7da9d1c39e23d2d2c1b3a3e48218e932b15f9c7ee38fb2c1e826d8a60499ed2ec2b90f0715cb04245b00daadbfc7ec6b9080c7
+  REF 8193cb2cc8ae23c0eb5df4560b1258ad9f07f544
+  SHA512 38df227c8223d4a5aac79068152818e7cf3a0f36379077558f645fe13ee828f9c72a4f1a46425a58961dc4d842f3d00a4be81ac8167fe3e2611903e70086ea52
   HEAD_REF master
-  PATCHES
-    patches/0001-move-gnuinstalldirs-before-add-subdirectory-src.patch
 )
+
+set(SOURCE_PATH "${SOURCE_PATH}/third_party/whisper.cpp")
 
 # whisper-cpp consumes the system-installed ggml provided by the `ggml-speech`
 # port (same shape as the `parakeet-cpp` and `tts-cpp` ports). Backend

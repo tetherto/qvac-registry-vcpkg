@@ -22,12 +22,12 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF ecac5bb729dd6e1c4e09da01353085d1c9c0ec37
-    SHA512 c08933c72c986780f91537854320638f3341fb348a99853fc6c9ec23bc359fe05c79bce4df8032ea1c102c4aa347adbb84c27c994f95c7964fc5c69895fdb136
+    REF 8193cb2cc8ae23c0eb5df4560b1258ad9f07f544
+    SHA512 38df227c8223d4a5aac79068152818e7cf3a0f36379077558f645fe13ee828f9c72a4f1a46425a58961dc4d842f3d00a4be81ac8167fe3e2611903e70086ea52
     HEAD_REF master
 )
 
-set(SOURCE_PATH "${WHISPER_CPP_SRC}/parakeet-cpp")
+set(SOURCE_PATH "${WHISPER_CPP_SRC}/engines/parakeet")
 if (NOT EXISTS "${SOURCE_PATH}/CMakeLists.txt")
     message(FATAL_ERROR
         "parakeet-cpp: ${SOURCE_PATH}/CMakeLists.txt missing; the parakeet-cpp/ "
