@@ -1,0 +1,81 @@
+{
+  "name": "audiogen-cpp",
+  "version-date": "2026-07-22",
+  "description": "ACE-Step music generation in pure C++/ggml. Text-to-music via the ACE-Step pipeline (Qwen3-Embedding text encoder -> ace-lm language model -> DiT diffusion transformer -> Oobleck VAE) behind the same unified Engine API as the tts-cpp and parakeet-cpp engines. Sourced from tetherto/qvac-ext-lib-whisper.cpp's engines/audiogen/ subfolder (master HEAD 0f832db3, PR #98 merged, QVAC-21921 -- the same PR that grouped tts / parakeet / audiogen under engines/). Runs on CPU and, when built with a ggml-speech GPU feature (Metal on Apple, Vulkan/OpenCL/CUDA elsewhere), on the GPU backend. Consumes the ggml-speech port for the custom GGML_OP_SNAKE and GGML_OP_COL2IM_1D ops the Oobleck VAE decode/encode need (ggml-speech >= 2026-07-22).",
+  "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/audiogen",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "ggml-speech",
+      "version>=": "2026-07-22"
+    },
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ],
+  "default-features": [
+    {
+      "name": "metal",
+      "platform": "osx | ios"
+    },
+    {
+      "name": "opencl",
+      "platform": "android"
+    },
+    {
+      "name": "vulkan",
+      "platform": "windows | linux | android"
+    }
+  ],
+  "features": {
+    "cuda": {
+      "description": "Enable CUDA GPU acceleration",
+      "dependencies": [
+        {
+          "name": "ggml-speech",
+          "features": [
+            "cuda"
+          ]
+        }
+      ]
+    },
+    "metal": {
+      "description": "Enable Metal GPU acceleration (macOS / iOS)",
+      "dependencies": [
+        {
+          "name": "ggml-speech",
+          "features": [
+            "metal"
+          ]
+        }
+      ]
+    },
+    "opencl": {
+      "description": "Enable OpenCL GPU acceleration (Android / Adreno)",
+      "dependencies": [
+        {
+          "name": "ggml-speech",
+          "features": [
+            "opencl"
+          ]
+        }
+      ]
+    },
+    "vulkan": {
+      "description": "Enable Vulkan GPU acceleration",
+      "dependencies": [
+        {
+          "name": "ggml-speech",
+          "features": [
+            "vulkan"
+          ]
+        }
+      ]
+    }
+  }
+}
