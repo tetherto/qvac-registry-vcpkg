@@ -1,16 +1,11 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD d7e27ac7 (merge of PR #42,
-# Adreno OpenCL decode speedups for whisper base/small q8_0). Fixes the
-# FLASH_ATTN Adreno miscompute (zero-init the partial-KV local tiles and clamp
-# the score before exp, killing the decoder self-attn NaN) and adds a q8_0 SOA
-# get_rows kernel plus faster f16 GEMV/GEMM paths; FA-on-GPU decode routing is
-# opt-in via GGML_OPENCL_FA_ADRENO (default routes Adreno FLASH_ATTN to CPU).
-# Bumps the speech-stack ggml pin from 2b8a56eb; non-OpenCL backends and
-# non-Adreno devices byte-identical.
+# ggml-speech: tetherto/qvac-ext-ggml@speech. Adds the ACE-Step Oobleck VAE
+# custom ops (snake, col2im_1d) on top of the prior pin; other consumers
+# byte-identical.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF d7e27ac765e0ef210a06eb8533b52b08b96c3ffd
-    SHA512 d26b0152ce24a0ea16ec93aed6b10faa7f329ceddae951f6a40d99a48e486cd8f6a38451bc430d7464a090437fe6818f5fe40897d099225556e8cb11b05138c0
+    REF 1383d5e2f9f90ea51eba7c6ccaf679193e573206
+    SHA512 e4f6846c9c8d758c249d40e458a329d2fd6136372eb1c2c7c5bf23e0ffc6f82a3d180f37689c3f9673d12a00f008473425e1ebaf0da8b2a537a3aa6894915b52
     HEAD_REF speech
 )
 
@@ -138,7 +133,7 @@ if(VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
     )
 endif()
 
-# PR #13 (v0.10.2 sync) introduces an unconditional
+# The v0.10.2 ggml sync introduces an unconditional
 # `#include <spirv/unified1/spirv.hpp>` in src/ggml-vulkan/ggml-vulkan.cpp,
 # but the upstream ggml-vulkan CMakeLists.txt never finds spirv-headers nor
 # wires its include dir into the ggml-vulkan target. Apply a small patch
