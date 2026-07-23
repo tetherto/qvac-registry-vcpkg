@@ -11,8 +11,17 @@
 # bit-identical single-pass path. Requires ggml-speech >= 2026-07-15 (unchanged
 # from the previous pin).
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp master 88b690c0 (PR #101), the
-# merged long-form windowed-encoder change on the engines/parakeet layout.
+# Apple Core ML (Neural Engine) encoder sidecar: adds the optional, Apple-only
+# `coreml` feature (default on osx/ios). When enabled and a matching
+# `<model>-encoder.mlmodelc` is present at runtime, the FastConformer encoder
+# runs on the Apple Neural Engine while mel preprocessing, TDT/CTC decode and the
+# tokenizer stay on ggml; a missing sidecar or a non-Apple build falls back to
+# the ggml encoder. Additive and presence-driven -- non-Apple platforms are
+# unaffected.
+#
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp master 22423551 (PR #100), the
+# merged Core ML encoder-sidecar change layered on the long-audio windowed
+# encoder (88b690c0, PR #101) on the engines/parakeet layout.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -20,8 +29,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 88b690c051666a63d6f5494a68596c4e785468ef
-    SHA512 a1adf1fc953e4c8210e120fc2859aece34a0c738407a346dadaa4bc1762b3f6f6f65ddaceb5ee6d470f56e209ae1d6f49a671cc844f3dfdd8c8a46bf53b426f0
+    REF 22423551e01ac28617bb5dde786cf5a70ec35e12
+    SHA512 b3d95965dc23a52e1973e67dda81fb3b4db2f2f64d6611af0f9e8d8de5853bcdfdc0b892b48e3e71002cb330bdcd9958efc89007fe330446361cc7d8ac63f6a5
     HEAD_REF master
 )
 
@@ -49,6 +58,11 @@ if("opencl" IN_LIST FEATURES)
     set(GGML_OPENCL ON)
 endif()
 
+set(PARAKEET_COREML OFF)
+if("coreml" IN_LIST FEATURES)
+    set(PARAKEET_COREML ON)
+endif()
+
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     DISABLE_PARALLEL_CONFIGURE
@@ -69,6 +83,7 @@ vcpkg_cmake_configure(
         -DGGML_VULKAN=${GGML_VULKAN}
         -DGGML_CUDA=${GGML_CUDA}
         -DGGML_OPENCL=${GGML_OPENCL}
+        -DPARAKEET_COREML=${PARAKEET_COREML}
 )
 
 vcpkg_cmake_install()
