@@ -1,7 +1,7 @@
 {
   "name": "tts-cpp",
-  "version-date": "2026-07-21",
-  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Parler-TTS, and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts).",
+  "version-date": "2026-07-24",
+  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS, and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts).",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/tts",
   "license": "MIT",
   "dependencies": [

@@ -1,6 +1,20 @@
-# tts-cpp: Resemble Chatterbox + Supertonic TTS in pure C++/ggml.
-# Sourced from the tts-cpp/ subfolder of qvac-ext-lib-whisper.cpp;
+# tts-cpp: Resemble Chatterbox + Supertonic + CosyVoice3 TTS in pure C++/ggml.
+# Sourced from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
+#
+# [TTS GGML] CosyVoice3 native C++/ggml TTS engine
+# (qvac-ext-lib-whisper.cpp PR #99, QVAC-21928): adds the Fun-CosyVoice3-0.5B
+# engine (public API tts-cpp/cosyvoice/engine.h) -- Qwen2.5 LM (text -> speech
+# tokens) + DiT conditional-flow-matching (tokens -> mel) + CausalHiFT vocoder
+# (mel -> 24 kHz PCM), all on the ggml-speech backend, CPU. Validated
+# bit-for-bit against the PyTorch reference (flow mel cosine 1.0, LM greedy
+# trajectory 200/200, HiFT waveform corr 0.92). Instruct2 mode (dialect / accent
+# / emotion / speed / volume) via EngineOptions::instruct_text; baked-voice
+# timbre via voice_gguf_path. Additive: Chatterbox / Supertonic outputs are
+# byte-identical to the prior 2026-07-21 pin. Two commits ahead of the 88b690c
+# pin (it carries #100 Parakeet Core ML + #101 long-form windowed encoder,
+# neither of which touches the tts-cpp target). This is the engine the
+# @qvac/tts-ggml addon wires for CosyVoice3.
 #
 # [TTS GGML] Chatterbox S3Gen configurable CFG rate
 # (qvac-ext-lib-whisper.cpp PR #88, QVAC-21908): exposes the S3Gen
@@ -161,8 +175,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 88b690c051666a63d6f5494a68596c4e785468ef
-    SHA512 a1adf1fc953e4c8210e120fc2859aece34a0c738407a346dadaa4bc1762b3f6f6f65ddaceb5ee6d470f56e209ae1d6f49a671cc844f3dfdd8c8a46bf53b426f0
+    REF fc844ce573176776dd474a634362e0922599d4c1
+    SHA512 38f2d918cb4e5aafb32b0beff409e80aa08f780b2264e453e2f6b27c25358069266812ca136297bd3e668c0342da38412d38d7f1228b1a0963ab39a91ffe799a
     HEAD_REF master
 )
 

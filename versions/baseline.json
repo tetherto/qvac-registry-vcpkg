@@ -121,7 +121,7 @@
       "port-version": 2
     },
     "tts-cpp": {
-      "baseline": "2026-07-21",
+      "baseline": "2026-07-24",
       "port-version": 0
     },
     "vcpkg-cmake": {
