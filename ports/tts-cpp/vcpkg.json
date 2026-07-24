@@ -1,7 +1,8 @@
 {
   "name": "tts-cpp",
   "version-date": "2026-07-24",
-  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS, and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts).",
+  "port-version": 1,
+  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS (CPU + Metal GPU), and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts). This pin (master HEAD 67c7ad3a, PR #103) adds Metal GPU offload to Parler-TTS (~2.25x vs CPU on indic q8_0; n_gpu_layers=0 keeps the CPU path byte-exact) plus native Parler streaming, one commit ahead of the CosyVoice3 pin (PR #99).",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/tts",
   "license": "MIT",
   "dependencies": [

@@ -1,6 +1,15 @@
-# tts-cpp: Resemble Chatterbox + Supertonic + CosyVoice3 TTS in pure C++/ggml.
-# Sourced from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
+# tts-cpp: Resemble Chatterbox + Supertonic + CosyVoice3 + Parler-TTS in pure
+# C++/ggml. Sourced from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
+#
+# [TTS GGML] Parler-TTS Metal GPU support
+# (qvac-ext-lib-whisper.cpp PR #103, QVAC-21593): adds Metal GPU offload to the
+# Parler engine (EngineOptions::n_gpu_layers) -- flash-attention plus fused
+# QKV / LM-head matmuls on the decode hot path and a conv_transpose_1d matmul
+# reformulation for the DAC -- ~2.25x faster than CPU on indic-parler q8_0
+# (Apple M5). All GPU work is gated: n_gpu_layers=0 (the default) keeps the CPU
+# reference path byte-exact. Also lands native windowed-DAC streaming for
+# Parler. Metal is the validated GPU backend; other backends fall back to CPU.
 #
 # [TTS GGML] CosyVoice3 native C++/ggml TTS engine
 # (qvac-ext-lib-whisper.cpp PR #99, QVAC-21928): adds the Fun-CosyVoice3-0.5B
@@ -116,11 +125,13 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 05879fc (PR #88
-# merged: Chatterbox S3Gen configurable CFG rate, described above -- the current
-# master tip). Carries the 1cbea2b7 pin (PR #82 merged: LavaSR enhancer on a
-# ggml compute graph, described below), one commit ahead of the d16d7853 pin
-# (PR #81, T3 per-op GPU->CPU fallback), which it carries.
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 67c7ad3a (PR #103
+# merged: Parler-TTS Metal GPU, described above -- the current master tip), one
+# commit ahead of the fc844ce5 pin (PR #99, CosyVoice3, described above), which
+# it carries. Carries the 05879fc pin (PR #88 merged: Chatterbox S3Gen
+# configurable CFG rate, described above) and the 1cbea2b7 pin (PR #82 merged:
+# LavaSR enhancer on a ggml compute graph, described below), one commit ahead of
+# the d16d7853 pin (PR #81, T3 per-op GPU->CPU fallback), which it carries.
 # Layered on the 9ea1a5e0 pin (PR #77 merged: Chatterbox MTL Chinese
 # (zh) support, described above -- exactly one commit ahead of the d149258 pin
 # (PR #71, chatterbox-mtl Metal q8 KV-on-GPU real fix), which it
@@ -175,15 +186,15 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF fc844ce573176776dd474a634362e0922599d4c1
-    SHA512 38f2d918cb4e5aafb32b0beff409e80aa08f780b2264e453e2f6b27c25358069266812ca136297bd3e668c0342da38412d38d7f1228b1a0963ab39a91ffe799a
+    REF 67c7ad3ae0b99947e9d3e6782d439dcba22c0f9c
+    SHA512 61c8b6921772ea46943ebd6ad23e55e193df79c0753527e4ccf5ae5ad3f26a6a9567668ac70432b0b75e10380eea263ef1d2c24539e888c1e837dac08dba0417
     HEAD_REF master
 )
 
 set(SOURCE_PATH "${WHISPER_CPP_SRC}/engines/tts")
 if (NOT EXISTS "${SOURCE_PATH}/CMakeLists.txt")
     message(FATAL_ERROR
-        "tts-cpp: ${SOURCE_PATH}/CMakeLists.txt missing; the tts-cpp/ "
+        "tts-cpp: ${SOURCE_PATH}/CMakeLists.txt missing; the engines/tts/ "
         "subfolder layout in qvac-ext-lib-whisper.cpp may have changed.")
 endif()
 
