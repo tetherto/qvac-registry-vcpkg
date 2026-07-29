@@ -33,9 +33,13 @@
 # `parakeet::` namespace, the include/parakeet/ header directory and this
 # port's own name are unchanged; only file ownership moved.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp master 35cc600e (PR #106), the
-# namespace rename layered on the Core ML encoder sidecar (22423551, PR #100)
-# and the long-audio windowed encoder (88b690c0, PR #101).
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp master HEAD 928369c9, shared with
+# the whisper-cpp / tts-cpp / audiogen-cpp ports so all four resolve one source
+# archive. engines/parakeet is byte-identical to the previous 35cc600e pin
+# (PR #106, the namespace rename described above); 928369c9 is its child and
+# touches engines/audiogen only. 35cc600e itself layered the rename on the
+# Core ML encoder sidecar (22423551, PR #100) and the long-audio windowed
+# encoder (88b690c0, PR #101).
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -43,8 +47,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 35cc600e2831eee56aafb508f1586dd9c61d4885
-    SHA512 0f8c7cd7ed23cd0ad6e17ba42da4a7eed216450bb345a40aa2e9ef13af955286e25c10618d39898d621329efa7f623cc92a3828e2024f249e1ba2ec277ba6c12
+    REF 928369c9309a051f91a8b3910e8dc03b198f7709
+    SHA512 2e65078f0f18c62463490abdd62a1e4483e8de9e0be7d8934357787051e093b9b2fd6bd48ee37e7c8475d310c917649f53867151c9a5c106e5024120f34fdeb8
     HEAD_REF master
 )
 

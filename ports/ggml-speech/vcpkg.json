@@ -1,7 +1,7 @@
 {
   "name": "ggml-speech",
-  "version-date": "2026-07-22",
-  "description": "Speech-stack ggml flavour (tetherto/qvac-ext-ggml@speech) with the ACE-Step Oobleck VAE custom ops (snake, col2im_1d).",
+  "version-date": "2026-07-29",
+  "description": "Speech-stack ggml flavour (tetherto/qvac-ext-ggml@speech). This pin makes GGML_PREC_F32 effective on the GPU backends: Vulkan and Metal previously reduced f32 matmuls in fp16 regardless of the requested precision, so callers carrying large-magnitude activations (Parler-TTS T5/DAC, ACE-Step) lost accuracy or saturated past 65504. Adds scalar fp32 matmul pipelines (dense and quantized) selected on GGML_PREC_F32, a Vulkan GET_ROWS offset fix, and Vulkan kernels for the ACE-Step Oobleck VAE custom ops (snake, col2im_1d) whose CPU + Metal implementations landed in the prior pin. CPU output is unchanged.",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml/tree/speech",
   "license": "MIT",
   "dependencies": [

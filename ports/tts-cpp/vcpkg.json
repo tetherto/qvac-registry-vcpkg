@@ -1,14 +1,13 @@
 {
   "name": "tts-cpp",
-  "version-date": "2026-07-24",
-  "port-version": 1,
-  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS (CPU + Metal GPU), and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts). This pin (master HEAD 67c7ad3a, PR #103) adds Metal GPU offload to Parler-TTS (~2.25x vs CPU on indic q8_0; n_gpu_layers=0 keeps the CPU path byte-exact) plus native Parler streaming, one commit ahead of the CosyVoice3 pin (PR #99).",
+  "version-date": "2026-07-29",
+  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS (CPU + Metal / Vulkan GPU), and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts). This pin (master HEAD 928369c9, PR #110) runs the full Parler pipeline -- T5 encoder, delay-pattern decoder LM, DAC vocoder -- on Vulkan for the mini / large / Indic families: the GPU gate becomes a validated-backend allowlist (Metal + Vulkan) and T5 / DAC declare GGML_PREC_F32 where they need it, which is why the ggml-speech floor moves to 2026-07-29 (qvac-ext-ggml PR #46 makes that request effective on the GPU backends). Unvalidated backends still fall back to CPU, and n_gpu_layers=0 keeps the CPU path byte-exact. Carries the prior pin (67c7ad3a, PR #103) that added Metal GPU offload to Parler (~2.25x vs CPU on indic q8_0) plus native Parler streaming, and the CosyVoice3 pin (PR #99).",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/tts",
   "license": "MIT",
   "dependencies": [
     {
       "name": "ggml-speech",
-      "version>=": "2026-07-15"
+      "version>=": "2026-07-29"
     },
     "mecab",
     {

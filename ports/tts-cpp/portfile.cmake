@@ -2,6 +2,16 @@
 # C++/ggml. Sourced from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# [TTS GGML] Parler-TTS on Vulkan
+# (qvac-ext-lib-whisper.cpp PR #110, QVAC-21596): runs the full Parler pipeline
+# -- T5 encoder, delay-pattern decoder LM, DAC vocoder -- on Vulkan for the
+# mini / large / Indic families. The GPU gate becomes a validated-backend
+# allowlist (Metal + Vulkan) instead of a Metal-only check, and T5 / DAC now
+# declare GGML_PREC_F32 on the matmuls that need it. Requires ggml-speech
+# >= 2026-07-29, which is what makes that precision request effective on the
+# GPU backends (qvac-ext-ggml PR #46); the floor below is a hard dependency,
+# not a courtesy bump. Unvalidated backends still fall back to CPU.
+#
 # [TTS GGML] Parler-TTS Metal GPU support
 # (qvac-ext-lib-whisper.cpp PR #103, QVAC-21593): adds Metal GPU offload to the
 # Parler engine (EngineOptions::n_gpu_layers) -- flash-attention plus fused
@@ -125,10 +135,13 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 67c7ad3a (PR #103
-# merged: Parler-TTS Metal GPU, described above -- the current master tip), one
-# commit ahead of the fc844ce5 pin (PR #99, CosyVoice3, described above), which
-# it carries. Carries the 05879fc pin (PR #88 merged: Chatterbox S3Gen
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 928369c9 -- the
+# current master tip, shared with the whisper-cpp / parakeet-cpp / audiogen-cpp
+# ports so all four resolve one source archive. The only engines/tts change
+# since the 67c7ad3a pin (PR #103, Parler-TTS Metal GPU, described above) is
+# PR #110 (Parler-TTS on Vulkan, described above); the intervening commits
+# touch engines/audiogen and engines/parakeet only. Carries the fc844ce5 pin
+# (PR #99, CosyVoice3, described above) and the 05879fc pin (PR #88 merged: Chatterbox S3Gen
 # configurable CFG rate, described above) and the 1cbea2b7 pin (PR #82 merged:
 # LavaSR enhancer on a ggml compute graph, described below), one commit ahead of
 # the d16d7853 pin (PR #81, T3 per-op GPU->CPU fallback), which it carries.
@@ -186,8 +199,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 67c7ad3ae0b99947e9d3e6782d439dcba22c0f9c
-    SHA512 61c8b6921772ea46943ebd6ad23e55e193df79c0753527e4ccf5ae5ad3f26a6a9567668ac70432b0b75e10380eea263ef1d2c24539e888c1e837dac08dba0417
+    REF 928369c9309a051f91a8b3910e8dc03b198f7709
+    SHA512 2e65078f0f18c62463490abdd62a1e4483e8de9e0be7d8934357787051e093b9b2fd6bd48ee37e7c8475d310c917649f53867151c9a5c106e5024120f34fdeb8
     HEAD_REF master
 )
 

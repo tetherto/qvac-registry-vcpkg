@@ -3,14 +3,20 @@
 # third_party/whisper.cpp as an upstream git subtree with a declared QVAC
 # delta (see PATCHES.md there). The GNUInstallDirs ordering patch this port
 # used to carry is absorbed into that delta, so PATCHES is gone.
-# This port moves together with parakeet-cpp and tts-cpp so all three registry
-# ports source the same master commit and the same archive SHA512.
+# This port moves together with parakeet-cpp, tts-cpp and audiogen-cpp so all
+# four registry ports source the same master commit and the same archive
+# SHA512, and vcpkg fetches one archive instead of four.
+#
+# This republish advances the pin from 88b690c0 to master HEAD 928369c9 for
+# that archive sharing and raises the ggml-speech floor to 2026-07-29;
+# third_party/whisper.cpp is byte-identical between the two commits (every
+# change in between lands in engines/).
 #
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-whisper.cpp
-  REF 88b690c051666a63d6f5494a68596c4e785468ef
-  SHA512 a1adf1fc953e4c8210e120fc2859aece34a0c738407a346dadaa4bc1762b3f6f6f65ddaceb5ee6d470f56e209ae1d6f49a671cc844f3dfdd8c8a46bf53b426f0
+  REF 928369c9309a051f91a8b3910e8dc03b198f7709
+  SHA512 2e65078f0f18c62463490abdd62a1e4483e8de9e0be7d8934357787051e093b9b2fd6bd48ee37e7c8475d310c917649f53867151c9a5c106e5024120f34fdeb8
   HEAD_REF master
 )
 

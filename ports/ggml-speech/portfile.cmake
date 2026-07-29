@@ -1,11 +1,12 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech. Adds the ACE-Step Oobleck VAE
-# custom ops (snake, col2im_1d) on top of the prior pin; other consumers
-# byte-identical.
+# ggml-speech: tetherto/qvac-ext-ggml@speech. This pin honours GGML_PREC_F32 on
+# Vulkan and Metal (PR #46) and adds the Vulkan side of the ACE-Step custom ops
+# plus a scalar fp32 quantized matmul for coopmat devices (PR #45). CPU output
+# is unchanged.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 1383d5e2f9f90ea51eba7c6ccaf679193e573206
-    SHA512 e4f6846c9c8d758c249d40e458a329d2fd6136372eb1c2c7c5bf23e0ffc6f82a3d180f37689c3f9673d12a00f008473425e1ebaf0da8b2a537a3aa6894915b52
+    REF f102f94686346db62a2decef9160ffa6860329a3
+    SHA512 4a33754978813653f21c434f02c7de97b47d36bd86522e685f6ae7a87329f1578b2c5274135692ac44e7b2867dd4d77256c8376320dd68a9b300eb0c13a92046
     HEAD_REF speech
 )
 
