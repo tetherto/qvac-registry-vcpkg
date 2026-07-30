@@ -1,7 +1,7 @@
 {
   "name": "ggml-speech",
-  "version-date": "2026-07-29",
-  "description": "Speech-stack ggml flavour (tetherto/qvac-ext-ggml@speech). This pin makes GGML_PREC_F32 effective on the GPU backends: Vulkan and Metal previously reduced f32 matmuls in fp16 regardless of the requested precision, so callers carrying large-magnitude activations (Parler-TTS T5/DAC, ACE-Step) lost accuracy or saturated past 65504. Adds scalar fp32 matmul pipelines (dense and quantized) selected on GGML_PREC_F32, a Vulkan GET_ROWS offset fix, and Vulkan kernels for the ACE-Step Oobleck VAE custom ops (snake, col2im_1d) whose CPU + Metal implementations landed in the prior pin. CPU output is unchanged.",
+  "version-date": "2026-07-30",
+  "description": "Speech-stack ggml flavour (tetherto/qvac-ext-ggml@speech). This pin teaches the Vulkan backend to CPY from the k-quants to F32 (PR #47): pipeline_cpy_quant_f32 covered only the legacy quants (Q4_0, Q4_1, Q5_0, Q5_1, Q8_0, IQ4_NL), so ggml_cast(<k-quant> -> F32) had no pipeline to bind and hit the GGML_ABORT at the end of ggml_vk_get_cpy_pipeline -- 'Missing CPY op for types: q4_K f32'. Every Vulkan audiogen runner aborted on it, because the ACE-Step FSQ detokenizer casts a Q4_K special-tokens tensor to F32 in-graph and there is no CPU fallback to absorb it (supports_op correctly returns false, but the stage computes with a direct single-backend call). Carries the prior pin's GGML_PREC_F32 work on Vulkan and Metal (PR #46) and the Vulkan ACE-Step Oobleck VAE custom ops (PR #45). CPU output is unchanged.",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml/tree/speech",
   "license": "MIT",
   "dependencies": [

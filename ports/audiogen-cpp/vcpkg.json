@@ -1,13 +1,14 @@
 {
   "name": "audiogen-cpp",
   "version-date": "2026-07-30",
-  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. Pins master HEAD 26803b09 (QVAC-22955: sequential lazy stage loading — create() loads each stage right before its step and frees it right after, bounding the peak resident set to a single stage so a non-entitled iOS app is no longer jetsam-killed mid-load). ggml-speech floor stays 2026-07-29 (first ggml-speech with the Vulkan snake / col2im_1d kernels + GGML_PREC_F32 matmul paths the Vulkan ACE-Step pipeline needs, qvac-ext-ggml PRs #45 / #46).",
+  "port-version": 1,
+  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. Same pin as port-version 0 (master HEAD 26803b09, QVAC-22955: sequential lazy stage loading — create() loads each stage right before its step and frees it right after, bounding the peak resident set to a single stage so a non-entitled iOS app is no longer jetsam-killed mid-load). This republish raises the ggml-speech floor to 2026-07-30, a hard dependency rather than a courtesy bump: the ACE-Step FSQ detokenizer casts a Q4_K special-tokens tensor to F32 in-graph and runs on the GPU only under Vulkan, so before qvac-ext-ggml PR #47 every Vulkan runner aborted on 'Missing CPY op for types: q4_K f32', with no CPU fallback to absorb it. Carries the Vulkan snake / col2im_1d kernels and GGML_PREC_F32 matmul paths from PRs #45 / #46.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/audiogen",
   "license": "MIT",
   "dependencies": [
     {
       "name": "ggml-speech",
-      "version>=": "2026-07-29"
+      "version>=": "2026-07-30"
     },
     {
       "name": "vcpkg-cmake",

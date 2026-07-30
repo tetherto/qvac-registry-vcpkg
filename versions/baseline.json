@@ -6,7 +6,7 @@
     },
     "audiogen-cpp": {
       "baseline": "2026-07-30",
-      "port-version": 0
+      "port-version": 1
     },
     "benchmark": {
       "baseline": "1.9.1",
@@ -29,7 +29,7 @@
       "port-version": 2
     },
     "ggml-speech": {
-      "baseline": "2026-07-29",
+      "baseline": "2026-07-30",
       "port-version": 0
     },
     "hip": {
@@ -121,7 +121,7 @@
       "port-version": 2
     },
     "tts-cpp": {
-      "baseline": "2026-07-29",
+      "baseline": "2026-07-30",
       "port-version": 0
     },
     "vcpkg-cmake": {

@@ -1,12 +1,13 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech. This pin honours GGML_PREC_F32 on
-# Vulkan and Metal (PR #46) and adds the Vulkan side of the ACE-Step custom ops
-# plus a scalar fp32 quantized matmul for coopmat devices (PR #45). CPU output
-# is unchanged.
+# ggml-speech: tetherto/qvac-ext-ggml@speech. This pin adds Vulkan CPY from the
+# k-quants to F32 (PR #47): pipeline_cpy_quant_f32 covered only the legacy
+# quants, so ggml_cast(<k-quant> -> F32) had no pipeline to bind and aborted in
+# ggml_vk_get_cpy_pipeline. Carries the GGML_PREC_F32 GPU work (PR #46) and the
+# Vulkan ACE-Step custom ops (PR #45). CPU output is unchanged.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF f102f94686346db62a2decef9160ffa6860329a3
-    SHA512 4a33754978813653f21c434f02c7de97b47d36bd86522e685f6ae7a87329f1578b2c5274135692ac44e7b2867dd4d77256c8376320dd68a9b300eb0c13a92046
+    REF 56966b560cd493e1ad7a844861745671610b8a6a
+    SHA512 d378a684db60af7ec4322968e115beed1ecccfb5d9fad6318717bf43ed362bc7303eb28c589f5825a81adb19a838fd6bc2fd82f9551008a4cd9db0ad3e0002fd
     HEAD_REF speech
 )
 

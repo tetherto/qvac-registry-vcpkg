@@ -2,6 +2,28 @@
 # C++/ggml. Sourced from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# [TTS GGML] Parler-TTS: bounded DAC decode memory + always-sampling
+# (qvac-ext-lib-whisper.cpp PR #114, QVAC-21599): fixes the iOS e2e failure
+# `parler: DAC decode failed`, which had two compounding causes.
+#   1. The DAC compute arena was unbounded in output length
+#      (~13.6 + 1.957 * n_frames MiB). iOS backs Metal buffers with
+#      posix_memalign, where macOS uses vm_allocate and effectively never
+#      fails at these sizes -- so it was fatal on device and invisible on a
+#      Mac. Streaming also re-decoded the whole code prefix on every chunk:
+#      O(n^2) work and ~10 growing allocations up to 837 MiB. Decoding now
+#      runs in fixed 128-frame windows that consult the surrounding frames as
+#      convolution context, so each window is bit-identical to slicing a
+#      whole-sequence decode. Peak DAC memory is O(1) in output length and
+#      streaming got 2.2-2.5x faster.
+#   2. Argmax decoding is degenerate for this model family: the LM collapses
+#      into a silence attractor after the first word, and EOS is gated on
+#      codebook 0 emitting EOS *as its argmax*, so generation never terminates
+#      and runs to the frame cap. The Engine now always samples -- greedy and
+#      top_k = 1 are repaired to the model's sampled defaults with a warning
+#      naming the trigger. Output is bit-identical to the previous pin for
+#      configurations that already sampled.
+# No new ggml-speech requirement: this is engine-side only.
+#
 # [TTS GGML] Parler-TTS on Vulkan
 # (qvac-ext-lib-whisper.cpp PR #110, QVAC-21596): runs the full Parler pipeline
 # -- T5 encoder, delay-pattern decoder LM, DAC vocoder -- on Vulkan for the
@@ -135,12 +157,13 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 928369c9 -- the
-# current master tip, shared with the whisper-cpp / parakeet-cpp / audiogen-cpp
-# ports so all four resolve one source archive. The only engines/tts change
-# since the 67c7ad3a pin (PR #103, Parler-TTS Metal GPU, described above) is
-# PR #110 (Parler-TTS on Vulkan, described above); the intervening commits
-# touch engines/audiogen and engines/parakeet only. Carries the fc844ce5 pin
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD d09cdb9e -- the
+# current master tip. The only engines/tts change since the 928369c9 pin
+# (PR #110, Parler-TTS on Vulkan, described above) is PR #114 (bounded DAC
+# decode memory + always-sampling, described above); the intervening commits
+# touch engines/audiogen and .github only. whisper-cpp and parakeet-cpp stay
+# at 928369c9 and audiogen-cpp at 26803b09 because their subtrees are
+# byte-identical at those commits. Carries the fc844ce5 pin
 # (PR #99, CosyVoice3, described above) and the 05879fc pin (PR #88 merged: Chatterbox S3Gen
 # configurable CFG rate, described above) and the 1cbea2b7 pin (PR #82 merged:
 # LavaSR enhancer on a ggml compute graph, described below), one commit ahead of
@@ -199,8 +222,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 928369c9309a051f91a8b3910e8dc03b198f7709
-    SHA512 2e65078f0f18c62463490abdd62a1e4483e8de9e0be7d8934357787051e093b9b2fd6bd48ee37e7c8475d310c917649f53867151c9a5c106e5024120f34fdeb8
+    REF d09cdb9ee6cfeb18c3b08963c07c97a078c7b281
+    SHA512 1d7d79a4afa41673d5f140221036fe08c181832f7a9119be5461a4d5cbff6a7cd17a67f3200c771ea61e699ebf32b664c39616579c19614d4649b483a20f55e0
     HEAD_REF master
 )
 
