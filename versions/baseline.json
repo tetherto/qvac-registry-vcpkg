@@ -116,6 +116,10 @@
       "baseline": "1.0.0",
       "port-version": 0
     },
+    "speech-cpp": {
+      "baseline": "2026-07-30",
+      "port-version": 0
+    },
     "ssplit": {
       "baseline": "1.0.0",
       "port-version": 0
