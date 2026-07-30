@@ -1,7 +1,7 @@
 {
   "name": "audiogen-cpp",
-  "version-date": "2026-07-29",
-  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. Same pin as the prior publish (master HEAD 928369c9); this republish raises the ggml-speech floor to 2026-07-29, which is the first ggml-speech carrying the Vulkan snake / col2im_1d kernels and the GGML_PREC_F32 matmul paths the Vulkan ACE-Step pipeline needs (qvac-ext-ggml PRs #45 / #46).",
+  "version-date": "2026-07-30",
+  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. Pins master HEAD 26803b09 (QVAC-22955: sequential lazy stage loading — create() loads each stage right before its step and frees it right after, bounding the peak resident set to a single stage so a non-entitled iOS app is no longer jetsam-killed mid-load). ggml-speech floor stays 2026-07-29 (first ggml-speech with the Vulkan snake / col2im_1d kernels + GGML_PREC_F32 matmul paths the Vulkan ACE-Step pipeline needs, qvac-ext-ggml PRs #45 / #46).",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/audiogen",
   "license": "MIT",
   "dependencies": [
