@@ -16,6 +16,28 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # 2026-07-03 (REF pinned to the branch tip for reproducibility).
 #
+# 97594f3 is the tip of 2026-07-03 after merging PR #27 on top of PR #22:
+# the walk's masked self-attention composes its mask explicitly
+# (scale -> add -> soft_max, the KV-cache path's formulation) instead of the
+# fused masked soft-max, whose CUDA kernel in this line's ggml (50cf5630)
+# rejects the walk's 2D-mask head broadcast. Golden-replay gated at cosines
+# identical to the fused path; the former CUDA crash config now passes.
+#
+# 61235ea is the tip of 2026-07-03 after merging PR #22: full ABot-World
+# support — model detection/loading, the interactive walk session C API
+# (sd_abot_session_*, opt-in per-layer KV cache + profiling as session
+# params, validated against the attention window at load), native scene
+# creation (sd_abot_scene_create: umT5-XXL prompt encode + Wan2.2 VAE
+# first-frame encode, replacing offline PyTorch extraction), gated text-only
+# packs, an untrusted-input-hardened scene-pack parser behind an exception
+# barrier at the C API boundary, and a fix that loads DiT params in their
+# GGUF type (quantized DiTs run natively; halves weight VRAM). Existing
+# pipelines are untouched (additive-only vs 6250dac; see the PR's regression
+# notes — the full SD/SDXL/FLUX.2/Wan/LTX/Ideogram/ESRGAN suite is green on
+# this build). Runs on this line's ggml (2026-07-03#2) unmodified: the walk's
+# masked attention composes its mask explicitly (scale -> add -> soft_max)
+# instead of relying on the fused masked soft-max kernel.
+#
 # 6250dac is the tip of 2026-07-03 after merging PR #21: it fixes the Wan VAE
 # temporal upsample to match the reference first-chunk "Rep" semantics (run
 # time_conv with causal zero padding on chunk 0, trim the first doubled frame,
@@ -50,8 +72,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 6250dac2b4a22976a3e0d6f096229174b7c6e5a9
-    SHA512 d4fa1b20421a189d1416d55b7cd80e6b3f8af7357a5abb9fd4776d8a6924842d90b903396252846ee6a8a182d084b46bd306b2f4fe15b56a41ce410e839bf223
+    REF 97594f36ee6946a446c8911c3154b4df2214a9a8
+    SHA512 4fab35be136daa4e6d22e6b6161bfb42fc3a5d9ef6a4b4ddac2a57e2f9c4fc946626342010a1a5a1f769f881c4789b7ce1d99a24fca4e33c5f1ea378d8c7488f
 )
 
 set(SD_FLASH_ATTN OFF)
