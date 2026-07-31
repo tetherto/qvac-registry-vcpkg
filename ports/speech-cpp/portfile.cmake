@@ -1,9 +1,10 @@
 # speech-cpp: umbrella port over tetherto/qvac-ext-lib-whisper.cpp (QIP #94,
 # Ticket 4). One source pin, per-engine features:
 #
-#   speech-cpp[whisper]                  -> third_party/whisper.cpp (package `whisper`)
-#   speech-cpp[parakeet]                 -> engines/parakeet        (package `qvac-parakeet`)
-#   speech-cpp[chatterbox|supertonic]    -> engines/tts             (package `tts-cpp`)
+#   speech-cpp[whisper]   -> third_party/whisper.cpp (package `whisper`)
+#   speech-cpp[parakeet]  -> engines/parakeet        (package `qvac-parakeet`)
+#   speech-cpp[tts]       -> engines/tts             (package `tts-cpp`)
+#   speech-cpp[audiogen]  -> engines/audiogen        (package `audiogen-cpp`)
 #
 # The repo-root CMakeLists.txt is the superbuild this port drives: it resolves
 # ONE system ggml (find_package(ggml) from the ggml-speech port) and hands it
@@ -36,6 +37,12 @@ vcpkg_from_github(
     REF d09cdb9ee6cfeb18c3b08963c07c97a078c7b281
     SHA512 1d7d79a4afa41673d5f140221036fe08c181832f7a9119be5461a4d5cbff6a7cd17a67f3200c771ea61e699ebf32b664c39616579c19614d4649b483a20f55e0
     HEAD_REF master
+    PATCHES
+        # The superbuild at this pin gates whisper / parakeet / tts only; add
+        # the same-shaped gate for engines/audiogen (byte-identical here to the
+        # standalone audiogen-cpp port's 26803b09 pin). Drop once upstream
+        # grows SPEECH_BUILD_AUDIOGEN.
+        patches/0001-umbrella-audiogen-gate.patch
 )
 
 if (NOT EXISTS "${SOURCE_PATH}/CMakeLists.txt")
@@ -47,23 +54,28 @@ endif()
 set(SPEECH_BUILD_WHISPER  OFF)
 set(SPEECH_BUILD_PARAKEET OFF)
 set(SPEECH_BUILD_TTS      OFF)
+set(SPEECH_BUILD_AUDIOGEN OFF)
 if("whisper" IN_LIST FEATURES)
     set(SPEECH_BUILD_WHISPER ON)
 endif()
 if("parakeet" IN_LIST FEATURES)
     set(SPEECH_BUILD_PARAKEET ON)
 endif()
-# engines/tts builds as one library carrying every TTS engine; either TTS
-# feature turns it on.
-if("chatterbox" IN_LIST FEATURES OR "supertonic" IN_LIST FEATURES)
+if("tts" IN_LIST FEATURES)
     set(SPEECH_BUILD_TTS ON)
 endif()
+if("audiogen" IN_LIST FEATURES)
+    set(SPEECH_BUILD_AUDIOGEN ON)
+endif()
 
-if (NOT SPEECH_BUILD_WHISPER AND NOT SPEECH_BUILD_PARAKEET AND NOT SPEECH_BUILD_TTS)
+# Unreachable through a default install (the whisper feature is a default);
+# guards a manifest that sets default-features false and picks only backends.
+if (NOT SPEECH_BUILD_WHISPER AND NOT SPEECH_BUILD_PARAKEET
+    AND NOT SPEECH_BUILD_TTS AND NOT SPEECH_BUILD_AUDIOGEN)
     message(FATAL_ERROR
         "speech-cpp: no engine selected. Enable at least one of the engine "
         "features: speech-cpp[whisper], speech-cpp[parakeet], "
-        "speech-cpp[chatterbox], speech-cpp[supertonic].")
+        "speech-cpp[tts], speech-cpp[audiogen].")
 endif()
 
 # Engine-side GPU gating (the actual backends are compiled into ggml-speech;
@@ -93,11 +105,21 @@ vcpkg_cmake_configure(
         -DSPEECH_BUILD_WHISPER=${SPEECH_BUILD_WHISPER}
         -DSPEECH_BUILD_PARAKEET=${SPEECH_BUILD_PARAKEET}
         -DSPEECH_BUILD_TTS=${SPEECH_BUILD_TTS}
+        -DSPEECH_BUILD_AUDIOGEN=${SPEECH_BUILD_AUDIOGEN}
         -DSPEECH_BUILD_TESTS=OFF
         -DSPEECH_BUILD_EXECUTABLES=OFF
         -DBUILD_SHARED_LIBS=OFF
-        # whisper-specific (the umbrella owns WHISPER_USE_SYSTEM_GGML,
-        # WHISPER_BUILD_TESTS/EXAMPLES and WHISPER_BUILD_PARAKEET=OFF itself)
+        # One shared system ggml. The superbuild already forces these (whisper
+        # via CACHE FORCE; parakeet via set(); tts / audiogen default ON), but
+        # the whole shared-pin premise rests on them, so pass them defensively
+        # too — harmless when redundant, and a vendored-ggml build can never
+        # slip in silently if an upstream default changes.
+        -DWHISPER_USE_SYSTEM_GGML=ON
+        -DPARAKEET_USE_SYSTEM_GGML=ON
+        -DTTS_CPP_USE_SYSTEM_GGML=ON
+        -DAUDIOGEN_USE_SYSTEM_GGML=ON
+        # whisper-specific (the umbrella owns WHISPER_BUILD_TESTS/EXAMPLES and
+        # WHISPER_BUILD_PARAKEET=OFF itself)
         -DWHISPER_BUILD_SERVER=OFF
         # parakeet-specific
         -DPARAKEET_BUILD_LIBRARY=ON
@@ -110,6 +132,10 @@ vcpkg_cmake_configure(
         -DTTS_CPP_INSTALL=ON
         -DTTS_CPP_OPENMP=OFF
         -DTTS_CPP_CCACHE=OFF
+        # audiogen-specific
+        -DAUDIOGEN_BUILD_LIBRARY=ON
+        -DAUDIOGEN_INSTALL=ON
+        -DAUDIOGEN_CCACHE=OFF
         # shared ggml-side knobs the engines forward
         -DGGML_NATIVE=OFF
         -DGGML_OPENMP=OFF
@@ -149,6 +175,9 @@ if (SPEECH_BUILD_TTS)
             SPEECH_TTS_CONFIG_CONTENTS "${SPEECH_TTS_CONFIG_CONTENTS}")
         file(WRITE "${SPEECH_TTS_CONFIG}" "${SPEECH_TTS_CONFIG_CONTENTS}")
     endif()
+endif()
+if (SPEECH_BUILD_AUDIOGEN)
+    vcpkg_cmake_config_fixup(PACKAGE_NAME audiogen-cpp CONFIG_PATH share/audiogen-cpp)
 endif()
 
 # The engines' generated .pc files carry absolute -L/-I paths derived from the

@@ -1,7 +1,7 @@
 {
   "name": "speech-cpp",
   "version-date": "2026-07-30",
-  "description": "Umbrella port over the QVAC speech stack (tetherto/qvac-ext-lib-whisper.cpp): one source pin, per-engine features. speech-cpp[whisper] builds upstream whisper.cpp from third_party/whisper.cpp (CMake package `whisper`); speech-cpp[parakeet] builds the Parakeet ASR + Sortformer diarization engine from engines/parakeet under the qvac-parakeet namespace (find_package(qvac-parakeet) + qvac::parakeet); speech-cpp[chatterbox] / speech-cpp[supertonic] build the TTS engine collection from engines/tts (find_package(tts-cpp) -- one library that ships Chatterbox, Supertonic, CosyVoice3, Parler-TTS and LavaSR; either feature enables it). Upstream whisper.cpp's own bundled parakeet is explicitly NOT built or installed, so speech-cpp[whisper,parakeet] co-installs without the lib/parakeet.* file-ownership clash the standalone ports had. All engines link the single system ggml from the ggml-speech port; the backend features (metal / vulkan / opencl / cuda) fan out to the matching ggml-speech features so a consumer manifest like speech-cpp[whisper,parakeet,vulkan] resolves one shared ggml-speech with unified features. Supersedes the standalone whisper-cpp, parakeet-cpp and tts-cpp ports, which remain available transitionally.",
+  "description": "Umbrella port over the QVAC speech stack (tetherto/qvac-ext-lib-whisper.cpp): one source pin, per-engine features. speech-cpp[whisper] builds upstream whisper.cpp from third_party/whisper.cpp (CMake package `whisper`); speech-cpp[parakeet] builds the Parakeet ASR + Sortformer diarization engine from engines/parakeet under the qvac-parakeet namespace (find_package(qvac-parakeet) + qvac::parakeet); speech-cpp[tts] builds the TTS engine collection from engines/tts (find_package(tts-cpp) -- one library shipping Chatterbox, Supertonic, CosyVoice3, Parler-TTS and LavaSR); speech-cpp[audiogen] builds the ACE-Step music-generation engine from engines/audiogen (find_package(audiogen-cpp)). Upstream whisper.cpp's own bundled parakeet is explicitly NOT built or installed, so speech-cpp[whisper,parakeet] co-installs without the lib/parakeet.* file-ownership clash the standalone ports had. All engines link the single system ggml from the ggml-speech port; the backend features (metal / vulkan / opencl / cuda) fan out to the matching ggml-speech features so a consumer manifest like speech-cpp[whisper,parakeet,vulkan] resolves one shared ggml-speech with unified features. The default feature set is the whisper engine plus the platform's default GPU backend; consumers that want a different engine mix set default-features to false and pick explicitly. Supersedes the standalone whisper-cpp, parakeet-cpp, tts-cpp and audiogen-cpp ports, which remain available transitionally.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp",
   "license": "MIT",
   "dependencies": [
@@ -20,6 +20,7 @@
     }
   ],
   "default-features": [
+    "whisper",
     {
       "name": "metal",
       "platform": "osx | ios"
@@ -40,17 +41,14 @@
     "parakeet": {
       "description": "Build the Parakeet engine (NVIDIA FastConformer ASR: CTC / TDT / EOU, plus Sortformer diarization) from engines/parakeet. CMake package: find_package(qvac-parakeet CONFIG) + qvac::parakeet."
     },
-    "chatterbox": {
-      "description": "Build the TTS engine collection from engines/tts for Resemble Chatterbox (Turbo + Multilingual). The engines/tts tree builds as one library, so this and the supertonic feature install the same tts-cpp package; enabling either is sufficient. CMake package: find_package(tts-cpp CONFIG) + tts-cpp::tts-cpp.",
+    "tts": {
+      "description": "Build the TTS engine collection from engines/tts: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS and LavaSR speech enhancement, as one library. CMake package: find_package(tts-cpp CONFIG) + tts-cpp::tts-cpp.",
       "dependencies": [
         "mecab"
       ]
     },
-    "supertonic": {
-      "description": "Build the TTS engine collection from engines/tts for Supertonic. The engines/tts tree builds as one library, so this and the chatterbox feature install the same tts-cpp package; enabling either is sufficient. CMake package: find_package(tts-cpp CONFIG) + tts-cpp::tts-cpp.",
-      "dependencies": [
-        "mecab"
-      ]
+    "audiogen": {
+      "description": "Build the audiogen engine (ACE-Step music generation) from engines/audiogen. CMake package: find_package(audiogen-cpp CONFIG) + audiogen-cpp::audiogen-cpp."
     },
     "coreml": {
       "description": "Parakeet only: enable the Apple Core ML (Neural Engine) encoder sidecar (presence-driven at runtime; falls back to the ggml encoder when the .mlmodelc sidecar is absent).",
