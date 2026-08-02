@@ -50,7 +50,7 @@
     },
     "marian-dev": {
       "baseline": "1.0.0",
-      "port-version": 0
+      "port-version": 1
     },
     "mecab": {
       "baseline": "2019-09-25",
