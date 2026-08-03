@@ -8,8 +8,7 @@
 # (~100 GB for a 90 min file, SIGKILL). This pin computes the mel once (global
 # CMVN) and slides the encoder over it in overlapping windows, trimming the
 # shared context at the interior seams; inputs that fit one window keep the
-# bit-identical single-pass path. Requires ggml-speech >= 2026-07-15 (unchanged
-# from the previous pin).
+# bit-identical single-pass path.
 #
 # Apple Core ML (Neural Engine) encoder sidecar: adds the optional, Apple-only
 # `coreml` feature (default on osx/ios). When enabled and a matching
@@ -33,13 +32,14 @@
 # `parakeet::` namespace, the include/parakeet/ header directory and this
 # port's own name are unchanged; only file ownership moved.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp master HEAD 928369c9, shared with
-# the whisper-cpp / tts-cpp / audiogen-cpp ports so all four resolve one source
-# archive. engines/parakeet is byte-identical to the previous 35cc600e pin
-# (PR #106, the namespace rename described above); 928369c9 is its child and
-# touches engines/audiogen only. 35cc600e itself layered the rename on the
-# Core ML encoder sidecar (22423551, PR #100) and the long-audio windowed
-# encoder (88b690c0, PR #101).
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp master 1823ab31, shared with the
+# whisper-cpp / tts-cpp / audiogen-cpp ports so all four resolve one source
+# archive against one ggml-speech. engines/parakeet is byte-identical to the
+# previous 928369c9 pin -- the intervening commits touch engines/tts,
+# engines/audiogen and CI only -- so this is a metadata-only move. 928369c9 was
+# itself byte-identical to the 35cc600e pin (PR #106, the namespace rename
+# described above), which layered the rename on the Core ML encoder sidecar
+# (22423551, PR #100) and the long-audio windowed encoder (88b690c0, PR #101).
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -47,8 +47,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 928369c9309a051f91a8b3910e8dc03b198f7709
-    SHA512 2e65078f0f18c62463490abdd62a1e4483e8de9e0be7d8934357787051e093b9b2fd6bd48ee37e7c8475d310c917649f53867151c9a5c106e5024120f34fdeb8
+    REF 1823ab31ec2c3f42b2056316d6720382300fd0ee
+    SHA512 aa155c6b6b662150db3f6647dcd25eb4dfe78c3732f121333294c7cbb15a5e8ff3104b733e22af184cf1b713e922875659264aa095f5e6dfa5d7a9fd7f3a5f0f
     HEAD_REF master
 )
 

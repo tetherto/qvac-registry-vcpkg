@@ -1,6 +1,11 @@
 # audiogen-cpp: ACE-Step music generation in pure C++/ggml, from the
 # engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp. Consumes ggml-speech
 # for the custom snake / col2im_1d ops the Oobleck VAE needs.
+#
+# The REF is the shared qvac-ext-lib-whisper.cpp master pin used by every -cpp
+# port in this registry. engines/audiogen/ is unchanged between the previous pin
+# (26803b09) and this one, so the built sources are identical; the move only
+# collapses the four ports onto one source archive and one ggml-speech.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -8,8 +13,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 26803b093a7ffefa7011aedc7ac7baed45a21f3c
-    SHA512 11b915f803a02b672dd227f46b5353d8ce65085caec7aa3f387889248de9259c105178564e2afd9787117dcaf494df51b29044ae6254f3be09e5526751511327
+    REF 1823ab31ec2c3f42b2056316d6720382300fd0ee
+    SHA512 aa155c6b6b662150db3f6647dcd25eb4dfe78c3732f121333294c7cbb15a5e8ff3104b733e22af184cf1b713e922875659264aa095f5e6dfa5d7a9fd7f3a5f0f
     HEAD_REF master
 )
 
