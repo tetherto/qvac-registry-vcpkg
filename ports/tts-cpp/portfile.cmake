@@ -3,7 +3,7 @@
 # consumes the ggml-speech port.
 #
 # [TTS GGML] Parler-TTS Vulkan on ARM Mali
-# (qvac-ext-lib-whisper.cpp PR #119, QVAC-21598):
+# (qvac-ext-lib-whisper.cpp PR #119):
 # lets the validated Parler pipeline select Vulkan on Mali instead of silently
 # falling back to CPU when GPU execution is requested. Verified end-to-end on
 # a Pixel 9a (Mali-G715). Engine-side only; no new ggml-speech requirement.
