@@ -3,10 +3,27 @@
 # consumes the ggml-speech port.
 #
 # [TTS GGML] Parler-TTS Vulkan on ARM Mali
-# (qvac-ext-lib-whisper.cpp QVAC-21598/parler-tts-vulkan-pixel9, b7e1bf46):
+# (qvac-ext-lib-whisper.cpp PR #119, QVAC-21598):
 # lets the validated Parler pipeline select Vulkan on Mali instead of silently
-# falling back to CPU. Verified end-to-end on a Pixel 9a (Mali-G715).
-# Engine-side only; no new ggml-speech requirement.
+# falling back to CPU when GPU execution is requested. Verified end-to-end on
+# a Pixel 9a (Mali-G715). Engine-side only; no new ggml-speech requirement.
+#
+# [TTS GGML] CosyVoice3 on the GPU (OpenCL / Adreno)
+# (qvac-ext-lib-whisper.cpp PR #118, QVAC-22777): CosyVoice3 landed CPU-only --
+# cosyvoice_load_gguf() hardcoded a CPU backend, all six graphs computed through
+# it directly, and n_gpu_layers / backends_dir were declared but never read.
+# This adds the GPU path and removes what blocked it: mish() built log(exp(x)+1)
+# around a host-only `one` tensor (null deref on the first ggml_cl_add, and
+# GGML_OP_LOG has no ggml-opencl kernel) and is replaced by ggml_softplus,
+# bit-identical over 960001 samples spanning x in [-120,120]; two weights read
+# via ggml_get_data() now stay host-resident, since ggml-opencl's
+# buffer_get_base() returns a sentinel (a segfault, not a slow read) -- which
+# also keeps 545 MB of embed_tokens off the device. Measured on an Adreno 740:
+# 2.04-2.15x faster than the same device's CPU, thermally gated and equal-work
+# on every leg. This also completes PR #117's dl-safety fix -- removing the
+# `one` tensor drops the last ggml_new_f32 call, which #117 left in the
+# standalone cosyvoice_flow.cpp and which fails to link under GGML_BACKEND_DL.
+# CPU output is byte-identical.
 #
 # [TTS GGML] CosyVoice3 dl-safe backend init
 # (qvac-ext-lib-whisper.cpp PR #117, QVAC-22652): the CosyVoice3 engine
@@ -173,12 +190,11 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp branch
-# QVAC-21598/parler-tts-vulkan-pixel9 HEAD b7e1bf46. This is one engine-side
-# commit ahead of master 0a306445 and only changes Parler's Android Mali
-# backend selection plus its shared policy documentation. whisper-cpp,
-# parakeet-cpp, and audiogen-cpp remain on their existing pins because their
-# subtrees are byte-identical. Carries the fc844ce5 pin
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD d6b00d95 (PR #119).
+# Relative to the previous tts-cpp pin 1823ab31, this only changes Parler's
+# Android Mali backend selection plus its shared policy documentation.
+# whisper-cpp, parakeet-cpp, and audiogen-cpp remain on their existing pins
+# because their subtrees are byte-identical. Carries the fc844ce5 pin
 # (PR #99, CosyVoice3, described above) and the 05879fc pin (PR #88 merged: Chatterbox S3Gen
 # configurable CFG rate, described above) and the 1cbea2b7 pin (PR #82 merged:
 # LavaSR enhancer on a ggml compute graph, described below), one commit ahead of
@@ -237,8 +253,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF b7e1bf468fd474bbf0ed72d42276d56d7713c3e8
-    SHA512 4975a09a898b0cbf1e4022a8e51ce0cae3d1164e359230824c00462d06ed21732807d699de3394473ee72fbd4e7a69d13e43e55142381ad3329fc28ea258c593
+    REF d6b00d952a87e5d4333f2522ad81ebebb5696b9b
+    SHA512 40dadd8b39920bba8d91bcb4d1e6380f333a49d9214ef3a9ba53b3bd75ed7cafef97444af466c9ff52c117131ec1dfbe746451e0cda4096a732e4b21440573ee
     HEAD_REF master
 )
 
