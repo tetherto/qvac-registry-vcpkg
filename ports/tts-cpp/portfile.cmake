@@ -2,6 +2,23 @@
 # C++/ggml. Sourced from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# [TTS GGML] CosyVoice3 on the GPU (OpenCL / Adreno)
+# (qvac-ext-lib-whisper.cpp PR #118, QVAC-22777): CosyVoice3 landed CPU-only --
+# cosyvoice_load_gguf() hardcoded a CPU backend, all six graphs computed through
+# it directly, and n_gpu_layers / backends_dir were declared but never read.
+# This adds the GPU path and removes what blocked it: mish() built log(exp(x)+1)
+# around a host-only `one` tensor (null deref on the first ggml_cl_add, and
+# GGML_OP_LOG has no ggml-opencl kernel) and is replaced by ggml_softplus,
+# bit-identical over 960001 samples spanning x in [-120,120]; two weights read
+# via ggml_get_data() now stay host-resident, since ggml-opencl's
+# buffer_get_base() returns a sentinel (a segfault, not a slow read) -- which
+# also keeps 545 MB of embed_tokens off the device. Measured on an Adreno 740:
+# 2.04-2.15x faster than the same device's CPU, thermally gated and equal-work
+# on every leg. This also completes PR #117's dl-safety fix -- removing the
+# `one` tensor drops the last ggml_new_f32 call, which #117 left in the
+# standalone cosyvoice_flow.cpp and which fails to link under GGML_BACKEND_DL.
+# CPU output is byte-identical.
+#
 # [TTS GGML] CosyVoice3 dl-safe backend init
 # (qvac-ext-lib-whisper.cpp PR #117, QVAC-22652): the CosyVoice3 engine
 # (cosyvoice_pipeline.cpp) called ggml_backend_cpu_init() and ggml_new_f32()
@@ -232,8 +249,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 0a306445bcaa063094518a519a11d60e796f6168
-    SHA512 e3ec556771a7e38e22959fbab7cb1a9eb9470e9910763f89e0784b18f8be360936c421cf8aeee1c19745ff4854aeb4ea22dbf547a0fb08e0f7d8b38e8ca69332
+    REF 1823ab31ec2c3f42b2056316d6720382300fd0ee
+    SHA512 aa155c6b6b662150db3f6647dcd25eb4dfe78c3732f121333294c7cbb15a5e8ff3104b733e22af184cf1b713e922875659264aa095f5e6dfa5d7a9fd7f3a5f0f
     HEAD_REF master
 )
 

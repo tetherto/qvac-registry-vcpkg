@@ -1,13 +1,18 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech. This pin adds Vulkan CPY from the
-# k-quants to F32 (PR #47): pipeline_cpy_quant_f32 covered only the legacy
-# quants, so ggml_cast(<k-quant> -> F32) had no pipeline to bind and aborted in
-# ggml_vk_get_cpy_pipeline. Carries the GGML_PREC_F32 GPU work (PR #46) and the
-# Vulkan ACE-Step custom ops (PR #45). CPU output is unchanged.
+# ggml-speech: tetherto/qvac-ext-ggml@speech. This pin lets the Adreno OpenCL
+# fused IM2COL->GEMM path take an unaligned M (PR #50): the fusion gate demanded
+# M % 4 == 0 and silently declined every other shape, so a conv whose output
+# length is not a multiple of 4 fell back to the slow local-memory GEMM. The
+# fused path now builds A into a scratch buffer padded to a multiple of 4 rows
+# and passes that stride to the kernel separately from dst's, with a row-aware
+# store epilogue; for already-aligned M the emitted code is the old flat-index
+# guard. Carries the Adreno OpenCL Parler fixes (PR #49), Vulkan CPY from the
+# k-quants to F32 (PR #47), the GGML_PREC_F32 GPU work (PR #46) and the Vulkan
+# ACE-Step custom ops (PR #45). CPU output is unchanged.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 56966b560cd493e1ad7a844861745671610b8a6a
-    SHA512 d378a684db60af7ec4322968e115beed1ecccfb5d9fad6318717bf43ed362bc7303eb28c589f5825a81adb19a838fd6bc2fd82f9551008a4cd9db0ad3e0002fd
+    REF d02471f8eb0458bf59a2466b535ad91188b50178
+    SHA512 4bf7eef8a55b40c7b064c665999e32a355c1227889f069a3f020678e8a295c168d484a135d0823023f31aa7dde9f87904327e1cf5c55ad7ee40477c6096aa3a2
     HEAD_REF speech
 )
 
