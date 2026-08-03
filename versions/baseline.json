@@ -33,7 +33,7 @@
       "port-version": 2
     },
     "ggml-speech": {
-      "baseline": "2026-07-30",
+      "baseline": "2026-08-03",
       "port-version": 0
     },
     "hip": {
@@ -130,7 +130,7 @@
     },
     "tts-cpp": {
       "baseline": "2026-08-03",
-      "port-version": 0
+      "port-version": 1
     },
     "vcpkg-cmake": {
       "baseline": "2024-04-23",
