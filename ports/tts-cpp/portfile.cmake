@@ -2,6 +2,16 @@
 # C++/ggml. Sourced from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# [TTS GGML] CosyVoice3 dl-safe backend init
+# (qvac-ext-lib-whisper.cpp PR #117, QVAC-22652): the CosyVoice3 engine
+# (cosyvoice_pipeline.cpp) called ggml_backend_cpu_init() and ggml_new_f32()
+# directly, which are unresolvable under GGML_BACKEND_DL=ON (per-arch CPU dlopen
+# variants on aarch64 Linux / Android) -- the @qvac/tts-ggml addon prebuild
+# failed verify-prebuild-symbols on linux-arm64 + android-arm64. Route CPU init
+# through tts_cpp::detail::init_cpu_backend() and build the scalar constant with
+# ggml-base ops instead. CPU output byte-identical (flow parity cosine 1.0);
+# statically-linked arches were unaffected.
+#
 # [TTS GGML] Parler-TTS: bounded DAC decode memory + always-sampling
 # (qvac-ext-lib-whisper.cpp PR #114, QVAC-21599): fixes the iOS e2e failure
 # `parler: DAC decode failed`, which had two compounding causes.
@@ -222,8 +232,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF d09cdb9ee6cfeb18c3b08963c07c97a078c7b281
-    SHA512 1d7d79a4afa41673d5f140221036fe08c181832f7a9119be5461a4d5cbff6a7cd17a67f3200c771ea61e699ebf32b664c39616579c19614d4649b483a20f55e0
+    REF 0a306445bcaa063094518a519a11d60e796f6168
+    SHA512 e3ec556771a7e38e22959fbab7cb1a9eb9470e9910763f89e0784b18f8be360936c421cf8aeee1c19745ff4854aeb4ea22dbf547a0fb08e0f7d8b38e8ca69332
     HEAD_REF master
 )
 
