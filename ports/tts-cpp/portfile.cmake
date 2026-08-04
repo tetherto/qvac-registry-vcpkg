@@ -2,6 +2,12 @@
 # C++/ggml. Sourced from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# This republish only re-aligns the pin onto master b965cba0 and the ggml-speech
+# 2026-08-04 floor, the single source archive and single ggml shared with
+# whisper-cpp, parakeet-cpp and audiogen-cpp. engines/tts is byte-identical to
+# the previous 4456c59b pin -- the only commit in between is the audiogen Metal
+# placement change (PR #122) -- so there is no engine change here.
+#
 # [TTS GGML] CosyVoice3 + Parler iOS memory-peak fix
 # (qvac-ext-lib-whisper.cpp PR #121): both engines loaded weights into dirty ggml
 # backend buffers (no mmap) -- dirty anon RAM iOS jetsam counts against the app
@@ -269,8 +275,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 4456c59b1f07138b30d1076996eb4115f8eb2320
-    SHA512 0b2319969691b2e8c03a7761986a775ac2e1fb27e875791f658152d55f796a7ccd9da272e1a1f3b9d676fd55e04dff18da3430f56f8e1c12627b34dca385774f
+    REF b965cba039f105df055f563ee3654925bfbb428f
+    SHA512 f2df5e82d02a142304db020c5581a9fd24cdffabb26688f81e852b3d2a5ca16e68814097836d5bda078851096fac52b2b98ce3654a01b90dda3c7be3ff25c90c
     HEAD_REF master
 )
 
