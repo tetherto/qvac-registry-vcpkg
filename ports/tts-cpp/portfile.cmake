@@ -2,19 +2,22 @@
 # C++/ggml. Sourced from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# [TTS GGML] CosyVoice3 iOS memory-peak fix
-# (qvac-ext-lib-whisper.cpp PR #121): CosyVoice3 loaded all four GGUFs eagerly at
-# Engine::create() and copied every weight into a ggml backend buffer (no mmap)
-# -- ~2.4 GB of dirty anon RAM co-resident at construction, which iOS jetsam
-# counts against the app memory limit, so the load OOM-killed on non-entitled
-# Device Farm iPhones (crashed:true). Two-part fix, numerically identical output:
-# (1) map-in-place -- mmap the GGUF and back each CPU/host weight tensor with its
-# mapped pointer via ggml_backend_cpu_buffer_from_ptr (bounds + 32B-align guarded,
-# alloc+upload fallback), so weights are clean, file-backed, evictable pages;
-# (2) sequential lazy stage loading -- create() reads voice.gguf (then frees it) +
-# the tokenizer, and run() loads llm -> free -> flow -> free -> hift -> free one at
-# a time, dropping peak resident weight memory to the largest single stage
-# (flow ~1.3 GB). Engine-side only; no new ggml-speech requirement.
+# [TTS GGML] CosyVoice3 + Parler iOS memory-peak fix
+# (qvac-ext-lib-whisper.cpp PR #121): both engines loaded weights into dirty ggml
+# backend buffers (no mmap) -- dirty anon RAM iOS jetsam counts against the app
+# memory limit -- so the CPU model loads OOM-killed on non-entitled Device Farm
+# iPhones (crashed:true). Numerically identical output.
+#   CosyVoice3: (1) map-in-place -- mmap the GGUF and back each CPU/host weight
+#   tensor with its mapped pointer via ggml_backend_cpu_buffer_from_ptr (bounds +
+#   32B-align guarded, alloc+upload fallback), so weights are clean, file-backed,
+#   evictable pages; (2) sequential lazy stage loading -- create() reads
+#   voice.gguf (then frees it) + the tokenizer, and run() loads llm -> free ->
+#   flow -> free -> hift -> free one at a time, dropping peak resident weight
+#   memory from the ~2.4 GB sum to the largest single stage (flow ~1.3 GB).
+#   Parler: map-in-place the ctx_w verbatim weights on the CPU backend (same
+#   ggml_backend_cpu_buffer_from_ptr path), so the indic-q8 CPU load fits on the
+#   tighter Device Farm iPhone. GPU path byte-identical for both. Engine-side
+#   only; no new ggml-speech requirement.
 #
 # [TTS GGML] Parler-TTS Vulkan on ARM Mali
 # (qvac-ext-lib-whisper.cpp PR #119):
@@ -267,8 +270,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 6b0b853a63a81e1a9b8f62b130c2e8062ad467b6
-    SHA512 8efca019575c35289b33b0488d30ce5d5343c6d9089742ebaac270633eacdeaeb4a2d9fa6725dd99d9e946e6a38507fe527c108fd9413e9a99553ae81b63a9da
+    REF 44390c68e499822ecb9445f67d6dbf5f39bc7dca
+    SHA512 d7c7cdcb83f91c9e31e253bdc7e40ce63c258049e44fac431110bb4059b69fb0796b9b5d3fddb66bbb264cead810d7e197f83bfe6cf9e92a36cce84d1accdd78
     HEAD_REF master
 )
 
