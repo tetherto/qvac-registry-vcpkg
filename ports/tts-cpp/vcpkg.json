@@ -1,8 +1,7 @@
 {
   "name": "tts-cpp",
-  "version-date": "2026-08-03",
-  "port-version": 2,
-  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS (CPU + Metal / Vulkan / OpenCL GPU), and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts). This pin (master HEAD d6b00d95, PR #119) lets the validated Parler pipeline select Vulkan on ARM Mali when GPU execution is requested, instead of silently falling back to CPU on Pixel hardware. Explicit CPU execution remains unchanged. It carries PR #118's CosyVoice3 GPU path and the ggml-speech 2026-08-03 floor required by that release, plus the dl-safe backend init (PR #117), bounded Parler DAC decode (PR #114), full Parler Vulkan pipeline (PR #110), Metal GPU support (PR #103), and the original CosyVoice3 engine (PR #99).",
+  "version-date": "2026-08-04",
+  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS (CPU + Metal / Vulkan / OpenCL GPU), and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts). This pin (master HEAD 4456c59b, PR #121) gives CosyVoice3 AND Parler the iOS memory-peak fix: map-in-place weight loading (mmap-backed clean pages) so the CPU model loads fit within the default iOS app memory budget (no OOM on non-entitled devices), plus sequential lazy stage loading for CosyVoice3's ~2.4 GB set; CPU output is byte-identical. It carries PR #119's Parler Vulkan-on-Mali, PR #118's CosyVoice3 GPU path and the ggml-speech 2026-08-03 floor, the dl-safe backend init (PR #117), bounded Parler DAC decode (PR #114), full Parler Vulkan pipeline (PR #110), Metal GPU support (PR #103), and the original CosyVoice3 engine (PR #99).",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/tts",
   "license": "MIT",
   "dependencies": [

@@ -2,6 +2,22 @@
 # C++/ggml. Sourced from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
+# [TTS GGML] CosyVoice3 + Parler iOS memory-peak fix
+# (qvac-ext-lib-whisper.cpp PR #121): both engines loaded weights into dirty ggml
+# backend buffers (no mmap) -- dirty anon RAM iOS jetsam counts against the app
+# memory limit -- so the CPU model loads OOM-killed on non-entitled Device Farm
+# iPhones (crashed:true). Numerically identical output; validated on Device Farm
+# (iOS 13/13 both engines).
+#   CosyVoice3: (1) map-in-place -- mmap the GGUF and back each CPU/host weight
+#   tensor with ggml_backend_cpu_buffer_from_ptr (bounds + 32B-align guarded,
+#   bounds-checked stream fallback), so weights are clean, file-backed, evictable
+#   pages; (2) sequential lazy stage loading -- run() loads llm -> free -> flow ->
+#   free -> hift -> free, dropping peak resident weight memory from the ~2.4 GB sum
+#   to the largest single stage (flow ~1.3 GB).
+#   Parler: map-in-place the ctx_w verbatim weights on the CPU backend, so the
+#   indic-q8 CPU load fits on the tighter Device Farm iPhone. GPU path
+#   byte-identical for both. Engine-side only; no new ggml-speech requirement.
+#
 # [TTS GGML] Parler-TTS Vulkan on ARM Mali
 # (qvac-ext-lib-whisper.cpp PR #119):
 # lets the validated Parler pipeline select Vulkan on Mali instead of silently
@@ -253,8 +269,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF d6b00d952a87e5d4333f2522ad81ebebb5696b9b
-    SHA512 40dadd8b39920bba8d91bcb4d1e6380f333a49d9214ef3a9ba53b3bd75ed7cafef97444af466c9ff52c117131ec1dfbe746451e0cda4096a732e4b21440573ee
+    REF 4456c59b1f07138b30d1076996eb4115f8eb2320
+    SHA512 0b2319969691b2e8c03a7761986a775ac2e1fb27e875791f658152d55f796a7ccd9da272e1a1f3b9d676fd55e04dff18da3430f56f8e1c12627b34dca385774f
     HEAD_REF master
 )
 
