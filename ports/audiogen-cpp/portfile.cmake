@@ -3,9 +3,12 @@
 # for the custom snake / col2im_1d ops the Oobleck VAE needs.
 #
 # The REF is the shared qvac-ext-lib-whisper.cpp master pin used by every -cpp
-# port in this registry. engines/audiogen/ is unchanged between the previous pin
-# (26803b09) and this one, so the built sources are identical; the move only
-# collapses the four ports onto one source archive and one ggml-speech.
+# port in this registry. This pin (PR #122) runs the ACE-Step LM and the FSQ
+# detokenizer on Metal instead of pinning them to the CPU, so on Apple the whole
+# pipeline is on the GPU. It pairs with the ggml-speech 2026-08-04 floor below:
+# moving the detokenizer onto Metal is what first makes ggml_cast(Q4_K -> F32)
+# reachable there, and Metal had no k-quant CPY kernel until ggml PR #51, so
+# this REF against an older ggml-speech aborts on the default turbo-q4 variant.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -13,8 +16,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 1823ab31ec2c3f42b2056316d6720382300fd0ee
-    SHA512 aa155c6b6b662150db3f6647dcd25eb4dfe78c3732f121333294c7cbb15a5e8ff3104b733e22af184cf1b713e922875659264aa095f5e6dfa5d7a9fd7f3a5f0f
+    REF b965cba039f105df055f563ee3654925bfbb428f
+    SHA512 f2df5e82d02a142304db020c5581a9fd24cdffabb26688f81e852b3d2a5ca16e68814097836d5bda078851096fac52b2b98ce3654a01b90dda3c7be3ff25c90c
     HEAD_REF master
 )
 

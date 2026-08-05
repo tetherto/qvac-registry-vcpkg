@@ -7,16 +7,17 @@
 # four registry ports source the same master commit and the same archive
 # SHA512, and vcpkg fetches one archive instead of four.
 #
-# This republish advances the pin from 928369c9 to master 1823ab31 for that
-# archive sharing and raises the ggml-speech floor to 2026-08-03;
+# This republish advances the pin from 1823ab31 to master b965cba0 for that
+# archive sharing and raises the ggml-speech floor to 2026-08-04;
 # third_party/whisper.cpp is byte-identical between the two commits (every
-# change in between lands in engines/ or CI).
+# change in between lands in engines/ or CI), so there is no whisper change
+# here -- only the shared archive and the shared ggml move.
 #
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-lib-whisper.cpp
-  REF 1823ab31ec2c3f42b2056316d6720382300fd0ee
-  SHA512 aa155c6b6b662150db3f6647dcd25eb4dfe78c3732f121333294c7cbb15a5e8ff3104b733e22af184cf1b713e922875659264aa095f5e6dfa5d7a9fd7f3a5f0f
+  REF b965cba039f105df055f563ee3654925bfbb428f
+  SHA512 f2df5e82d02a142304db020c5581a9fd24cdffabb26688f81e852b3d2a5ca16e68814097836d5bda078851096fac52b2b98ce3654a01b90dda3c7be3ff25c90c
   HEAD_REF master
 )
 

@@ -1,18 +1,31 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech. This pin lets the Adreno OpenCL
-# fused IM2COL->GEMM path take an unaligned M (PR #50): the fusion gate demanded
-# M % 4 == 0 and silently declined every other shape, so a conv whose output
-# length is not a multiple of 4 fell back to the slow local-memory GEMM. The
-# fused path now builds A into a scratch buffer padded to a multiple of 4 rows
-# and passes that stride to the kernel separately from dst's, with a row-aware
-# store epilogue; for already-aligned M the emitted code is the old flat-index
-# guard. Carries the Adreno OpenCL Parler fixes (PR #49), Vulkan CPY from the
-# k-quants to F32 (PR #47), the GGML_PREC_F32 GPU work (PR #46) and the Vulkan
-# ACE-Step custom ops (PR #45). CPU output is unchanged.
+# ggml-speech: tetherto/qvac-ext-ggml@speech. This pin adds Metal CPY from the
+# k-quants to F32/F16 (PR #51): kernel_cpy_q_f32 was already generic over the
+# block type and ggml_metal_op_cpy already walked a quantised source in
+# 16-element groups -- exactly the k-quant sub-block size -- so only the
+# instantiations and the supports_op cases were missing and ggml_cast(Q4_K ->
+# F32) aborted with "unsupported op 'CPY'". Reachable today: the ACE-Step FSQ
+# detokenizer keeps detokenizer.special_tokens verbatim, so q3_as_f32 lowers to
+# a cast from the DiT quant, and the addon's default variant is
+# acestep-v15-turbo-Q4_K_M. Dequantise direction only, matching the Vulkan hole
+# closed in PR #47 and the CPU backend.
+#
+# The same pin sizes the Metal im2col threadgroup from CHW instead of the kernel
+# window. With KH == 1 and N == 1 (1-D audio convolutions) the threadgroup was
+# left at KW threads -- 7, or 1 for a pointwise conv -- against a 32-wide SIMD
+# group, so the op was bound by threadgroup dispatch, not bandwidth. Each output
+# position now gets one threadgroup walking its contiguous CHW columns. im2col
+# is a pure gather, so this is bit-exact: the ACE-Step VAE renders a
+# byte-identical wav, at 2.62x (VAE decode 7980 -> 3043 ms on an M5).
+#
+# Carries the unaligned-M Adreno im2col fusion (PR #50), the Adreno OpenCL
+# Parler fixes (PR #49), Vulkan CPY from the k-quants to F32 (PR #47), the
+# GGML_PREC_F32 GPU work (PR #46) and the Vulkan ACE-Step custom ops (PR #45).
+# CPU output is unchanged.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF d02471f8eb0458bf59a2466b535ad91188b50178
-    SHA512 4bf7eef8a55b40c7b064c665999e32a355c1227889f069a3f020678e8a295c168d484a135d0823023f31aa7dde9f87904327e1cf5c55ad7ee40477c6096aa3a2
+    REF b517d335cc05c012ae0e1b266584846f6e664746
+    SHA512 11476f7225ce2d27b0822e58bec339c0f71e46c44e9002341ac57f747b0aac32bb6baa0933680fd1612b48401818f76929ad2c0dfc9d6094b2ea8d60c8a53a88
     HEAD_REF speech
 )
 
