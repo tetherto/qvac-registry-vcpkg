@@ -2,13 +2,12 @@
 # engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp. Consumes ggml-speech
 # for the custom snake / col2im_1d ops the Oobleck VAE needs.
 #
-# The REF is the shared qvac-ext-lib-whisper.cpp master pin used by every -cpp
-# port in this registry. This pin (PR #122) runs the ACE-Step LM and the FSQ
-# detokenizer on Metal instead of pinning them to the CPU, so on Apple the whole
-# pipeline is on the GPU. It pairs with the ggml-speech 2026-08-04 floor below:
-# moving the detokenizer onto Metal is what first makes ggml_cast(Q4_K -> F32)
-# reachable there, and Metal had no k-quant CPY kernel until ggml PR #51, so
-# this REF against an older ggml-speech aborts on the default turbo-q4 variant.
+# This pin (qvac-ext-lib-whisper.cpp PR #125) lets ACE-Step select integrated
+# GPU devices in addition to discrete GPUs. Vulkan reports Android UMA adapters
+# such as Pixel's Mali-G715 as IGPU, so the previous GPU-only lookup silently
+# fell back to CPU. The engine now prefers the validated Vulkan/Metal backends
+# across both device classes. The ggml-speech floor remains 2026-08-04 because
+# it already contains the Vulkan snake / col2im_1d and F32 matmul support.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -16,8 +15,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF b965cba039f105df055f563ee3654925bfbb428f
-    SHA512 f2df5e82d02a142304db020c5581a9fd24cdffabb26688f81e852b3d2a5ca16e68814097836d5bda078851096fac52b2b98ce3654a01b90dda3c7be3ff25c90c
+    REF f37bf4531c48d4f3dd6b95402f9f78ef9bd6c8c5
+    SHA512 44cf5b6839e9db5f7bca35824ac853618bec59122f7aaa4c2ba2773cba189e148dab0fc40b139c498522fd72d3ff173ab87430f35ec6310378dcd68b21162149
     HEAD_REF master
 )
 

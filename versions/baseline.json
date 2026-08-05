@@ -6,7 +6,7 @@
     },
     "audiogen-cpp": {
       "baseline": "2026-08-04",
-      "port-version": 0
+      "port-version": 1
     },
     "benchmark": {
       "baseline": "1.9.1",
