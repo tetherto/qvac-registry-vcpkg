@@ -122,7 +122,7 @@
     },
     "stable-diffusion-cpp": {
       "baseline": "2026-07-03",
-      "port-version": 5
+      "port-version": 6
     },
     "tokenizers-cpp": {
       "baseline": "0.1.1",
