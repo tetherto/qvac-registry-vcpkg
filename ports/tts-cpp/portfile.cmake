@@ -2,11 +2,13 @@
 # C++/ggml. Sourced from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# This republish only re-aligns the pin onto master b965cba0 and the ggml-speech
-# 2026-08-04 floor, the single source archive and single ggml shared with
-# whisper-cpp, parakeet-cpp and audiogen-cpp. engines/tts is byte-identical to
-# the previous 4456c59b pin -- the only commit in between is the audiogen Metal
-# placement change (PR #122) -- so there is no engine change here.
+# [TTS GGML] LavaSR Vulkan on ARM Mali
+# (qvac-ext-lib-whisper.cpp PR #123): lets the LavaSR enhancer select Vulkan on
+# Mali when GPU execution is requested. Small Valhall GEMM dimensions are padded
+# before mul_mat and sliced back to preserve numerical correctness. Verified on
+# Pixel 9a/Mali-G715 with CPU/GPU cosine similarity 1.0 and through the tts-ggml
+# Device Farm suite, where both Supertonic + LavaSR and Chatterbox + LavaSR
+# reported GPU/Vulkan placement and 48 kHz output.
 #
 # [TTS GGML] CosyVoice3 + Parler iOS memory-peak fix
 # (qvac-ext-lib-whisper.cpp PR #121): both engines loaded weights into dirty ggml
@@ -212,9 +214,9 @@
 # bit-identical.  On-device the chatterbox first-test peak drops 3184 -> 2772 MB
 # (under the ~3 GB budget); warm tests unchanged.
 #
-# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD d6b00d95 (PR #119).
-# Relative to the previous tts-cpp pin 1823ab31, this only changes Parler's
-# Android Mali backend selection plus its shared policy documentation.
+# Pinned at tetherto/qvac-ext-lib-whisper.cpp@master HEAD 5bf602e7 (PR #123).
+# Relative to the previous tts-cpp pin e91a2a27, the tts subtree adds LavaSR's
+# validated Android Mali Vulkan path and small-GEMM correctness workaround.
 # whisper-cpp, parakeet-cpp, and audiogen-cpp remain on their existing pins
 # because their subtrees are byte-identical. Carries the fc844ce5 pin
 # (PR #99, CosyVoice3, described above) and the 05879fc pin (PR #88 merged: Chatterbox S3Gen
@@ -275,8 +277,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF e91a2a2798a743b7e11dfe9c2a1134e6193647d3
-    SHA512 9c0771e526ea4a2d70b146404eb413834823fa4c7e676822dd8775ba2b262718395bb856fcc0f9b2e14dd5abcb08287e7452ce7a64a54a5e68a9d147c3413747
+    REF 5bf602e7ee6c03d76df453fe90e5bd13101ceb82
+    SHA512 177fa68c659c8a6d93971782c684cf43ef754b5f18f6dc2a0c953a46088b67155b0d63945c858a263aa066c64ee4e456c532595a91f28e879e2bed79c8684d47
     HEAD_REF master
 )
 
