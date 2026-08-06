@@ -1,16 +1,31 @@
-# ggml-speech: tetherto/qvac-ext-ggml@speech HEAD 11581cd5 (merge of PR #35,
-# ggml-vulkan: optimize parakeet/whisper Vulkan on ARM Mali). Two
-# ARM/Mali-gated changes: disable KHR_cooperative_matrix (Mali's coopmat matmul
-# is ~5x slower than the scalar path for our encoder shapes) and use the medium
-# (64x64) matmul tile instead of large (128x128) on ARM (few shader cores leave
-# tall-K/small-N GEMMs underutilized). Bumps the speech-stack ggml pin from
-# f5727c32; off ARM (desktop NVIDIA/AMD/Intel, Adreno, Apple) byte-identical.
-
+# ggml-speech: tetherto/qvac-ext-ggml@speech. This pin adds Metal CPY from the
+# k-quants to F32/F16 (PR #51): kernel_cpy_q_f32 was already generic over the
+# block type and ggml_metal_op_cpy already walked a quantised source in
+# 16-element groups -- exactly the k-quant sub-block size -- so only the
+# instantiations and the supports_op cases were missing and ggml_cast(Q4_K ->
+# F32) aborted with "unsupported op 'CPY'". Reachable today: the ACE-Step FSQ
+# detokenizer keeps detokenizer.special_tokens verbatim, so q3_as_f32 lowers to
+# a cast from the DiT quant, and the addon's default variant is
+# acestep-v15-turbo-Q4_K_M. Dequantise direction only, matching the Vulkan hole
+# closed in PR #47 and the CPU backend.
+#
+# The same pin sizes the Metal im2col threadgroup from CHW instead of the kernel
+# window. With KH == 1 and N == 1 (1-D audio convolutions) the threadgroup was
+# left at KW threads -- 7, or 1 for a pointwise conv -- against a 32-wide SIMD
+# group, so the op was bound by threadgroup dispatch, not bandwidth. Each output
+# position now gets one threadgroup walking its contiguous CHW columns. im2col
+# is a pure gather, so this is bit-exact: the ACE-Step VAE renders a
+# byte-identical wav, at 2.62x (VAE decode 7980 -> 3043 ms on an M5).
+#
+# Carries the unaligned-M Adreno im2col fusion (PR #50), the Adreno OpenCL
+# Parler fixes (PR #49), Vulkan CPY from the k-quants to F32 (PR #47), the
+# GGML_PREC_F32 GPU work (PR #46) and the Vulkan ACE-Step custom ops (PR #45).
+# CPU output is unchanged.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 11581cd56162606d678aca58a7fbc0013bcd228d
-    SHA512 27d15be0fab79aaeec942f5e4889a7d42d46fe6689360c8cc152fb5c74f1643b8e6ce30e090d0c01bb6a0a4a5c38dd137852f2e5cdc35c154c997f722e576268
+    REF b517d335cc05c012ae0e1b266584846f6e664746
+    SHA512 11476f7225ce2d27b0822e58bec339c0f71e46c44e9002341ac57f747b0aac32bb6baa0933680fd1612b48401818f76929ad2c0dfc9d6094b2ea8d60c8a53a88
     HEAD_REF speech
 )
 
@@ -99,7 +114,46 @@ if(VCPKG_TARGET_IS_ANDROID)
     )
 endif()
 
-# PR #13 (v0.10.2 sync) introduces an unconditional
+# Desktop aarch64 Linux: same per-arch CPU-variant packaging as Android.
+# This build is not GGML_NATIVE and passes no -march override, so a
+# single-variant CPU backend lands on the compiler's plain armv8-a
+# baseline: the dotprod/fp16/i8mm ARM kernels (incl. the repack GEMM
+# kernels in ggml-cpu/arch/arm/repack.cpp) are compiled out and both
+# f16 and quantized (q4_0/q8_0) GEMMs stay on the slowest generic
+# paths. GGML_CPU_ALL_VARIANTS builds one MODULE .so per ARMv8.x/9.x
+# feature tier and scores them against the running CPU at first use,
+# so the prebuild stays SIGILL-safe on any aarch64 host. The speech
+# addons stage lib/libqvac-speech-ggml-*.so next to their .bare and
+# forward backendsDir to ggml_backend_load_all_from_path(), same as
+# Android. Verified on the Parakeet + Whisper RTF benchmarks (qvac
+# runs 29243365879 / 29333221534): parakeet tdt q4_0 mean RTF
+# 0.2285 -> 0.0612, whisper base f16 0.3316 -> 0.0970.
+set(QVAC_LINUX_ARM64_DL_CPU OFF)
+if(VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
+    set(QVAC_LINUX_ARM64_DL_CPU ON)
+    list(APPEND PLATFORM_OPTIONS
+        -DGGML_BACKEND_DL=ON
+        -DGGML_CPU_ALL_VARIANTS=ON
+        -DGGML_CPU_REPACK=ON
+        # The dlopen'd MODULE backends must not carry shared-library
+        # dependencies the host machine doesn't ship. The qvac linux
+        # triplets compile with clang -stdlib=libc++ but only the final
+        # addon binary links libc++ statically; a module with NEEDED
+        # libc++.so.1 / libc++abi.so.1 entries fails to dlopen on a
+        # stock host (no libc++ runtime package) and the registry
+        # loader skips it *silently* -- the CPU backend then simply
+        # never registers ("no CPU device registered"). Link the C++
+        # runtime statically into the modules instead, matching the
+        # addon convention. Composed with the triplet's own
+        # VCPKG_LINKER_FLAGS because a bare -DCMAKE_MODULE_LINKER_FLAGS
+        # would override vcpkg's *_INIT seeding and drop the triplet's
+        # -stdlib=libc++ at link time (under gcc triplets this composes
+        # to plain -static-libstdc++, which is equally valid).
+        "-DCMAKE_MODULE_LINKER_FLAGS=${VCPKG_LINKER_FLAGS} -static-libstdc++"
+    )
+endif()
+
+# The v0.10.2 ggml sync introduces an unconditional
 # `#include <spirv/unified1/spirv.hpp>` in src/ggml-vulkan/ggml-vulkan.cpp,
 # but the upstream ggml-vulkan CMakeLists.txt never finds spirv-headers nor
 # wires its include dir into the ggml-vulkan target. Apply a small patch
@@ -145,6 +199,46 @@ if(VCPKG_TARGET_IS_ANDROID)
     if(_backend_sos)
         file(INSTALL ${_backend_sos} DESTINATION "${CURRENT_PACKAGES_DIR}/lib")
     endif()
+endif()
+
+# Desktop Linux MODULE backend pickup. ggml's own install() places the
+# MODULE backends in bin/ (CMAKE_INSTALL_BINDIR) and -- unlike Android,
+# where CMake never versions module filenames -- as versioned files
+# (libqvac-speech-ggml-cpu-armv8.2_1.so.<ver>) plus unversioned .so
+# symlinks. Two problems with leaving them there: the runtime loader
+# only matches the exact `.so` extension, and the speech addons stage
+# backends by file(INSTALL)-ing a glob of lib/libqvac-speech-ggml-*.so,
+# which would copy a symlink without its target. Dereference each
+# unversioned name onto its real file, publish plain .so files in lib/,
+# and drop bin/ (static triplets must not ship a bin/ dir anyway).
+if(QVAC_LINUX_ARM64_DL_CPU)
+    foreach(_cfg "" "/debug")
+        file(GLOB _backend_mods
+            "${CURRENT_PACKAGES_DIR}${_cfg}/bin/libqvac-speech-ggml-*.so")
+        foreach(_mod IN LISTS _backend_mods)
+            get_filename_component(_mod_name "${_mod}" NAME)
+            file(REAL_PATH "${_mod}" _mod_real)
+            file(COPY_FILE "${_mod_real}"
+                 "${CURRENT_PACKAGES_DIR}${_cfg}/lib/${_mod_name}")
+        endforeach()
+        file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}${_cfg}/bin")
+        # Do not ship the SVE-bearing CPU variants. ggml's SVE code
+        # paths are drastically slower than the NEON dotprod/fp16 paths
+        # on the 128-bit-vector cores that make up the desktop
+        # arm64-linux fleet (Neoverse-N2 runners; Apple VMs and
+        # Snapdragon X have no SVE at all): whisper base q8_0 RTF
+        # 0.2224 via armv8.6_2 (SVE) vs 0.0626 via armv8.2_2 (no SVE),
+        # f16 0.2586 vs 0.0938 (qvac A/B runs 29328745233 /
+        # 29332248742) -- and the runtime score would pick the SVE
+        # tiers on SVE hardware. Parakeet is within 3% either way (its
+        # hot GEMMs use the NEON repack kernels). Revisit when the
+        # speech branch grows an SVE-free i8mm tier (the Android
+        # variant list has one) or VL-aware scoring.
+        foreach(_sve_tier armv8.2_3 armv8.6_1 armv8.6_2 armv9.2_1 armv9.2_2)
+            file(REMOVE
+                "${CURRENT_PACKAGES_DIR}${_cfg}/lib/libqvac-speech-ggml-cpu-${_sve_tier}.so")
+        endforeach()
+    endforeach()
 endif()
 
 vcpkg_cmake_config_fixup(PACKAGE_NAME ggml CONFIG_PATH lib/cmake/ggml)

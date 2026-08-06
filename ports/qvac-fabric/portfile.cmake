@@ -30,32 +30,16 @@ if(NOT BUILD_GPU_BACKENDS)
   message(STATUS "qvac-fabric: gpu-backends feature OFF — building CPU-only ggml (no Metal/Vulkan/CUDA/OpenCL)")
 endif()
 
-if (VCPKG_TARGET_IS_ANDROID AND BUILD_GPU_BACKENDS)
-  # NDK only comes with C headers.
-  # Make sure C++ header exists, it will be used by ggml tensor library.
-  # Need to determine installed vulkan version and download correct headers
-  include(${CMAKE_CURRENT_LIST_DIR}/android-vulkan-version.cmake)
-  detect_ndk_vulkan_version()
-  message(STATUS "Using Vulkan C++ wrappers from version: ${vulkan_version}")
-  file(DOWNLOAD
-    "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v${vulkan_version}.tar.gz"
-    "${SOURCE_PATH}/vulkan-sdk-${vulkan_version}.tar.gz"
-    TLS_VERIFY ON
-  )
-
-  file(ARCHIVE_EXTRACT
-    INPUT "${SOURCE_PATH}/vulkan-sdk-${vulkan_version}.tar.gz"
-    DESTINATION "${SOURCE_PATH}"
-    PATTERNS "*.hpp"
-  )
-
-  file(RENAME
-    "${SOURCE_PATH}/Vulkan-Headers-${vulkan_version}"
-    "${SOURCE_PATH}/ggml/src/ggml-vulkan/vulkan_cpp_wrapper"
-  )
-endif()
-
 set(PLATFORM_OPTIONS)
+
+if (VCPKG_TARGET_IS_ANDROID AND BUILD_GPU_BACKENDS)
+  # The Android NDK ships only the C Vulkan headers; the ggml Vulkan backend
+  # additionally needs the C++ bindings (vulkan.hpp) and SPIRV-Headers, which as
+  # of b9840 ggml fetches itself via FetchContent (ggml/src/ggml-vulkan/CMakeLists.txt,
+  # `if (ANDROID)` block). The registry vcpkg-cmake sets FETCHCONTENT_FULLY_DISCONNECTED=ON
+  # globally, so allow the fetch here (same as the kleidiai path below).
+  list(APPEND PLATFORM_OPTIONS -DFETCHCONTENT_FULLY_DISCONNECTED=OFF)
+endif()
 
 if(NOT BUILD_GPU_BACKENDS)
   # Force every GPU backend off explicitly, in case upstream defaults change.
@@ -181,7 +165,7 @@ endif()
 # boundary is the C ggml-backend ABI, so per-module libc++ copies never exchange
 # C++ objects. Linux only: Apple/iOS use Metal frameworks, Android ships
 # libc++_shared via the NDK STL, Windows uses the MSVC runtime.
-if(VCPKG_TARGET_IS_LINUX)
+if(VCPKG_TARGET_IS_LINUX AND DL_BACKENDS)
   string(APPEND VCPKG_LINKER_FLAGS " -static-libstdc++")
 endif()
 
@@ -207,6 +191,8 @@ vcpkg_cmake_configure(
     -DLLAMA_BUILD_TOOLS=OFF
     -DLLAMA_BUILD_EXAMPLES=OFF
     -DLLAMA_BUILD_SERVER=OFF
+    -DLLAMA_BUILD_APP=OFF
+    -DMTMD_VIDEO=OFF
     -DLLAMA_ALL_WARNINGS=OFF
     ${LLAMA_OPTIONS}
     ${PLATFORM_OPTIONS}

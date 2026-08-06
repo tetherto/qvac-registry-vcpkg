@@ -1,0 +1,41 @@
+{
+  "name": "fuzztest",
+  "version-date": "2026-06-29",
+  "description": "Google FuzzTest: a C++ testing framework for writing and executing property-based tests backed by coverage-guided fuzzing",
+  "homepage": "https://github.com/google/fuzztest",
+  "license": "Apache-2.0",
+  "supports": "linux",
+  "dependencies": [
+    "abseil",
+    "antlr4",
+    "gtest",
+    "re2",
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ],
+  "features": {
+    "asan": {
+      "description": "Build with AddressSanitizer, for consumers that are themselves ASan-instrumented",
+      "dependencies": [
+        {
+          "name": "abseil",
+          "features": [
+            "asan"
+          ]
+        },
+        {
+          "name": "re2",
+          "features": [
+            "asan"
+          ]
+        }
+      ]
+    }
+  }
+}

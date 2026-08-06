@@ -1,6 +1,7 @@
 {
   "name": "marian-dev",
   "version": "1.0.0",
+  "port-version": 1,
   "description": "Fast neural machine translation framework (Marian NMT development fork)",
   "homepage": "https://github.com/tetherto/qvac-ext-marian-dev",
   "license": "MIT",
