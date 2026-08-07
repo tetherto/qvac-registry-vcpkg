@@ -5,8 +5,8 @@
       "port-version": 0
     },
     "audiogen-cpp": {
-      "baseline": "2026-08-04",
-      "port-version": 1
+      "baseline": "2026-08-07",
+      "port-version": 0
     },
     "benchmark": {
       "baseline": "1.9.1",
@@ -33,7 +33,7 @@
       "port-version": 2
     },
     "ggml-speech": {
-      "baseline": "2026-08-04",
+      "baseline": "2026-08-07",
       "port-version": 0
     },
     "hip": {
@@ -73,7 +73,7 @@
       "port-version": 0
     },
     "parakeet-cpp": {
-      "baseline": "2026-08-04",
+      "baseline": "2026-08-07",
       "port-version": 0
     },
     "protobuf": {
@@ -129,7 +129,7 @@
       "port-version": 2
     },
     "tts-cpp": {
-      "baseline": "2026-08-06",
+      "baseline": "2026-08-07",
       "port-version": 0
     },
     "vcpkg-cmake": {
@@ -146,7 +146,7 @@
     },
     "whisper-cpp": {
       "baseline": "1.9.1",
-      "port-version": 8
+      "port-version": 9
     },
     "xnnpack": {
       "baseline": "onnxruntime",

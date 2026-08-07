@@ -1,13 +1,13 @@
 {
   "name": "tts-cpp",
-  "version-date": "2026-08-06",
-  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS (CPU + Metal / Vulkan / OpenCL GPU), and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts). This pin enables LavaSR enhancer execution on ARM Mali Vulkan and pads small Valhall GEMM dimensions to preserve numerical correctness (PR #123), validated on Pixel 9a with CPU/GPU cosine similarity 1.0 and through the tts-ggml Device Farm suite. It carries the CosyVoice3 win32 model-load fix (PR #124), the ggml-speech 2026-08-04 floor, CosyVoice3 + Parler iOS memory reductions (PR #121), Parler Vulkan-on-Mali (PR #119), CosyVoice3 GPU support (PR #118), dl-safe backend initialization (PR #117), bounded Parler DAC decode (PR #114), Parler Vulkan (PR #110), Parler Metal (PR #103), and the original CosyVoice3 engine (PR #99).",
+  "version-date": "2026-08-07",
+  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS (CPU + Metal / Vulkan / OpenCL GPU), and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts). This republish advances the pin to master 5e57a692, the single source archive shared with whisper-cpp, parakeet-cpp and audiogen-cpp, and raises the ggml-speech floor to 2026-08-07 for the Vulkan matmul src0 binding fix and the OpenCL im2col rewrite; engines/tts itself is unchanged.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/tts",
   "license": "MIT",
   "dependencies": [
     {
       "name": "ggml-speech",
-      "version>=": "2026-08-04"
+      "version>=": "2026-08-07"
     },
     "mecab",
     {

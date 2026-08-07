@@ -1,13 +1,13 @@
 # audiogen-cpp: ACE-Step music generation in pure C++/ggml, from the
-# engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp. Consumes ggml-speech
-# for the custom snake / col2im_1d ops the Oobleck VAE needs.
+# engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp; consumes the
+# ggml-speech port.
 #
-# This pin (qvac-ext-lib-whisper.cpp PR #125) lets ACE-Step select integrated
-# GPU devices in addition to discrete GPUs. Vulkan reports Android UMA adapters
-# such as Pixel's Mali-G715 as IGPU, so the previous GPU-only lookup silently
-# fell back to CPU. The engine now prefers the validated Vulkan/Metal backends
-# across both device classes. The ggml-speech floor remains 2026-08-04 because
-# it already contains the Vulkan snake / col2im_1d and F32 matmul support.
+# Pinned at master 5e57a692, shared with the whisper-cpp / parakeet-cpp /
+# tts-cpp ports so all four resolve one source archive against one ggml-speech.
+# This pin (PRs #126 and #129) runs ACE-Step end to end on Adreno OpenCL and
+# fixes the cond-encoder fp16 overflow and the VAE decode allocation cap. The
+# ggml-speech floor moves to 2026-08-07 as a hard dependency: the Oobleck VAE
+# needs the OpenCL snake and col2im_1d kernels from qvac-ext-ggml PR #52.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -15,8 +15,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF a73f6bb26336da8415f0da2282835c429a69e8d6
-    SHA512 3dc8baa9ee99d4006c9987508f2711c7e67d704e1f0536c008039094f6a3f71a8b90349e2779ba3a1423f57aea9c3ef2ecea49fa52758052f77d5bd4324e1c79
+    REF 5e57a69221e58a091aac07b2d19895df985ba53c
+    SHA512 2cce663c5c375e07d0bdc109fe40ce13727fa0f01969537fa1b2e07c8a20429e4854fc140e40d3b146f2debcb75207952c8a5efbf67d8c21dba4e60452cf53fd
     HEAD_REF master
 )
 

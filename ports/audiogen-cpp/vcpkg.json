@@ -1,14 +1,13 @@
 {
   "name": "audiogen-cpp",
-  "version-date": "2026-08-04",
-  "port-version": 1,
-  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. This pin (merged commit a73f6bb2, PR #125) treats integrated GPUs as valid compute devices and prefers the validated Vulkan and Metal backends. Vulkan reports Android UMA adapters such as Pixel's Mali-G715 as IGPU, so the previous GPU-only lookup silently fell back to CPU even though the complete Vulkan pipeline was available. The pin was validated on a Pixel 9a with every ACE-Step stage on Vulkan0, non-silent 48 kHz stereo output, and 0.999951 Vulkan/CPU cosine similarity for the FSQ detokenizer. The ggml-speech floor remains 2026-08-04 because it already carries the required Vulkan snake, col2im_1d, quantized CPY, and GGML_PREC_F32 matmul support, along with the Metal kernels required by the previous audiogen release.",
+  "version-date": "2026-08-07",
+  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. This pin (merged commit 5e57a692, PRs #126 and #129) runs the whole pipeline on Adreno OpenCL and fixes the cond-encoder fp16 overflow and the VAE decode allocation cap. Requires ggml-speech >= 2026-08-07 for the OpenCL snake / col2im_1d kernels and the im2col rewrite.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/audiogen",
   "license": "MIT",
   "dependencies": [
     {
       "name": "ggml-speech",
-      "version>=": "2026-08-04"
+      "version>=": "2026-08-07"
     },
     {
       "name": "vcpkg-cmake",
