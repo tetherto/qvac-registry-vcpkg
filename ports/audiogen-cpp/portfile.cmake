@@ -2,12 +2,11 @@
 # engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp. Consumes ggml-speech
 # for the custom snake / col2im_1d ops the Oobleck VAE needs.
 #
-# This pin (qvac-ext-lib-whisper.cpp PR #125) lets ACE-Step select integrated
-# GPU devices in addition to discrete GPUs. Vulkan reports Android UMA adapters
-# such as Pixel's Mali-G715 as IGPU, so the previous GPU-only lookup silently
-# fell back to CPU. The engine now prefers the validated Vulkan/Metal backends
-# across both device classes. The ggml-speech floor remains 2026-08-04 because
-# it already contains the Vulkan snake / col2im_1d and F32 matmul support.
+# This pin aligns the C++ pipeline with the official ACE-Step synthesis path:
+# Haar DCW runs after each DiT step, the Metal LM uses F32 Flash Attention with
+# batched CFG, and Vulkan keeps the numerically unstable autoregressive LM on
+# CPU while the remaining stages stay GPU-accelerated. The ggml-speech floor
+# remains 2026-08-04 because no backend kernels are required for host-side DCW.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -15,8 +14,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF a73f6bb26336da8415f0da2282835c429a69e8d6
-    SHA512 3dc8baa9ee99d4006c9987508f2711c7e67d704e1f0536c008039094f6a3f71a8b90349e2779ba3a1423f57aea9c3ef2ecea49fa52758052f77d5bd4324e1c79
+    REF 7f2eabb2ef8d71c70b3662eb5ce1b869b99cc142
+    SHA512 6ba844b3853fd688db698aab5ec4f201d551a3e5cb87cdddf585b34f90a775ff95eb14b03879fd2765798d5989493d5fc5c7f3565c6950476e53c2d072277e7f
     HEAD_REF master
 )
 
