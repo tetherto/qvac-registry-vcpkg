@@ -1,7 +1,8 @@
 {
   "name": "tts-cpp",
   "version-date": "2026-08-07",
-  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS (CPU + Metal / Vulkan / OpenCL GPU), and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts). This republish advances the pin to master 5e57a692, the single source archive shared with whisper-cpp, parakeet-cpp and audiogen-cpp, and raises the ggml-speech floor to 2026-08-07 for the Vulkan matmul src0 binding fix and the OpenCL im2col rewrite; engines/tts itself is unchanged.",
+  "port-version": 1,
+  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS (CPU + Metal / Vulkan / OpenCL GPU), and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts). This revision adds the analytic, gradient-checked Supertonic vocoder backward pass and a production-forward parity guard while retaining the ggml-speech 2026-08-07 backend fixes.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/tts",
   "license": "MIT",
   "dependencies": [

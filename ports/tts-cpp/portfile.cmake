@@ -2,11 +2,10 @@
 # C++/ggml, from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master 5e57a692, shared with the whisper-cpp / parakeet-cpp /
-# audiogen-cpp ports so all four resolve one source archive against one
-# ggml-speech. engines/tts is unchanged from the previous pin; the ggml-speech
-# floor moves to 2026-08-07 for the Vulkan matmul src0 binding fix and the
-# OpenCL im2col rewrite (qvac-ext-ggml PRs #52, #53).
+# Pinned at f89a2755 to include the analytic, gradient-checked Supertonic
+# vocoder backward pass and its production-forward parity guard. The
+# ggml-speech floor remains 2026-08-07 because the backward implementation is
+# host-side numerical code and needs no additional backend kernels.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -14,8 +13,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 5e57a69221e58a091aac07b2d19895df985ba53c
-    SHA512 2cce663c5c375e07d0bdc109fe40ce13727fa0f01969537fa1b2e07c8a20429e4854fc140e40d3b146f2debcb75207952c8a5efbf67d8c21dba4e60452cf53fd
+    REF f89a27558af748d03293e31d710221d140c31e18
+    SHA512 0825eb58a132029cf4979e341310b0524a70be96dda1ff9190cccf3a8a54b924cdb5ed670478f455e5e95681e40141c7dd7deba4c4f25718aee7e0bdd90485a3
     HEAD_REF master
 )
 
