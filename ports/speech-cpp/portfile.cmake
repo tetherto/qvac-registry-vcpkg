@@ -21,14 +21,16 @@
 # (find_package(qvac-parakeet) + qvac::parakeet) — and upstream's is neither
 # built nor installed. No file-ownership clash, no wasted build.
 #
-# Pinned at master HEAD a7cae879 (PR #116 merged: the SPEECH_BUILD_AUDIOGEN
-# umbrella gate this port previously carried as a patch — now upstream, patch
-# dropped). Relative to the standalone ports' pins this additionally carries
-# PR #115 (tts-cpp: Parler-TTS on OpenCL/Adreno, engine-side only) and #112
-# (CI only); third_party/whisper.cpp and engines/{parakeet,audiogen} are
-# byte-identical to the standalone whisper-cpp / parakeet-cpp (928369c9) and
-# audiogen-cpp (26803b09) pins, and engines/tts is #115 ahead of the
-# standalone tts-cpp (d09cdb9e) pin. The standalone ports remain available
+# Pinned at master 09566de3 — the same commit (and the same source archive)
+# as the standalone tts-cpp 2026-08-07#1 port (PR #128, the Audio8 engine).
+# The superbuild gates all four engines natively at this pin (the
+# SPEECH_BUILD_AUDIOGEN gate landed upstream as PR #116; this port used to
+# carry it as a patch). whisper-cpp / parakeet-cpp / audiogen-cpp pin
+# 5e57a692, two commits behind, which touch engines/{tts,audiogen} only —
+# third_party/whisper.cpp and engines/parakeet are byte-identical across the
+# two, so the whisper and parakeet artifacts match the standalone ports
+# exactly, and engines/audiogen is those two engine-side commits ahead of the
+# standalone audiogen-cpp pin. The standalone ports remain available
 # transitionally; this port supersedes them.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
@@ -37,8 +39,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF a7cae879e00c0eb89cc2825603e699f3e742ca2c
-    SHA512 e7a818f628467675e8bbebcc25bd2b4c8485e35fd4d85f16bb6e3e4441b970206a1df352cd7a7836bd88ae3ad774a232e51183f3e409d7c309cf82393641b0b2
+    REF 09566de32e48a2681d78ab442d51d083f4301fc7
+    SHA512 556a18d2e1ff2102b5ba702a23fb2d3793591a0c02a57ce5a58de8567840ac5fa7b713b3aa58630f3161b0436c0b8ccf7394585383416a6995635d41fe41d5ea
     HEAD_REF master
 )
 
