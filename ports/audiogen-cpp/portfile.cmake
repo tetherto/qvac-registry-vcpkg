@@ -2,12 +2,11 @@
 # engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp; consumes the
 # ggml-speech port.
 #
-# Pinned at master 5e57a692, shared with the whisper-cpp / parakeet-cpp /
-# tts-cpp ports so all four resolve one source archive against one ggml-speech.
-# This pin (PRs #126 and #129) runs ACE-Step end to end on Adreno OpenCL and
-# fixes the cond-encoder fp16 overflow and the VAE decode allocation cap. The
-# ggml-speech floor moves to 2026-08-07 as a hard dependency: the Oobleck VAE
-# needs the OpenCL snake and col2im_1d kernels from qvac-ext-ggml PR #52.
+# Pinned at merged commit 80d5c3a2 (qvac-ext-lib-whisper.cpp PR #132). This
+# aligns generation with official ACE-Step, including the Haar wavelet DCW
+# correction that removes robotic artifacts and the stabilized quantized
+# batched LM head. The ggml-speech floor remains 2026-08-07 because it already
+# provides the required GPU kernels for the supported backends.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -15,8 +14,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 5e57a69221e58a091aac07b2d19895df985ba53c
-    SHA512 2cce663c5c375e07d0bdc109fe40ce13727fa0f01969537fa1b2e07c8a20429e4854fc140e40d3b146f2debcb75207952c8a5efbf67d8c21dba4e60452cf53fd
+    REF 80d5c3a267753422d57c533441b3fb640bb7d56a
+    SHA512 3e9b5f168e3b18acd7cbb17c291381e7fa16fee2bcbfce621749d121609a39d34305d563d2cdb522d0f9b07f8e08f4f77822e77bf6c60fcc0ff01bc7caaf71d3
     HEAD_REF master
 )
 

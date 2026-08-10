@@ -1,7 +1,7 @@
 {
   "name": "audiogen-cpp",
-  "version-date": "2026-08-07",
-  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. This pin (merged commit 5e57a692, PRs #126 and #129) runs the whole pipeline on Adreno OpenCL and fixes the cond-encoder fp16 overflow and the VAE decode allocation cap. Requires ggml-speech >= 2026-08-07 for the OpenCL snake / col2im_1d kernels and the im2col rewrite.",
+  "version-date": "2026-08-10",
+  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. This pin (merged commit 80d5c3a2, PR #132) aligns generation with official ACE-Step, including Haar wavelet DCW correction to remove robotic artifacts and a stabilized quantized batched LM head. Requires ggml-speech >= 2026-08-07 for the supported GPU backends.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/audiogen",
   "license": "MIT",
   "dependencies": [
