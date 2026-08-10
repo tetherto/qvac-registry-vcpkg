@@ -10,7 +10,7 @@
 # ONE system ggml (find_package(ggml) from the ggml-speech port) and hands it
 # to every enabled engine, so the whole stack shares a single ggml pin — the
 # ggml/ tree vendored inside the whisper subtree is never compiled. Backend
-# selection (metal / vulkan / opencl / cuda) is therefore expressed purely as
+# selection (metal / vulkan / opencl) is therefore expressed purely as
 # ggml-speech features in vcpkg.json; the GGML_* flags passed below only steer
 # engine-side gating (e.g. which GPU paths the engines consider validated).
 #
@@ -21,17 +21,10 @@
 # (find_package(qvac-parakeet) + qvac::parakeet) — and upstream's is neither
 # built nor installed. No file-ownership clash, no wasted build.
 #
-# Pinned at master 09566de3 — the same commit (and the same source archive)
-# as the standalone tts-cpp 2026-08-07#1 port (PR #128, the Audio8 engine).
-# The superbuild gates all four engines natively at this pin (the
-# SPEECH_BUILD_AUDIOGEN gate landed upstream as PR #116; this port used to
-# carry it as a patch). whisper-cpp / parakeet-cpp / audiogen-cpp pin
-# 5e57a692, two commits behind, which touch engines/{tts,audiogen} only —
-# third_party/whisper.cpp and engines/parakeet are byte-identical across the
-# two, so the whisper and parakeet artifacts match the standalone ports
-# exactly, and engines/audiogen is those two engine-side commits ahead of the
-# standalone audiogen-cpp pin. The standalone ports remain available
-# transitionally; this port supersedes them.
+# The REF below is the single source pin for every engine. When re-publishing,
+# keep it at or ahead of the standalone whisper-cpp / parakeet-cpp / tts-cpp /
+# audiogen-cpp pins, which this port supersedes (the standalone ports remain
+# available transitionally).
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -81,7 +74,6 @@ vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
     FEATURES
         metal   GGML_METAL
         vulkan  GGML_VULKAN
-        cuda    GGML_CUDA
         opencl  GGML_OPENCL
         coreml  PARAKEET_COREML
 )

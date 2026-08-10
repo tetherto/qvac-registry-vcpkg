@@ -23,7 +23,6 @@ GPU backends (fan out to ggml-speech, shared by all engines):
   metal  - Metal (macOS/iOS; default on Apple platforms)
   vulkan - Vulkan (default on Windows/Linux/Android)
   opencl - OpenCL (default on Android)
-  cuda   - CUDA
 Parakeet extra:
   coreml - Apple Core ML encoder sidecar (implies the parakeet feature)
 
