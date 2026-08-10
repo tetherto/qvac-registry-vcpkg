@@ -16,6 +16,10 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # 2026-07-03 (REF pinned to the branch tip for reproducibility).
 #
+# 3df163d is the tip of 2026-07-03-ltx-lora after merging qvac-ext-stable-
+# diffusion.cpp PR #25, including the final transactional LoRA loading and
+# safe VAE fallback fixes.
+#
 # 97594f3 is the tip of 2026-07-03 after merging PR #27 on top of PR #22:
 # the walk's masked self-attention composes its mask explicitly
 # (scale -> add -> soft_max, the KV-cache path's formulation) instead of the
@@ -72,8 +76,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 97594f36ee6946a446c8911c3154b4df2214a9a8
-    SHA512 4fab35be136daa4e6d22e6b6161bfb42fc3a5d9ef6a4b4ddac2a57e2f9c4fc946626342010a1a5a1f769f881c4789b7ce1d99a24fca4e33c5f1ea378d8c7488f
+    REF 3df163deb46c2f55d2b8891216fbe8cae76fcb8d
+    SHA512 241906a63962830d0275653cafd766b4c9752b6e6f6a04fad854affa6c100fa9b0788877db3c3f6377735a1aa0c3ef4562f539672c8fa3e6905238ca74decda5
 )
 
 set(SD_FLASH_ATTN OFF)

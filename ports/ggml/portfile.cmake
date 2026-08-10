@@ -23,6 +23,9 @@
 # Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-07-03
 # (REF pinned to that branch's tip commit for reproducibility).
 #
+# eab719e is the final 2026-07-03-ltx-lora branch head after merging qvac-ext-
+# ggml PR #54, including the Vulkan F32 tier and allocation-capacity fixes.
+#
 # 50cf563 is the 2026-07-03 branch head after merging the size-reduction
 # commits below.
 #
@@ -54,8 +57,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 50cf5630ac66c2d8584cd1299b1c89c684fc82d9
-    SHA512 a98bb4042f858652aecf0fec7682d456e503140e2e9d92a0b7ba84ac7204cb9287066a73dabb0da5b950c3a0a80886476f6670734e0921e3fed620d555cbbe90
+    REF eab719eadead8dc1afae6438817414a57920c613
+    SHA512 4b7ea78998955064a62169d2a50a10ff23d6dff55da2a11f6cf855ab30f10e84355438a9d7162f9c19d83b7f2d01e9f191b3a04a05d9c90bd43c5c55db3c1a6c
 )
 
 # --- GPU feature flags ---
