@@ -2,11 +2,9 @@
 # in pure C++/ggml, from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master 52b9abc, shared with the whisper-cpp / parakeet-cpp /
-# audiogen-cpp ports so all four resolve one source archive against one
-# ggml-speech. This pin unifies the emotion / pace vocabulary across the engines
-# (PR #134) and adds the gradchecked Supertonic vocoder backward (PR #60). The
-# ggml-speech floor stays at 2026-08-07.
+# Pinned at master ca075380. This keeps the 2026-08-10 emotion / pace controls
+# and Supertonic vocoder backward, and adds Audio8 desktop Vulkan execution.
+# The ggml-speech floor stays at 2026-08-07.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -14,8 +12,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 52b9abcc7a0ffb129e33cba80f7a657c757fb6ed
-    SHA512 77b43132f2b4c97356868b4c01476eb8bb2578c70541a6e151f3b098270b71e375b0b7fc09086977970dd71ab65193938147fc3a22388c80b690b5a19422e90b
+    REF ca075380c1fb775d3441b86a81eb3dd65f1352c3
+    SHA512 a43b149a7385367cabbcd0078546def726ba63586797c2ffb8fac5d56358714ecc17dac3cbdd94c5a7bc2c3ef053962e55683a71796cf6a0d473b003b7be6447
     HEAD_REF master
 )
 
