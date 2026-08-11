@@ -2,9 +2,10 @@
 # in pure C++/ggml, from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master ca075380. This keeps the 2026-08-10 emotion / pace controls
-# and Supertonic vocoder backward, and adds Audio8 desktop Vulkan execution.
-# The ggml-speech floor stays at 2026-08-07.
+# Pinned at 0957d6a9. This adds Audio8 execution on Metal, for macOS and iOS, on
+# top of the desktop Vulkan support the previous pin carried, along with the
+# codec block sizing and single-graph greedy fast frame that came with it.
+# The ggml-speech floor stays at 2026-08-07: no ggml change is needed.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -12,8 +13,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF ca075380c1fb775d3441b86a81eb3dd65f1352c3
-    SHA512 a43b149a7385367cabbcd0078546def726ba63586797c2ffb8fac5d56358714ecc17dac3cbdd94c5a7bc2c3ef053962e55683a71796cf6a0d473b003b7be6447
+    REF 0957d6a92ca13a3fbb38fcc1327e8e9b1212ded0
+    SHA512 1a5576dfaa8db0e6403d5053b7ab71274c695001f6ade9b618fb00334c9ae9bd374205d10206bc20e2babcd0218cb720fd919350c43cacaed76fc8473aa10e22
     HEAD_REF master
 )
 
