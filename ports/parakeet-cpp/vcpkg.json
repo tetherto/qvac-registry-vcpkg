@@ -1,8 +1,7 @@
 {
   "name": "parakeet-cpp",
-  "version-date": "2026-08-10",
-  "port-version": 2,
-  "description": "Parakeet (NVIDIA FastConformer ASR + Sortformer diarization) inference in pure C++/ggml. Ships CTC, TDT, EOU and Sortformer engines under one Engine umbrella plus the cross-engine StreamEvent API, with an optional Apple Core ML encoder sidecar; sourced from tetherto/qvac-ext-lib-whisper.cpp engines/parakeet. Port-version 2 corrects the source archive checksum for the e9255b29 IndicConformer multilingual CTC language-masking pin introduced by port-version 1. ggml-speech floor stays 2026-08-07. Consumers use find_package(qvac-parakeet CONFIG) + qvac::parakeet: the installable artifacts live under the qvac-parakeet name so this port is co-installable with whisper-cpp.",
+  "version-date": "2026-08-11",
+  "description": "Parakeet (NVIDIA FastConformer ASR + Sortformer diarization) inference in pure C++/ggml. Ships CTC, TDT, EOU and Sortformer engines under one Engine umbrella plus the cross-engine StreamEvent API, with an optional Apple Core ML encoder sidecar; sourced from tetherto/qvac-ext-lib-whisper.cpp engines/parakeet. This release makes Sortformer stream finalization deterministic: trailing real segments remain non-final and each non-cancelled session emits exactly one synthetic final terminator. ggml-speech floor stays 2026-08-07. Consumers use find_package(qvac-parakeet CONFIG) + qvac::parakeet: the installable artifacts live under the qvac-parakeet name so this port is co-installable with whisper-cpp.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/parakeet",
   "license": "Apache-2.0",
   "dependencies": [
