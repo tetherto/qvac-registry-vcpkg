@@ -2,11 +2,9 @@
 # engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp; consumes the
 # ggml-speech port.
 #
-# Pinned at master 52b9abc, shared with the whisper-cpp / parakeet-cpp / tts-cpp
-# ports so all four resolve one source archive against one ggml-speech.
-# engines/audiogen is byte-identical to the previous 80d5c3a2 pin (PR #132, the
-# official ACE-Step generation alignment) and the ggml-speech floor stays at
-# 2026-08-07; this republish only re-joins the shared archive.
+# Pinned at QVAC-22886/reference-audio-input tip 37a2ab6d520b28af573e0c0115a7c83130d37692 for CI against the
+# unmerged cover/reference-audio work (source_audio, task_type, cover
+# strengths, plus existing reference_audio timbre conditioning).
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -14,9 +12,9 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 52b9abcc7a0ffb129e33cba80f7a657c757fb6ed
-    SHA512 77b43132f2b4c97356868b4c01476eb8bb2578c70541a6e151f3b098270b71e375b0b7fc09086977970dd71ab65193938147fc3a22388c80b690b5a19422e90b
-    HEAD_REF master
+    REF 37a2ab6d520b28af573e0c0115a7c83130d37692
+    SHA512 2f013fd870525ab17233119c1664d26ec3177040bc65cf1d8fffc971c510e51c44ac371f6f2b7e81f4a1faa481ccc8d5b6af485d0f2f79aa17e1d24d27685ebc
+    HEAD_REF QVAC-22886/reference-audio-input
 )
 
 set(SOURCE_PATH "${WHISPER_CPP_SRC}/engines/audiogen")

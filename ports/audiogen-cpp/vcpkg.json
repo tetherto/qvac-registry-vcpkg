@@ -1,8 +1,7 @@
 {
   "name": "audiogen-cpp",
-  "version-date": "2026-08-10",
-  "port-version": 1,
-  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. This republish advances the pin to master 52b9abc, the single source archive shared with whisper-cpp, parakeet-cpp and tts-cpp. engines/audiogen is byte-identical to the previous 80d5c3a2 pin, which aligned generation with official ACE-Step (PR #132) including Haar wavelet DCW correction and a stabilized quantized batched LM head. Requires ggml-speech >= 2026-08-07 for the supported GPU backends.",
+  "version-date": "2026-08-11",
+  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. This pin (QVAC-22886/reference-audio-input @ 37a2ab6d) adds reference/source audio and cover-nofsq task controls on top of the ACE-Step parity path (Haar DCW + quantized LM head). Requires ggml-speech >= 2026-08-07 for the supported GPU backends.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/audiogen",
   "license": "MIT",
   "dependencies": [
