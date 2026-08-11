@@ -1,10 +1,6 @@
 # audiogen-cpp: ACE-Step music generation in pure C++/ggml, from the
 # engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp; consumes the
 # ggml-speech port.
-#
-# Pinned at QVAC-22886/reference-audio-input tip 37a2ab6d520b28af573e0c0115a7c83130d37692 for CI against the
-# unmerged cover/reference-audio work (source_audio, task_type, cover
-# strengths, plus existing reference_audio timbre conditioning).
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -12,9 +8,9 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 37a2ab6d520b28af573e0c0115a7c83130d37692
-    SHA512 2f013fd870525ab17233119c1664d26ec3177040bc65cf1d8fffc971c510e51c44ac371f6f2b7e81f4a1faa481ccc8d5b6af485d0f2f79aa17e1d24d27685ebc
-    HEAD_REF QVAC-22886/reference-audio-input
+    REF 78925059d85fa3ae1caeb2073aaa6d4dce817c1b
+    SHA512 c11eceffb0d220afda63960a0e83429502898bc0085f7a0c2a42de74670780fc646a5a794b70920133d1aaec63fb1ea94b22b36665abcc573a7f6bcbdb3a692d
+    HEAD_REF master
 )
 
 set(SOURCE_PATH "${WHISPER_CPP_SRC}/engines/audiogen")

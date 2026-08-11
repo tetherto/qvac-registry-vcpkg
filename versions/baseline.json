@@ -74,7 +74,7 @@
     },
     "parakeet-cpp": {
       "baseline": "2026-08-10",
-      "port-version": 0
+      "port-version": 2
     },
     "protobuf": {
       "baseline": "onnxruntime",
@@ -114,6 +114,10 @@
     },
     "simd-utils": {
       "baseline": "1.0.0",
+      "port-version": 0
+    },
+    "speech-cpp": {
+      "baseline": "2026-08-10",
       "port-version": 0
     },
     "ssplit": {
