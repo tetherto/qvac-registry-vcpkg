@@ -2,8 +2,10 @@
 # in pure C++/ggml, from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master ca075380. This keeps the 2026-08-10 emotion / pace controls
-# and Supertonic vocoder backward, and adds Audio8 desktop Vulkan execution.
+# Pinned at master 21f12102 (QVAC-22775). This enables CosyVoice3 GPU
+# execution on Metal (macOS / iOS) via the Metal-or-OpenCL selection
+# requirement, guarded by per-stage GPU parity tests, on top of the
+# 2026-08-10 emotion / pace controls and Audio8 desktop Vulkan execution.
 # The ggml-speech floor stays at 2026-08-07.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
@@ -12,8 +14,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF ca075380c1fb775d3441b86a81eb3dd65f1352c3
-    SHA512 a43b149a7385367cabbcd0078546def726ba63586797c2ffb8fac5d56358714ecc17dac3cbdd94c5a7bc2c3ef053962e55683a71796cf6a0d473b003b7be6447
+    REF 21f12102e26ced099809802039109caca3f09045
+    SHA512 51cc29225d0d2f219df77ed7396aaf34df61c410bf7d8ee5a1c0c2bc577df580ccf3c60b189bca1b3b6451389217b14165c7d1d9b5b42a2e08ba7222884c8500
     HEAD_REF master
 )
 
