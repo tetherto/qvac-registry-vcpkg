@@ -1,7 +1,7 @@
 {
   "name": "parakeet-cpp",
-  "version-date": "2026-08-07",
-  "description": "Parakeet (NVIDIA FastConformer ASR + Sortformer diarization) inference in pure C++/ggml. Ships CTC, TDT, EOU and Sortformer engines under one Engine umbrella plus the cross-engine StreamEvent API, with an optional Apple Core ML encoder sidecar; sourced from tetherto/qvac-ext-lib-whisper.cpp engines/parakeet. This republish advances the pin to master 5e57a692, the single source archive shared with whisper-cpp, tts-cpp and audiogen-cpp, and raises the ggml-speech floor to 2026-08-07 for the Vulkan matmul src0 binding fix and the OpenCL im2col rewrite; engines/parakeet itself is unchanged. Consumers use find_package(qvac-parakeet CONFIG) + qvac::parakeet: the installable artifacts live under the qvac-parakeet name so this port is co-installable with whisper-cpp.",
+  "version-date": "2026-08-10",
+  "description": "Parakeet (NVIDIA FastConformer ASR + Sortformer diarization) inference in pure C++/ggml. Ships CTC, TDT, EOU and Sortformer engines under one Engine umbrella plus the cross-engine StreamEvent API, with an optional Apple Core ML encoder sidecar; sourced from tetherto/qvac-ext-lib-whisper.cpp engines/parakeet. This republish advances the pin to master 52b9abc, the single source archive shared with whisper-cpp, tts-cpp and audiogen-cpp. engines/parakeet is byte-identical to the previous 5e57a692 pin and the ggml-speech floor stays at 2026-08-07; the republish only re-joins the shared archive. Consumers use find_package(qvac-parakeet CONFIG) + qvac::parakeet: the installable artifacts live under the qvac-parakeet name so this port is co-installable with whisper-cpp.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/parakeet",
   "license": "MIT",
   "dependencies": [

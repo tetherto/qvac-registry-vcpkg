@@ -2,11 +2,9 @@
 # in pure C++/ggml, from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master 09566de3, which adds the Audio8 engine (PR #128): a DualAR
-# zero-shot model with in-process voice cloning, CPU-only, three GGUFs. Nothing
-# existing changes shape and the ggml-speech floor stays at 2026-08-07.
-# whisper-cpp / parakeet-cpp / audiogen-cpp stay at 5e57a692, whose library
-# sources are byte-identical here; the four re-align at the next joint bump.
+# Pinned at master ca075380. This keeps the 2026-08-10 emotion / pace controls
+# and Supertonic vocoder backward, and adds Audio8 desktop Vulkan execution.
+# The ggml-speech floor stays at 2026-08-07.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -14,8 +12,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 09566de32e48a2681d78ab442d51d083f4301fc7
-    SHA512 556a18d2e1ff2102b5ba702a23fb2d3793591a0c02a57ce5a58de8567840ac5fa7b713b3aa58630f3161b0436c0b8ccf7394585383416a6995635d41fe41d5ea
+    REF ca075380c1fb775d3441b86a81eb3dd65f1352c3
+    SHA512 a43b149a7385367cabbcd0078546def726ba63586797c2ffb8fac5d56358714ecc17dac3cbdd94c5a7bc2c3ef053962e55683a71796cf6a0d473b003b7be6447
     HEAD_REF master
 )
 
