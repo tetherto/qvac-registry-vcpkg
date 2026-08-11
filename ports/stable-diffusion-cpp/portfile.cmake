@@ -16,9 +16,9 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # 2026-07-03 (REF pinned to the branch tip for reproducibility).
 #
-# 3df163d is the tip of 2026-07-03-ltx-lora after merging qvac-ext-stable-
-# diffusion.cpp PR #25, including the final transactional LoRA loading and
-# safe VAE fallback fixes.
+# 1dcbe360 is the merged 2026-07-03 tip after merging qvac-ext-stable-
+# diffusion.cpp PR #25, preserving the ABot-World session API while adding
+# the final transactional LoRA loading and safe VAE fallback fixes.
 #
 # 97594f3 is the tip of 2026-07-03 after merging PR #27 on top of PR #22:
 # the walk's masked self-attention composes its mask explicitly
@@ -76,8 +76,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 3df163deb46c2f55d2b8891216fbe8cae76fcb8d
-    SHA512 241906a63962830d0275653cafd766b4c9752b6e6f6a04fad854affa6c100fa9b0788877db3c3f6377735a1aa0c3ef4562f539672c8fa3e6905238ca74decda5
+    REF 1dcbe3604c195a18005e95d9b7fd467c316643cc
+    SHA512 e578efc65e398c7712ee674243f25b960e9bb04d96d3bee0860623a958d2016575e6df42983365b798014940bc50cdf08cdee09736cee2bd910ac4f52ab3caa8
 )
 
 set(SD_FLASH_ATTN OFF)
