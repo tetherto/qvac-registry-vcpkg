@@ -74,7 +74,7 @@
     },
     "parakeet-cpp": {
       "baseline": "2026-08-10",
-      "port-version": 0
+      "port-version": 1
     },
     "protobuf": {
       "baseline": "onnxruntime",
@@ -117,7 +117,7 @@
       "port-version": 0
     },
     "speech-cpp": {
-      "baseline": "2026-08-07",
+      "baseline": "2026-08-10",
       "port-version": 0
     },
     "ssplit": {
