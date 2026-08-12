@@ -1,12 +1,6 @@
 # audiogen-cpp: ACE-Step music generation in pure C++/ggml, from the
 # engines/audiogen/ subfolder of qvac-ext-lib-whisper.cpp; consumes the
 # ggml-speech port.
-#
-# Pinned at merged commit 80d5c3a2 (qvac-ext-lib-whisper.cpp PR #132). This
-# aligns generation with official ACE-Step, including the Haar wavelet DCW
-# correction that removes robotic artifacts and the stabilized quantized
-# batched LM head. The ggml-speech floor remains 2026-08-07 because it already
-# provides the required GPU kernels for the supported backends.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -14,8 +8,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 80d5c3a267753422d57c533441b3fb640bb7d56a
-    SHA512 3e9b5f168e3b18acd7cbb17c291381e7fa16fee2bcbfce621749d121609a39d34305d563d2cdb522d0f9b07f8e08f4f77822e77bf6c60fcc0ff01bc7caaf71d3
+    REF 78925059d85fa3ae1caeb2073aaa6d4dce817c1b
+    SHA512 c11eceffb0d220afda63960a0e83429502898bc0085f7a0c2a42de74670780fc646a5a794b70920133d1aaec63fb1ea94b22b36665abcc573a7f6bcbdb3a692d
     HEAD_REF master
 )
 

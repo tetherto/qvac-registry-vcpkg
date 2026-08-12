@@ -1,8 +1,7 @@
 {
   "name": "tts-cpp",
-  "version-date": "2026-08-07",
-  "port-version": 1,
-  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS, Audio8 (CPU + Metal / Vulkan / OpenCL GPU; Audio8 CPU-only), and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts). This republish advances the pin to master 09566de3 and adds the Audio8 engine (PR #128), a DualAR zero-shot model with in-process voice cloning, shipped as three GGUFs so a text-only deployment can omit the codec encoder. New engine only: nothing existing changes shape and the ggml-speech floor stays at 2026-08-07.",
+  "version-date": "2026-08-12",
+  "description": "Text-to-speech in pure C++/ggml: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS, Audio8, and LavaSR speech enhancement. Sourced from tetherto/qvac-ext-lib-whisper.cpp (engines/tts). This release advances the pin from ca075380 to master 21f12102 (QVAC-22775) and enables CosyVoice3 GPU execution on Metal (macOS / iOS): backend selection is constrained to the engine's validated set via a Metal-or-OpenCL requirement filtered inside the registry walk, so a Vulkan device can no longer shadow an available Metal one, and CPU fallback on off-requirement hosts reports as an intentional policy decline. Guarded by per-stage GPU parity tests (flow / llm against their PyTorch-reference gates; llm additionally bit-identical to the CPU trajectory; hift with the f0 trajectory pinned across backends because SineGen2 integrates it into sine phases). The public API shape is unchanged: the existing n_gpu_layers option now engages Metal on Apple hosts; Vulkan hosts continue to fall back to CPU. The ggml-speech floor stays at 2026-08-07.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/tts",
   "license": "MIT",
   "dependencies": [

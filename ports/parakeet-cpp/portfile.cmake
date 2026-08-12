@@ -8,11 +8,11 @@
 # find_package(qvac-parakeet CONFIG) + qvac::parakeet; the C++ `parakeet::`
 # namespace and the include/parakeet/ directory are unchanged.
 #
-# Pinned at master 5e57a692, shared with the whisper-cpp / tts-cpp /
-# audiogen-cpp ports so all four resolve one source archive against one
-# ggml-speech. engines/parakeet is unchanged from the previous pin; the
-# ggml-speech floor moves to 2026-08-07 for the Vulkan matmul src0 binding fix
-# and the OpenCL im2col rewrite (qvac-ext-ggml PRs #52, #53).
+# Pinned at master e9255b29 (merged qvac-ext-lib-whisper.cpp#133) for
+# IndicConformer multilingual CTC language masking (EngineOptions::language /
+# CLI --language + converter lang_* metadata). Port-version 2 corrects the
+# source archive checksum published by port-version 1. ggml-speech floor stays
+# at 2026-08-07.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -20,8 +20,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 5e57a69221e58a091aac07b2d19895df985ba53c
-    SHA512 2cce663c5c375e07d0bdc109fe40ce13727fa0f01969537fa1b2e07c8a20429e4854fc140e40d3b146f2debcb75207952c8a5efbf67d8c21dba4e60452cf53fd
+    REF e9255b29815d6b73f0c0de95e98570e57de31831
+    SHA512 28d5b60cdcc664e9353183e1b015b36615ab6de78e5434d34a361a4df496e83e6f5697be3202fa736aa5d588318cf57dc84de2b47af3f5a85305bd633942ee2b
     HEAD_REF master
 )
 
