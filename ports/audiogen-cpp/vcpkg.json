@@ -1,6 +1,7 @@
 {
   "name": "audiogen-cpp",
   "version-date": "2026-08-11",
+  "port-version": 1,
   "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. This version adds reference/source audio and cover-nofsq task controls on top of the ACE-Step parity path (Haar DCW + quantized LM head). Requires ggml-speech >= 2026-08-07 for the supported GPU backends.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/audiogen",
   "license": "MIT",
