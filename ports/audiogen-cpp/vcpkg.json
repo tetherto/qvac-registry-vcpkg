@@ -1,7 +1,7 @@
 {
   "name": "audiogen-cpp",
-  "version-date": "2026-08-13",
-  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. This version adds ordered Repaint and FlowEdit operations alongside reference/source audio and cover-nofsq controls. Requires ggml-speech >= 2026-08-07 for the supported GPU backends.",
+  "version-date": "2026-08-14",
+  "description": "ACE-Step text-to-music engine in pure C++/ggml, from qvac-ext-lib-whisper.cpp's engines/audiogen. This version hardens ordered Repaint and FlowEdit with backend capability checks, deterministic RNG continuity, cancellable VAE decoding, and tested CLI plan parsing. Requires ggml-speech >= 2026-08-07 for the supported GPU backends.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp/tree/master/engines/audiogen",
   "license": "MIT",
   "dependencies": [

@@ -8,9 +8,9 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF f1a53e4d9504a75f9b9f12912f31bfc16d18d16d
-    SHA512 da769e669a4c1461aeca0a8dbaeb044935608bb650eddf8dec60d2bcb75a4dc42613a46d8c00558cbd50b2f3e2d517442d1831bfd0e773b4e41dee054056db09
-    HEAD_REF master
+    REF c980a29ff5071ccbc17939e07c5649ba65c74c79
+    SHA512 228caf6199c2e28e25bf8ade3c70b0c91b110efc0ac739a39d6ddd8374a6ecb7fedbbd678ccbbab4517326cab236a38d7abebe91a885adfb5b5c2ecce4819238
+    HEAD_REF QVAC-22883/audiogen-repaint-flow-edit
 )
 
 set(SOURCE_PATH "${WHISPER_CPP_SRC}/engines/audiogen")
