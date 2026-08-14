@@ -2,10 +2,9 @@
 # in pure C++/ggml, from the engines/tts subfolder of qvac-ext-lib-whisper.cpp;
 # consumes the ggml-speech port.
 #
-# Pinned at master 21f12102 (QVAC-22775). This enables CosyVoice3 GPU
-# execution on Metal (macOS / iOS) via the Metal-or-OpenCL selection
-# requirement, guarded by per-stage GPU parity tests, on top of the
-# 2026-08-10 emotion / pace controls and Audio8 desktop Vulkan execution.
+# Pinned at master e57fd9c6. This keeps Metal-specific Audio8 output
+# precision from selecting invalid Vulkan matmul pipelines during quantized
+# synthesis, on top of CosyVoice3 and Audio8 desktop GPU execution.
 # The ggml-speech floor stays at 2026-08-07.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
@@ -14,8 +13,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH WHISPER_CPP_SRC
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 7ca7369cc887c09e84e2ca09d3f517569f410c13
-    SHA512 58376dd1232334559378d93aa17cfcf6348bd0b32ffd98e5dfc8a3fe2d51e3b8588630ee1bf4d2fe2a11f419a855e712985b2d3c904b358cdd226c884dc12bfe
+    REF e57fd9c6648cd56b20b8f834e7a018a5d83e0f70
+    SHA512 51a027dc1dbd8ececeea11a1d9396dd54187ead00d6b89c67a47d412a715255175eb5bde45f8877a2122943f75e9ad9b25108a5359e8f130786664335617b82a
     HEAD_REF master
 )
 
