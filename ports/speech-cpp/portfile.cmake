@@ -31,9 +31,9 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 84be03cce743e509224788b81707e996bbd0b09b
-    SHA512 3838feccdf9f1082eb168856060b60c219212ffae5c5ecef9311e528f1f5a7a9dbfd1f0261a6bfed716c779ecfc5b945f3c33e5184d64f3094f9d7b5675aa6e3
-    HEAD_REF QVAC-22883/audiogen-repaint-flow-edit
+    REF 1cdde3bb88a8ad1ee0cc78152a7ffa2eb4925a78
+    SHA512 ecc12a70d2d57b204a1fdb06b17281b0f30a74ca81d5612bee310ddfaa8b8529aebba5c8b86124b25e9be1c02d13e54c38bdb7e90366843157e3f3518d4db192
+    HEAD_REF master
 )
 
 if (NOT EXISTS "${SOURCE_PATH}/CMakeLists.txt")
