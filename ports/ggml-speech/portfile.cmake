@@ -1,16 +1,16 @@
 # ggml-speech: the speech-stack ggml flavour, tetherto/qvac-ext-ggml@speech.
-# Consumed by the whisper-cpp / parakeet-cpp / tts-cpp / audiogen-cpp ports.
+# Consumed by the speech-cpp port.
 #
-# This pin (PRs #52, #53) sizes the Vulkan matmul src0 binding from nb[] so a
-# strided src0 view stops reading past the end of its descriptor, defaults
-# prefer_host_memory on unified-memory adapters, and on OpenCL adds the ACE-Step
-# snake / col2im_1d kernels plus a much faster im2col on the default conv path.
-# CPU output is unchanged.
+# This pin (PR #55) carries four OpenCL fixes that are keyed on tensor shape
+# rather than on any one model, so they apply to every engine on Adreno: the
+# elementwise ops no longer abort on a non-contiguous src0, kernel_pad gains a
+# float4 flat-dispatch path, small-M matmuls stay off the tiled GEMM, and
+# ARGMAX gains a kernel instead of falling back. CPU output is unchanged.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 576c9735326a50ef1f2d54263ba4dac0d384d73d
-    SHA512 15b6f8816d25c5e7e4393a9b080370776035e6538f7f970b486c0946b85924c5875eaa7ad1e1364d92e2512ce17aeb8e0dda4170abe969a94465cc6eed1f15c7
+    REF 70a110cddfb1fa16dbf61bebf2ceeb31f2d8360f
+    SHA512 0e59b5226b8ba43f2b7b65264e311e3b854fe5ca4b418985f8d27806a1c1354b642eb0a8149b1ff9bc3550bee031ddda88bf82116dfe36b03fdb676680d70764
     HEAD_REF speech
 )
 

@@ -1,7 +1,7 @@
 {
   "name": "ggml-speech",
-  "version-date": "2026-08-07",
-  "description": "Speech-stack ggml flavour (tetherto/qvac-ext-ggml@speech), consumed by the whisper-cpp, parakeet-cpp, tts-cpp and audiogen-cpp ports. This pin (PRs #52 and #53) sizes the Vulkan matmul src0 binding from nb[] so a strided src0 view no longer reads past the end of its descriptor, defaults prefer_host_memory on unified-memory adapters, and on OpenCL adds the ACE-Step snake and col2im_1d kernels together with a much faster im2col on the default convolution path. CPU output is unchanged.",
+  "version-date": "2026-08-17",
+  "description": "Speech-stack ggml flavour (tetherto/qvac-ext-ggml@speech), consumed by the speech-cpp port. This pin (PR #55) carries four OpenCL fixes keyed on tensor shape rather than on any one model, so every engine on Adreno gets them: ggml_cl_mul / div / sub no longer take the broadcast-row path on a non-contiguous src0 and then abort on a contiguity assert, kernel_pad gains a float4 flat-dispatch variant in place of one float per work-item on a 64-wide row group, the local-memory GEMM gate now tests M so a small-output-channel matmul stops running on a 64-row tile, and ARGMAX gains an OpenCL kernel (ties resolve to the largest index, matching ggml_vec_argmax_f32) instead of falling back. Also picks up a torch 2.6.0 bump in requirements.txt for CVE-2025-32434, which affects the Python conversion tooling only. CPU output is unchanged.",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml/tree/speech",
   "license": "MIT",
   "dependencies": [

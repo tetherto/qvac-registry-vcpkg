@@ -5,10 +5,34 @@ A [vcpkg](https://vcpkg.io/) custom registry used by QVAC projects. It provides 
 ## What’s in this registry
 
 - **QVAC packages**: `qvac-lib-inference-addon-cpp`, `qvac-lint-cpp`
-- **Inference / ML**: `llama-cpp`, `whisper-cpp`, `onnxruntime`, `onnx`, `tokenizers-cpp`, `sentencepiece`
+- **Inference / ML**: `llama-cpp`, `speech-cpp`, `stable-diffusion-cpp`, `onnxruntime`, `onnx`, `tokenizers-cpp`, `sentencepiece`
+- **ggml flavours**: `ggml`, `ggml-speech`
 - **Build / runtime deps**: `vcpkg-cmake`, `vcpkg-cmake-config`, `vcpkg-cmake-get-vars`, `abseil`, `eigen3`, `opencl`, `opencl-headers`, `protobuf`, `pybind11`, `xnnpack`, and others
 
 Exact versions and baselines are defined in `versions/baseline.json`.
+
+### The speech stack: `speech-cpp`
+
+`speech-cpp` is an umbrella port over [qvac-ext-lib-whisper.cpp](https://github.com/tetherto/qvac-ext-lib-whisper.cpp): one source pin for the whole speech stack, with the engines selected as features and every engine linking the single `ggml-speech` ggml.
+
+| Feature | Engine | `find_package` | Imported target |
+|---|---|---|---|
+| `whisper` | whisper.cpp transcription | `whisper` | `whisper::whisper` |
+| `parakeet` | Parakeet ASR + diarization | `qvac-parakeet` | `qvac::parakeet` |
+| `tts` | Chatterbox, Supertonic, CosyVoice3, Parler, Audio8, LavaSR | `tts-cpp` | `tts-cpp::tts-cpp` |
+| `audiogen` | ACE-Step music generation | `audiogen-cpp` | `audiogen-cpp::audiogen-cpp` |
+
+Backend features (`metal`, `vulkan`, `opencl`) fan out to the matching `ggml-speech` features, so a manifest entry like the one below resolves one shared `ggml-speech` with unified features:
+
+```json
+{
+  "name": "speech-cpp",
+  "default-features": false,
+  "features": ["whisper", "parakeet", "vulkan"]
+}
+```
+
+`speech-cpp` replaced the per-engine `whisper-cpp`, `parakeet-cpp`, `tts-cpp` and `audiogen-cpp` ports, which pinned the same upstream repo at four different commits. Those ports were removed once every consumer had migrated, so manifests that still name them no longer resolve — depend on the matching `speech-cpp` feature instead.
 
 ## Prerequisites
 
@@ -37,8 +61,8 @@ Exact versions and baselines are defined in `versions/baseline.json`.
            "qvac-lib-inference-addon-cpp",
            "qvac-lint-cpp",
            "llama-cpp",
-           "whisper-cpp",
-           "piper",
+           "speech-cpp",
+           "ggml-speech",
            "onnxruntime"
          ]
        }
