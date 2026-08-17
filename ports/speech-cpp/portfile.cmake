@@ -32,7 +32,7 @@ vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-lib-whisper.cpp
     REF 84be03cce743e509224788b81707e996bbd0b09b
-    SHA512 0
+    SHA512 3838feccdf9f1082eb168856060b60c219212ffae5c5ecef9311e528f1f5a7a9dbfd1f0261a6bfed716c779ecfc5b945f3c33e5184d64f3094f9d7b5675aa6e3
     HEAD_REF QVAC-22883/audiogen-repaint-flow-edit
 )
 
