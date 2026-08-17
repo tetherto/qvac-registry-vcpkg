@@ -32,7 +32,7 @@ vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-lib-whisper.cpp
     REF 8e0140ff3750a7fa2b6d0905bdb6c98b028abff9
-    SHA512 2d70c113c3f0fd9d1f16b028783e08e3d1484b513e92b34b209cfd12a1481c480cf0338bcd62e190d002cbc5688d5c7a578b9f8a5bf28c34aa0d0c9916123564
+    SHA512 0ef332f101b74f8de9770514df49cdeca2ad44ebe03524c2ab9ce45354a7a72e9d23d370da421ea4077423f5ddf8c5f44efcf08f007685f49343a52753dcd6be
     HEAD_REF QVAC-23762/metadata-aware-caption-conditioning
 )
 
