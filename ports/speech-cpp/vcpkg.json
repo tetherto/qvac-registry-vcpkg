@@ -1,14 +1,14 @@
 {
   "name": "speech-cpp",
-  "version-date": "2026-08-14",
-  "description": "Umbrella port over the QVAC speech stack (tetherto/qvac-ext-lib-whisper.cpp): one source pin, per-engine features. This revision advances the shared source pin from e57fd9c6 to fbc55d66, adding native zero-shot / cross-lingual voice cloning to CosyVoice3: with EngineOptions::reference_audio set, speech_tokenizer_v3, CAM++ and the prompt mel run in-process at engine construction (fail-closed; prompt_text selects zero-shot vs cross-lingual, and the new cosyvoice3-s3tok / cosyvoice3-campplus GGUFs are required only for cloning). speech-cpp[whisper] builds upstream whisper.cpp from third_party/whisper.cpp (CMake package `whisper`); speech-cpp[parakeet] builds the Parakeet ASR + Sortformer diarization engine from engines/parakeet under the qvac-parakeet namespace (find_package(qvac-parakeet) + qvac::parakeet); speech-cpp[tts] builds the TTS engine collection from engines/tts (find_package(tts-cpp) -- one library shipping Chatterbox, Supertonic, CosyVoice3, Parler-TTS, Audio8 and LavaSR); speech-cpp[audiogen] builds the ACE-Step music-generation engine from engines/audiogen (find_package(audiogen-cpp)). Upstream whisper.cpp's own bundled parakeet is explicitly NOT built or installed, so speech-cpp[whisper,parakeet] co-installs without the lib/parakeet.* file-ownership clash the standalone ports had. All engines link the single system ggml from the ggml-speech port; the backend features (metal / vulkan / opencl) fan out to the matching ggml-speech features so a consumer manifest like speech-cpp[whisper,parakeet,vulkan] resolves one shared ggml-speech with unified features. The default feature set is the whisper engine plus the platform's default GPU backend; consumers that want a different engine mix set default-features to false and pick explicitly. Supersedes the standalone whisper-cpp, parakeet-cpp, tts-cpp and audiogen-cpp ports, which remain available transitionally.",
+  "version-date": "2026-08-17",
+  "description": "Umbrella port over the QVAC speech stack (tetherto/qvac-ext-lib-whisper.cpp): one source pin, per-engine features. This revision advances the shared source pin from fbc55d66 to ea1ac615, admitting OpenCL to the Audio8 GPU allowlist so Audio8 runs on Qualcomm Adreno instead of falling back to CPU. GpuBackendRequirement becomes a bit-flag set, so an engine ORs the backends it has validated rather than the enumeration growing one value per combination; the admitted device sets are unchanged for every other engine. Only engines/tts changed in this window -- third_party/whisper.cpp, engines/parakeet and engines/audiogen are byte-identical to the previous pin. Requires ggml-speech 2026-08-17, without which Audio8 aborts on the first rotary embedding. speech-cpp[whisper] builds upstream whisper.cpp from third_party/whisper.cpp (CMake package `whisper`); speech-cpp[parakeet] builds the Parakeet ASR + Sortformer diarization engine from engines/parakeet under the qvac-parakeet namespace (find_package(qvac-parakeet) + qvac::parakeet); speech-cpp[tts] builds the TTS engine collection from engines/tts (find_package(tts-cpp) -- one library shipping Chatterbox, Supertonic, CosyVoice3, Parler-TTS, Audio8 and LavaSR); speech-cpp[audiogen] builds the ACE-Step music-generation engine from engines/audiogen (find_package(audiogen-cpp)). Upstream whisper.cpp's own bundled parakeet is explicitly NOT built or installed, so speech-cpp[whisper,parakeet] co-installs without the lib/parakeet.* file-ownership clash the standalone ports had. All engines link the single system ggml from the ggml-speech port; the backend features (metal / vulkan / opencl) fan out to the matching ggml-speech features so a consumer manifest like speech-cpp[whisper,parakeet,vulkan] resolves one shared ggml-speech with unified features. The default feature set is the whisper engine plus the platform's default GPU backend; consumers that want a different engine mix set default-features to false and pick explicitly. Replaced the standalone whisper-cpp, parakeet-cpp, tts-cpp and audiogen-cpp ports, which were removed from this registry once every consumer had migrated.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp",
   "license": "MIT",
   "dependencies": [
     {
       "name": "ggml-speech",
       "default-features": false,
-      "version>=": "2026-08-07"
+      "version>=": "2026-08-17"
     },
     {
       "name": "vcpkg-cmake",
@@ -20,7 +20,6 @@
     }
   ],
   "default-features": [
-    "whisper",
     {
       "name": "metal",
       "platform": "osx | ios"
@@ -32,21 +31,10 @@
     {
       "name": "vulkan",
       "platform": "windows | linux | android"
-    }
+    },
+    "whisper"
   ],
   "features": {
-    "whisper": {
-      "description": "Build the whisper engine from third_party/whisper.cpp (upstream whisper.cpp with the QVAC delta; upstream's bundled parakeet is gated off). CMake package: find_package(whisper CONFIG) + whisper::whisper."
-    },
-    "parakeet": {
-      "description": "Build the Parakeet engine (NVIDIA FastConformer ASR: CTC / TDT / EOU, plus Sortformer diarization) from engines/parakeet. CMake package: find_package(qvac-parakeet CONFIG) + qvac::parakeet."
-    },
-    "tts": {
-      "description": "Build the TTS engine collection from engines/tts: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS, Audio8 and LavaSR speech enhancement, as one library. CMake package: find_package(tts-cpp CONFIG) + tts-cpp::tts-cpp.",
-      "dependencies": [
-        "mecab"
-      ]
-    },
     "audiogen": {
       "description": "Build the audiogen engine (ACE-Step music generation) from engines/audiogen. CMake package: find_package(audiogen-cpp CONFIG) + audiogen-cpp::audiogen-cpp."
     },
@@ -91,6 +79,15 @@
         }
       ]
     },
+    "parakeet": {
+      "description": "Build the Parakeet engine (NVIDIA FastConformer ASR: CTC / TDT / EOU, plus Sortformer diarization) from engines/parakeet. CMake package: find_package(qvac-parakeet CONFIG) + qvac::parakeet."
+    },
+    "tts": {
+      "description": "Build the TTS engine collection from engines/tts: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS, Audio8 and LavaSR speech enhancement, as one library. CMake package: find_package(tts-cpp CONFIG) + tts-cpp::tts-cpp.",
+      "dependencies": [
+        "mecab"
+      ]
+    },
     "vulkan": {
       "description": "Enable Vulkan GPU acceleration for all enabled engines (Linux / Windows / Android; Apple platforms use the metal feature instead, via ggml-speech[vulkan]).",
       "supports": "!osx & !ios",
@@ -104,6 +101,9 @@
           "platform": "!osx & !ios"
         }
       ]
+    },
+    "whisper": {
+      "description": "Build the whisper engine from third_party/whisper.cpp (upstream whisper.cpp with the QVAC delta; upstream's bundled parakeet is gated off). CMake package: find_package(whisper CONFIG) + whisper::whisper."
     }
   }
 }

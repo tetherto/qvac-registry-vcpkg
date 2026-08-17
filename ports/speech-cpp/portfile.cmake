@@ -21,10 +21,9 @@
 # (find_package(qvac-parakeet) + qvac::parakeet) — and upstream's is neither
 # built nor installed. No file-ownership clash, no wasted build.
 #
-# The REF below is the single source pin for every engine. When re-publishing,
-# keep it at or ahead of the standalone whisper-cpp / parakeet-cpp / tts-cpp /
-# audiogen-cpp pins, which this port supersedes (the standalone ports remain
-# available transitionally).
+# The REF below is the single source pin for every engine. It replaced the
+# standalone whisper-cpp / parakeet-cpp / tts-cpp / audiogen-cpp ports, which
+# were removed from this registry once every consumer had migrated.
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 set(VCPKG_BUILD_TYPE release)
@@ -32,8 +31,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF fbc55d663e53d8530d38f322af48762bfc1cf91f
-    SHA512 2e0976076183db3d157ab48561e281732928a4dcc67c0c198f4b51b97f6c29e6e06dcd985b248da9512d14e31790b53dd1ae8ac2f0a377034b1489ce44e9e6d0
+    REF ea1ac6152ae21507f2b161b02cd27b761d42cba0
+    SHA512 0cc2d80e7eb9123c35066ec233e62563a70725c9137d9757cf6aaef0ba13e24e72e70304464571cb7a0c49e9aefe83c9610a959f8726dc2baaae64e352fe26cd
     HEAD_REF master
 )
 
