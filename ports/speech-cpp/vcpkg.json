@@ -2,7 +2,7 @@
   "name": "speech-cpp",
   "version-date": "2026-08-18",
   "port-version": 2,
-  "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines. This port revision advances the source pin to qvac-ext-lib-whisper.cpp 792b6892 (QVAC-23762) so ACE-Step can optionally augment captions with BPM, tempo, time signature, and key. Requires ggml-speech 2026-08-18.",
+  "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines. This port revision advances the source pin to qvac-ext-lib-whisper.cpp 792b6892 so ACE-Step can optionally augment captions with BPM, tempo, time signature, and key. Requires ggml-speech 2026-08-18.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp",
   "license": "MIT",
   "dependencies": [
