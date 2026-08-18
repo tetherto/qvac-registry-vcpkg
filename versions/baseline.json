@@ -29,7 +29,7 @@
       "port-version": 4
     },
     "ggml-speech": {
-      "baseline": "2026-08-17",
+      "baseline": "2026-08-18",
       "port-version": 0
     },
     "hip": {
@@ -110,7 +110,7 @@
     },
     "speech-cpp": {
       "baseline": "2026-08-18",
-      "port-version": 0
+      "port-version": 1
     },
     "ssplit": {
       "baseline": "1.0.0",

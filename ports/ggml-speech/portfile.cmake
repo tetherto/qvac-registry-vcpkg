@@ -1,16 +1,8 @@
-# ggml-speech: the speech-stack ggml flavour, tetherto/qvac-ext-ggml@speech.
-# Consumed by the speech-cpp port.
-#
-# This pin (PR #55) carries four OpenCL fixes that are keyed on tensor shape
-# rather than on any one model, so they apply to every engine on Adreno: the
-# elementwise ops no longer abort on a non-contiguous src0, kernel_pad gains a
-# float4 flat-dispatch path, small-M matmuls stay off the tiled GEMM, and
-# ARGMAX gains a kernel instead of falling back. CPU output is unchanged.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 70a110cddfb1fa16dbf61bebf2ceeb31f2d8360f
-    SHA512 0e59b5226b8ba43f2b7b65264e311e3b854fe5ca4b418985f8d27806a1c1354b642eb0a8149b1ff9bc3550bee031ddda88bf82116dfe36b03fdb676680d70764
+    REF 0a76e3ed969781da6de41d6c9a1c3fc471c0978b
+    SHA512 2bc1fbfb5993bbab5ec7c35706b1fb8d717f109978492cf36c84ebb946f6e23eda595bd51f3c27324f0ea3bcb06d8bf397b6902eb74f181f5522494a42213e32
     HEAD_REF speech
 )
 

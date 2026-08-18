@@ -1,14 +1,15 @@
 {
   "name": "speech-cpp",
   "version-date": "2026-08-18",
-  "description": "Umbrella port over the QVAC speech stack (tetherto/qvac-ext-lib-whisper.cpp): one source pin, per-engine features. This revision advances the shared source pin from 1cdde3bb to 5f181b9d. The window contains three changes: PR #155 makes the Parakeet Unified RNN-T 0.6B model work properly on Metal (the pinned ggml's Metal backend registers as 'MTL', so parakeet's backend_is_metal() never matched and the Apple-specific QKV-stacking gate silently stopped firing; verified on Apple M2 with CPU/Metal byte-identical transcripts and q8_0 RTF 0.028, plus new Metal GPU ctest fixtures and a macOS test-rnnt link fix); PR #152 validates the IndicConformer multilingual CTC on Metal (coverage only, no engine changes); PR #151 adds the MiniMax Music3 CPU engine to engines/audiogen. No ggml-speech bump required: the window is engine-side only and runs against ggml-speech 2026-08-17. speech-cpp[whisper] builds upstream whisper.cpp from third_party/whisper.cpp (CMake package `whisper`); speech-cpp[parakeet] builds the Parakeet ASR + Sortformer diarization engine from engines/parakeet under the qvac-parakeet namespace (find_package(qvac-parakeet) + qvac::parakeet); speech-cpp[tts] builds the TTS engine collection from engines/tts (find_package(tts-cpp) -- one library shipping Chatterbox, Supertonic, CosyVoice3, Parler-TTS, Audio8 and LavaSR); speech-cpp[audiogen] builds the ACE-Step music-generation engine from engines/audiogen (find_package(audiogen-cpp)). Upstream whisper.cpp's own bundled parakeet is explicitly NOT built or installed, so speech-cpp[whisper,parakeet] co-installs without the lib/parakeet.* file-ownership clash the standalone ports had. All engines link the single system ggml from the ggml-speech port; backend features fan out to the matching ggml-speech features. The default feature set is the whisper engine plus the platform's default GPU backend; consumers that want a different engine mix set default-features to false and pick explicitly. Replaced the standalone whisper-cpp, parakeet-cpp, tts-cpp and audiogen-cpp ports, which were removed once every consumer migrated.",
+  "port-version": 1,
+  "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines. This port revision requires ggml-speech 2026-08-18 so Android OpenCL consumers receive the Adreno launch validation fixes without changing the speech-cpp source pin.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp",
   "license": "MIT",
   "dependencies": [
     {
       "name": "ggml-speech",
       "default-features": false,
-      "version>=": "2026-08-17"
+      "version>=": "2026-08-18"
     },
     {
       "name": "vcpkg-cmake",
