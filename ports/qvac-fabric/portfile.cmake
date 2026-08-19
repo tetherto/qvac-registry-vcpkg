@@ -2,7 +2,7 @@ vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-fabric-llm.cpp
   REF v${VERSION}
-  SHA512 9b0e66baad11ceb883132b363d8f7ca3fd795dff5ddc292fd9b108ec6fccbf34fc7fbe639236b997e030104e422d809abbe0e91265b3ac1f4d75f7fa65199e46
+  SHA512 f50e9de12d9e5c37b9a4435badb18e60f10fd2be448d9f05fda60ae56469ff33d91677f3e7ba2f00bc3bea421f9aa6169509eb71a9268e7825e512e1bbd275fe
 )
 
 # Upstream CMake options only — passed through to vcpkg_cmake_configure.
@@ -11,6 +11,7 @@ vcpkg_check_features(
   FEATURES
     force-profiler FORCE_GGML_VK_PERF_LOGGER
     llama BUILD_LLAMA
+    vector-index GGML_VECTOR_INDEX
 )
 
 # Portfile-only feature flags (drive PLATFORM_OPTIONS; not upstream cache vars).
