@@ -1,7 +1,6 @@
 {
   "name": "speech-cpp",
-  "version-date": "2026-08-18",
-  "port-version": 2,
+  "version-date": "2026-08-19",
   "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines. This port revision advances the source pin to qvac-ext-lib-whisper.cpp 792b6892 so ACE-Step can optionally augment captions with BPM, tempo, time signature, and key. Requires ggml-speech 2026-08-18.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp",
   "license": "MIT",
@@ -49,6 +48,20 @@
           "features": [
             "parakeet"
           ]
+        }
+      ]
+    },
+    "cuda": {
+      "description": "Enable the CUDA GPU backend for all enabled engines (NVIDIA on Linux / Windows, via ggml-speech[cuda]). Requires the CUDA toolkit on the build host; ggml-speech locates nvcc itself.",
+      "supports": "!osx & !ios & !android",
+      "dependencies": [
+        {
+          "name": "ggml-speech",
+          "default-features": false,
+          "features": [
+            "cuda"
+          ],
+          "platform": "!osx & !ios & !android"
         }
       ]
     },
