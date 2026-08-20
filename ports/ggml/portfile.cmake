@@ -1,17 +1,13 @@
 # ggml vcpkg overlay port
 #
-# Builds the ggml tensor library from tetherto/qvac-ext-ggml.
-# Fork of leejet/ggml (v0.12.0) carrying the reviewed Metal/video kernels
-# (IM2COL_3D, PAD, fused Flux RoPE, direct conv2d) plus the merged LTX compute
-# set, pinned from the 2026-06-06 branch (see the REF block below for specifics).
-#
-# Without these kernels the Metal backend aborts mid-video inference with
-# `unsupported op 'IM2COL_3D'` and the test-backend-ops support/test matrix
-# advertises invalid IM2COL_3D combos that hit CPU GGML_ASSERTs.
+# Builds the ggml tensor library from tetherto/qvac-ext-ggml for the QVAC
+# diffusion stack (paired with the stable-diffusion-cpp port from the same
+# branch date).
 #
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
 #   lib/libggml.a, lib/libggml-base.a, lib/libggml-cpu.a, ...
+#   lib/libqvac-diffusion-ggml-*.so  (dlopen'd GPU backend modules, see below)
 #   share/ggml/      (CMake package config)
 #
 # GPU backend selection via vcpkg features:
@@ -20,45 +16,24 @@
 #   cuda   -> GGML_CUDA=ON
 #   opencl -> GGML_OPENCL=ON
 
-# Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-07-03
+# Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-08-11
 # (REF pinned to that branch's tip commit for reproducibility).
 #
-# eab719e is the final 2026-07-03-ltx-lora branch head after merging qvac-ext-
-# ggml PR #54, including the Vulkan F32 tier and allocation-capacity fixes.
-#
-# 50cf563 is the 2026-07-03 branch head after merging the size-reduction
-# commits below.
-#
-# ea8cf04 extends the size-reduction shader filter to also replace unused
-# Vulkan training, backward, loss, and outer-product shader payloads with
-# no-op bodies.
-#
-# 9089ce6 replaced unused TQ1/TQ2/MXFP4/NVFP4 Vulkan shader payloads with
-# no-op bodies.
-#
-# b0d6be4 was the tip of 2026-07-03 after merging the size-reduction change
-# that defaults Adreno Vulkan shaders to Android-only and replaces unused
-# TBQ/PQ shader payloads with no-op bodies.
-#
-# b84554ae was the tip of 2026-07-03 - a clone of the
-# 2026-06-06-on-fabric-ggml-adreno-teardown branch. On top of leejet/ggml
-# v0.12.0 it carries the full merged compute set: the reviewed Metal/video
-# kernels (IM2COL_3D/PAD, fused Flux RoPE, direct conv2d), the coopmat1
-# flash-attn f32-accumulation fixes, the ggml_graph_leaf/leafs/n_leafs public
-# API export, and the ggml_conv_1d/dw im2col-type fix (derive from a->type like
-# conv_2d) so F32 conv weights (e.g. LTX audio VAE) flow through the F32 path
-# instead of aborting on the CPU im2col_f16 F16 assert.
-#
-# This fabric-based branch also preserves qvac-fabric-llm.cpp's Adreno OpenCL
-# Q4_0 preallocated transpose-buffer path and serialized OpenCL SOA tensor
-# uploads, and cherry-picks e90151ab (ggml-opencl: release sub-buffers before
-# parent buffers on teardown) to fix the Adreno/QCOM Scudo "invalid chunk state"
-# abort on repeated Q4_0 load/unload cycles.
+# 7d9ce11 is the 2026-08-11 head after merging the two QVAC-23767 fixes on
+# top of f31dab0:
+# - PR #61: cmake-only, skips the x86 cpu-feats OBJECT helper in hybrid
+#   GGML_BACKEND_DL + GGML_CPU_STATIC builds, where the statically-linked CPU
+#   backend never consults the DL variant score and the un-exported helper
+#   broke install(EXPORT ggml-targets). Required for the desktop-Linux hybrid
+#   mode below.
+# - PR #64: drops a duplicated `case GGML_OP_POOL_2D` in the OpenCL backend
+#   that made ggml-opencl fail to compile (Android is the only OpenCL
+#   consumer in this family).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF eab719eadead8dc1afae6438817414a57920c613
-    SHA512 4b7ea78998955064a62169d2a50a10ff23d6dff55da2a11f6cf855ab30f10e84355438a9d7162f9c19d83b7f2d01e9f191b3a04a05d9c90bd43c5c55db3c1a6c
+    REF 7d9ce11cd47f338b361a00e866ffe7c224abedff
+    SHA512 0c7c99a799a6479d8fbf72d47240119da52d5d4b63ee1ecabf05cf84a0317588ee78939d9c6dba5a881d1bb4fc22765ac0991395cfc47204aa0548fe4c937d15
 )
 
 # --- GPU feature flags ---
@@ -96,33 +71,6 @@ if("opencl" IN_LIST FEATURES)
     set(GGML_OPENCL ON)
 endif()
 
-# --- Android: fetch NDK-matched Vulkan C++ headers ---
-# The NDK ships vulkan/vulkan_core.h (C) but not vulkan/vulkan.hpp (C++).
-# Rather than pulling the vcpkg vulkan-headers package (which may be a
-# different version), we detect the NDK's exact Vulkan version and download
-# the matching C++ headers from KhronosGroup/Vulkan-Headers.
-if(VCPKG_TARGET_IS_ANDROID AND "vulkan" IN_LIST FEATURES)
-    include(${CMAKE_CURRENT_LIST_DIR}/android-vulkan-version.cmake)
-    detect_ndk_vulkan_version()
-    message(STATUS "NDK Vulkan version: ${vulkan_version}")
-
-    file(DOWNLOAD
-        "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v${vulkan_version}.tar.gz"
-        "${SOURCE_PATH}/vulkan-hpp-${vulkan_version}.tar.gz"
-        TLS_VERIFY ON
-    )
-    file(ARCHIVE_EXTRACT
-        INPUT "${SOURCE_PATH}/vulkan-hpp-${vulkan_version}.tar.gz"
-        DESTINATION "${SOURCE_PATH}"
-        PATTERNS "*.hpp"
-    )
-    # ggml_add_backend_library adds target_include_directories(${backend} PRIVATE ..)
-    # which resolves to src/ for backends under src/ggml-vulkan/.  Placing the
-    # headers at src/vulkan/*.hpp makes #include <vulkan/vulkan.hpp> resolve.
-    file(COPY "${SOURCE_PATH}/Vulkan-Headers-${vulkan_version}/include/"
-         DESTINATION "${SOURCE_PATH}/src/")
-endif()
-
 # --- Platform options ---
 set(PLATFORM_OPTIONS)
 
@@ -130,22 +78,55 @@ if(VCPKG_TARGET_IS_IOS)
     list(APPEND PLATFORM_OPTIONS -DGGML_BLAS=OFF -DGGML_ACCELERATE=OFF)
 endif()
 
-# Hybrid backend mode for Android: GPU backends (Vulkan, OpenCL) are MODULE
-# .so files loaded at runtime via dlopen - no libOpenCL.so NEEDED dependency.
-# The CPU backend is statically linked (GGML_CPU_STATIC) so that SD can call
-# ggml_set_f32, ggml_backend_cpu_init, etc. directly at link time.
-if(VCPKG_TARGET_IS_ANDROID)
+# --- Android: allow the pinned Vulkan C++ / SPIRV header fetch ---
+# The NDK ships only the C Vulkan headers; the 2026-08-11 ggml fetches pinned
+# header-only copies of Vulkan-Headers and SPIRV-Headers itself via
+# FetchContent (src/ggml-vulkan/CMakeLists.txt, `if (ANDROID)` block). The
+# registry vcpkg-cmake sets FETCHCONTENT_FULLY_DISCONNECTED=ON globally, so
+# allow the fetch here (same pattern as the qvac-fabric port).
+if(VCPKG_TARGET_IS_ANDROID AND "vulkan" IN_LIST FEATURES)
+    list(APPEND PLATFORM_OPTIONS -DFETCHCONTENT_FULLY_DISCONNECTED=OFF)
+endif()
+
+# Hybrid backend mode for Android and desktop Linux: GPU backends (Vulkan,
+# OpenCL) are MODULE .so files loaded at runtime via dlopen - the consuming
+# addon carries no libvulkan.so.1 / libOpenCL.so NEEDED dependency, so it
+# loads on hosts without any graphics stack (the GPU module simply fails to
+# dlopen and ggml falls back to CPU).  The CPU backend is statically linked
+# (GGML_CPU_STATIC) so that SD can call ggml_set_f32, ggml_backend_cpu_init,
+# etc. directly at link time.
+if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX)
     list(APPEND PLATFORM_OPTIONS
         -DGGML_BACKEND_DL=ON
         -DGGML_CPU_STATIC=ON
+    )
+endif()
+
+# Adreno-specific coopmat workarounds stay Android-only; desktop Vulkan keeps
+# coopmat, matching the previous statically-linked desktop builds.
+if(VCPKG_TARGET_IS_ANDROID)
+    list(APPEND PLATFORM_OPTIONS
         -DGGML_VULKAN_DISABLE_COOPMAT=ON
         -DGGML_VULKAN_DISABLE_COOPMAT2=ON
     )
 endif()
 
+# The desktop-Linux triplets build with -stdlib=libc++.  Backend MODULE .so
+# files are dlopen'd on end-user machines that may not have libc++ installed
+# (e.g. stock ubuntu-24.04), where an unresolved libc++.so.1 NEEDED makes the
+# dlopen fail silently and the GPU backend never registers.  Statically link
+# the C++ runtime into the modules so they are self-contained, matching
+# qvac-fabric's DL modules and how the consuming addons link themselves.  The
+# module<->addon boundary is the C ggml-backend ABI, so per-module libc++
+# copies never exchange C++ objects.  Android ships libc++_shared via the NDK
+# STL instead.
+if(VCPKG_TARGET_IS_LINUX)
+    string(APPEND VCPKG_LINKER_FLAGS " -static-libstdc++")
+endif()
+
 # --- Configure & build ---
-# Only build Release. The fabric branch installs its CMake package config once
-# under share/ggml, matching the release-only consumers in this package family.
+# Only build Release, matching the release-only consumers in this package
+# family.
 set(VCPKG_BUILD_TYPE release)
 
 vcpkg_cmake_configure(
@@ -170,9 +151,10 @@ vcpkg_cmake_configure(
 
 vcpkg_cmake_install()
 
-# Install DL backend .so files for Android.  ggml builds each backend as a
-# MODULE target but does NOT install them via cmake install().
-if(VCPKG_TARGET_IS_ANDROID)
+# Install DL backend .so files for Android and desktop Linux.  ggml builds
+# each backend as a MODULE target but does NOT install them via cmake
+# install().
+if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX)
     file(GLOB _backend_sos
         "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libqvac-diffusion-ggml-*.so"
         "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libqvac-ggml-*.so"
@@ -209,4 +191,6 @@ file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 
 file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
-vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
+# The 2026-08-11 source tree ships no LICENSE file; install the fork's MIT
+# text (unchanged from the previous REF) from the port instead.
+vcpkg_install_copyright(FILE_LIST "${CMAKE_CURRENT_LIST_DIR}/LICENSE")
