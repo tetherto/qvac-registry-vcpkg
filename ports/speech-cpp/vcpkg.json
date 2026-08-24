@@ -1,8 +1,7 @@
 {
   "name": "speech-cpp",
-  "version-date": "2026-08-18",
-  "port-version": 2,
-  "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines. This port revision advances the source pin to qvac-ext-lib-whisper.cpp 792b6892 so ACE-Step can optionally augment captions with BPM, tempo, time signature, and key. Requires ggml-speech 2026-08-18.",
+  "version-date": "2026-08-24",
+  "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines. This port revision advances the source pin to qvac-ext-lib-whisper.cpp d5472eec (792b6892..d5472eec). It ships PR #158, which makes MiniMax-Music3 produce music instead of tonal noise: the runtime no longer honors the vestigial mm3.dit.output_negated GGUF flag that flipped a correct flow velocity, and the DiT condition is re-uploaded on every forward because the graph allocator recycles input blocks between computes (the resident upload left steps 1..N-1 on garbage conditioning). Replaying the official Diffusers prompt/codes/noise through the native pipeline now reproduces the official mix at 0.9993 time-domain audio correlation on CPU and GPU. The same PR adds MiniMax GPU execution (EngineOptions::device = cpu | gpu | auto; gpu fails creation without a usable GPU, auto falls back to CPU), the mm3-replay parity harness, and a model-backed quality regression. The window also carries PR #156 (IndicConformer multilingual CTC validated on Vulkan), PRs #159/#161 (Chatterbox and Supertonic CUDA engine paths; the speech-cpp[cuda] feature that exposes them is added by the TTS CUDA epic's own registry bump), and PR #160 (addon.node cmake-js 8.x, not built by this port). No ggml-speech bump required: the window is engine-side only and runs against ggml-speech 2026-08-18.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp",
   "license": "MIT",
   "dependencies": [
