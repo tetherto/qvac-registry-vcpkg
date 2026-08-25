@@ -1,4 +1,4 @@
-# speech-cpp: umbrella port over tetherto/qvac-ext-lib-whisper.cpp (QIP #94,
+# speech-cpp: umbrella port over tetherto/qvac-fabric-speech.cpp (QIP #94,
 # Ticket 4). One source pin, per-engine features:
 #
 #   speech-cpp[whisper]   -> third_party/whisper.cpp (package `whisper`)
@@ -30,16 +30,16 @@ set(VCPKG_BUILD_TYPE release)
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO tetherto/qvac-ext-lib-whisper.cpp
-    REF 30cc6c5cab0a38cabdb4894f6de4c47d0cfef95c
-    SHA512 e302ee47359c4204882dc3fe14bd347c2e9c4538cd99ff8dc5db77f3a239910a9b4b5212b8bc9f70ea86bb8d28cbdb84abac28f5f9fabc6e7043f5526a50f258
+    REPO tetherto/qvac-fabric-speech.cpp
+    REF c0935b741155a7bd2db80830f38741b75a56f53f
+    SHA512 14e40f6d5b37d0ff01d2e56f3fc45674ce685dfb265c7c47c7272ec8a1d303c5ad0f1adf09cc546afb69e1fa4bd87f73d8e86f84409c107706dbf52bec75be06
     HEAD_REF master
 )
 
 if (NOT EXISTS "${SOURCE_PATH}/CMakeLists.txt")
     message(FATAL_ERROR
         "speech-cpp: ${SOURCE_PATH}/CMakeLists.txt missing; the umbrella "
-        "CMakeLists.txt at the qvac-ext-lib-whisper.cpp repo root may have moved.")
+        "CMakeLists.txt at the qvac-fabric-speech.cpp repo root may have moved.")
 endif()
 
 # Engine features, each mapped to its SPEECH_BUILD_<ENGINE> superbuild gate.
