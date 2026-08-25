@@ -14,7 +14,10 @@
 # dynamically loaded backends.
 #
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
-# 2026-07-03 (REF pinned to the branch tip for reproducibility).
+# fix/wan-vae-midrun-cpu-fallback (REF pinned to the PR tip for reproducibility).
+#
+# c3d7fc1 fixes the mid-run VAE CPU fallback scheduler route by avoiding a
+# duplicate internal CPU backend when the graph is retried on explicit CPU.
 #
 # 1dcbe360 is the merged 2026-07-03 tip after merging qvac-ext-stable-
 # diffusion.cpp PR #25, preserving the ABot-World session API while adding
@@ -76,8 +79,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 1dcbe3604c195a18005e95d9b7fd467c316643cc
-    SHA512 e578efc65e398c7712ee674243f25b960e9bb04d96d3bee0860623a958d2016575e6df42983365b798014940bc50cdf08cdee09736cee2bd910ac4f52ab3caa8
+    REF c3d7fc14c2e7d93cf2c7a2b7811ad8bc71a03e6a
+    SHA512 0618079673c05b0d40a01059dd8cc8da9f05d81ca6d91877a241664a861e06281e1b95d4320e96e34df8bc51a0b4c2d7273fc0a7d7db6a9d945379a4f1eac6ab
 )
 
 set(SD_FLASH_ATTN OFF)
