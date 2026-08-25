@@ -5,11 +5,13 @@ A [vcpkg](https://vcpkg.io/) custom registry used by QVAC projects. It provides 
 ## What’s in this registry
 
 - **QVAC packages**: `qvac-lib-inference-addon-cpp`, `qvac-lint-cpp`
-- **Inference / ML**: `llama-cpp`, `speech-cpp`, `stable-diffusion-cpp`, `onnxruntime`, `onnx`, `tokenizers-cpp`, `sentencepiece`
+- **Inference / ML**: `llama-cpp`, `qvac-fabric`, `speech-cpp`, `stable-diffusion-cpp`, `tokenizers-cpp`, `sentencepiece`
 - **ggml flavours**: `ggml`, `ggml-speech`
-- **Build / runtime deps**: `vcpkg-cmake`, `vcpkg-cmake-config`, `vcpkg-cmake-get-vars`, `abseil`, `eigen3`, `opencl`, `opencl-headers`, `protobuf`, `pybind11`, `xnnpack`, and others
+- **Build / runtime deps**: `vcpkg-cmake`, `vcpkg-cmake-config`, `vcpkg-cmake-get-vars`, `abseil`, `cpuinfo`, `opencl`, `opencl-headers`, `protobuf`, `re2`, and others
 
 Exact versions and baselines are defined in `versions/baseline.json`.
+
+The ONNX Runtime stack — `onnxruntime`, `onnx`, and the `eigen3`, `pybind11`, `xnnpack` and `pthreadpool` ports that existed only to pin its dependency versions — was removed once its sole consumer, the `@qvac/onnx` addon, was retired from tetherto/qvac. Manifests naming those ports no longer resolve, whatever baseline they pin; all four supporting ports are available from the official vcpkg registry instead.
 
 ### The speech stack: `speech-cpp`
 
@@ -62,8 +64,7 @@ Backend features (`metal`, `vulkan`, `opencl`) fan out to the matching `ggml-spe
            "qvac-lint-cpp",
            "llama-cpp",
            "speech-cpp",
-           "ggml-speech",
-           "onnxruntime"
+           "ggml-speech"
          ]
        }
      ]

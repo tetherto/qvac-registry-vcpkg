@@ -16,10 +16,6 @@
       "baseline": "onnxruntime",
       "port-version": 0
     },
-    "eigen3": {
-      "baseline": "onnxruntime",
-      "port-version": 1
-    },
     "fuzztest": {
       "baseline": "2026-06-29",
       "port-version": 0
@@ -52,14 +48,6 @@
       "baseline": "2019-09-25",
       "port-version": 0
     },
-    "onnx": {
-      "baseline": "onnxruntime",
-      "port-version": 1
-    },
-    "onnxruntime": {
-      "baseline": "1.24.2",
-      "port-version": 6
-    },
     "opencl": {
       "baseline": "2024.10.24",
       "port-version": 0
@@ -69,14 +57,6 @@
       "port-version": 0
     },
     "protobuf": {
-      "baseline": "onnxruntime",
-      "port-version": 0
-    },
-    "pthreadpool": {
-      "baseline": "onnxruntime",
-      "port-version": 0
-    },
-    "pybind11": {
       "baseline": "onnxruntime",
       "port-version": 0
     },
@@ -135,10 +115,6 @@
     "vcpkg-cmake-get-vars": {
       "baseline": "2024-09-22",
       "port-version": 0
-    },
-    "xnnpack": {
-      "baseline": "onnxruntime",
-      "port-version": 1
     }
   }
 }
