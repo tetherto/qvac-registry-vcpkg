@@ -1,7 +1,7 @@
 {
   "name": "speech-cpp",
   "version-date": "2026-08-24",
-  "port-version": 3,
+  "port-version": 4,
   "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-ext-lib-whisper.cpp",
   "license": "MIT",
@@ -9,7 +9,7 @@
     {
       "name": "ggml-speech",
       "default-features": false,
-      "version>=": "2026-08-24"
+      "version>=": "2026-08-24#1"
     },
     {
       "name": "vcpkg-cmake",

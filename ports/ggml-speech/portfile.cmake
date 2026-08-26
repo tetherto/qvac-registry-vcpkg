@@ -103,6 +103,24 @@ if(VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
     )
 endif()
 
+# Desktop x64 Linux with CUDA: same hybrid MODULE packaging. A statically
+# linked ggml-cuda hands the consuming addon hard DT_NEEDED entries on
+# libcuda/libcudart/libcublas, so the addon fails to dlopen on every host
+# without an NVIDIA driver plus the CUDA runtime libraries. Built as MODULEs,
+# only the CUDA backend .so carries those entries; the registry loader skips
+# it on hosts that cannot resolve them and the cascade falls back to Vulkan
+# or CPU.
+set(QVAC_LINUX_X64_DL_GPU OFF)
+if(VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "x64" AND "cuda" IN_LIST FEATURES)
+    set(QVAC_LINUX_X64_DL_GPU ON)
+    list(APPEND PLATFORM_OPTIONS
+        -DGGML_BACKEND_DL=ON
+        -DGGML_CPU_ALL_VARIANTS=ON
+        -DGGML_CPU_REPACK=ON
+        "-DCMAKE_MODULE_LINKER_FLAGS=${VCPKG_LINKER_FLAGS} -static-libstdc++"
+    )
+endif()
+
 # The v0.10.2 ggml sync introduces an unconditional
 # `#include <spirv/unified1/spirv.hpp>` in src/ggml-vulkan/ggml-vulkan.cpp,
 # but the upstream ggml-vulkan CMakeLists.txt never finds spirv-headers nor
@@ -155,7 +173,7 @@ endif()
 # symlinks into bin/, but the runtime loader matches only a plain `.so` and
 # the addons stage backends by copying a lib/ glob, which would copy a symlink
 # without its target. Dereference onto real files in lib/ and drop bin/.
-if(QVAC_LINUX_ARM64_DL_CPU)
+if(QVAC_LINUX_ARM64_DL_CPU OR QVAC_LINUX_X64_DL_GPU)
     foreach(_cfg "" "/debug")
         file(GLOB _backend_mods
             "${CURRENT_PACKAGES_DIR}${_cfg}/bin/libqvac-speech-ggml-*.so")
@@ -166,10 +184,15 @@ if(QVAC_LINUX_ARM64_DL_CPU)
                  "${CURRENT_PACKAGES_DIR}${_cfg}/lib/${_mod_name}")
         endforeach()
         file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}${_cfg}/bin")
-        # Do not ship the SVE-bearing CPU variants: ggml's SVE paths are
-        # several times slower than NEON dotprod/fp16 on the 128-bit-vector
-        # cores of the desktop arm64-linux fleet, and the runtime score would
-        # pick them on SVE hardware. Revisit with an SVE-free i8mm tier.
+    endforeach()
+endif()
+
+# Do not ship the SVE-bearing CPU variants: ggml's SVE paths are
+# several times slower than NEON dotprod/fp16 on the 128-bit-vector
+# cores of the desktop arm64-linux fleet, and the runtime score would
+# pick them on SVE hardware. Revisit with an SVE-free i8mm tier.
+if(QVAC_LINUX_ARM64_DL_CPU)
+    foreach(_cfg "" "/debug")
         foreach(_sve_tier armv8.2_3 armv8.6_1 armv8.6_2 armv9.2_1 armv9.2_2)
             file(REMOVE
                 "${CURRENT_PACKAGES_DIR}${_cfg}/lib/libqvac-speech-ggml-cpu-${_sve_tier}.so")
