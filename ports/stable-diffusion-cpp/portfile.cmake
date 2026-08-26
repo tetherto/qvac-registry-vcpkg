@@ -16,8 +16,8 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # fix/wan-vae-midrun-cpu-fallback (REF pinned to the PR tip for reproducibility).
 #
-# b2228a4 keeps ModelManager's graph-parameter compute assignments synchronized
-# with temporary CPU VAE execution and restores them before returning to Vulkan.
+# b2228a4 (PR #34) keeps ModelManager's graph-parameter compute assignments
+# synchronized with temporary CPU VAE execution and restores them before Vulkan.
 #
 # 1dcbe360 is the merged 2026-07-03 tip after merging qvac-ext-stable-
 # diffusion.cpp PR #25, preserving the ABot-World session API while adding
