@@ -16,8 +16,8 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # fix/wan-vae-midrun-cpu-fallback (REF pinned to the PR tip for reproducibility).
 #
-# c3d7fc1 fixes the mid-run VAE CPU fallback scheduler route by avoiding a
-# duplicate internal CPU backend when the graph is retried on explicit CPU.
+# b2228a4 keeps ModelManager's graph-parameter compute assignments synchronized
+# with temporary CPU VAE execution and restores them before returning to Vulkan.
 #
 # 1dcbe360 is the merged 2026-07-03 tip after merging qvac-ext-stable-
 # diffusion.cpp PR #25, preserving the ABot-World session API while adding
@@ -79,8 +79,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF c3d7fc14c2e7d93cf2c7a2b7811ad8bc71a03e6a
-    SHA512 0618079673c05b0d40a01059dd8cc8da9f05d81ca6d91877a241664a861e06281e1b95d4320e96e34df8bc51a0b4c2d7273fc0a7d7db6a9d945379a4f1eac6ab
+    REF b2228a463ab1c29852840acd957ca712b4a4b42e
+    SHA512 b4562256672174814558eb11ff87acbbec458052070ffcec0bbca8cd05bb5200b379542ef230b10562dfd07cae7837318e80e3415d55d157cc802b14443dabb9
 )
 
 set(SD_FLASH_ATTN OFF)
