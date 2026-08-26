@@ -15,7 +15,7 @@ The ONNX Runtime stack — `onnxruntime`, `onnx`, and the `eigen3`, `pybind11`, 
 
 ### The speech stack: `speech-cpp`
 
-`speech-cpp` is an umbrella port over [qvac-ext-lib-whisper.cpp](https://github.com/tetherto/qvac-ext-lib-whisper.cpp): one source pin for the whole speech stack, with the engines selected as features and every engine linking the single `ggml-speech` ggml.
+`speech-cpp` is an umbrella port over [qvac-fabric-speech.cpp](https://github.com/tetherto/qvac-fabric-speech.cpp) (formerly `qvac-ext-lib-whisper.cpp`): one source pin for the whole speech stack, with the engines selected as features and every engine linking the single `ggml-speech` ggml.
 
 | Feature | Engine | `find_package` | Imported target |
 |---|---|---|---|
