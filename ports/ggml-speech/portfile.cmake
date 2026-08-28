@@ -1,8 +1,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF b30fb1035f79543c55f0b31547341a9d4a3a9650
-    SHA512 1b33d873731b8b13126cafcccfa44a1f652874d099ad1f4c508d154d47b90e8bf812a9b7db632fbb1ce8c8a9bf7036e297fd64dfacc17a4ee6f88ac5a17867a6
+    REF 2c7fbbeec6bd64c600803fa676d892810d0e6b94
+    SHA512 620a536c187761a043555db9a3c030a1ab8f80d1e2fd4cb6aecd1d86266c4660d2d748e10756636032590413a4e26861979fb1f491beac4a11c54860001296d6
     HEAD_REF speech
 )
 
@@ -28,6 +28,7 @@ if("vulkan" IN_LIST FEATURES)
 endif()
 
 set(GGML_CUDA_COMPILER_OPTION "")
+set(GGML_CUDA_ARCHITECTURES_OPTION "")
 
 if("cuda" IN_LIST FEATURES)
     set(GGML_CUDA ON)
@@ -39,6 +40,7 @@ if("cuda" IN_LIST FEATURES)
         find_program(NVCC_EXECUTABLE nvcc REQUIRED)
     endif()
     set(GGML_CUDA_COMPILER_OPTION "-DCMAKE_CUDA_COMPILER=${NVCC_EXECUTABLE}")
+    set(GGML_CUDA_ARCHITECTURES_OPTION "-DCMAKE_CUDA_ARCHITECTURES=80-virtual\\;86-real\\;89-real")
     message(STATUS "CUDA compiler: ${NVCC_EXECUTABLE}")
 endif()
 
@@ -121,20 +123,6 @@ if(VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "x64" AND "cuda"
     )
 endif()
 
-# The v0.10.2 ggml sync introduces an unconditional
-# `#include <spirv/unified1/spirv.hpp>` in src/ggml-vulkan/ggml-vulkan.cpp,
-# but the upstream ggml-vulkan CMakeLists.txt never finds spirv-headers nor
-# wires its include dir into the ggml-vulkan target. Apply a small patch
-# so it does (and depend on spirv-headers in vcpkg.json's vulkan feature).
-# TODO: push the equivalent fix upstream and drop this patch.
-if("vulkan" IN_LIST FEATURES)
-    vcpkg_apply_patches(
-        SOURCE_PATH "${SOURCE_PATH}"
-        PATCHES
-            "${CMAKE_CURRENT_LIST_DIR}/patches/0001-ggml-vulkan-find-spirv-headers.patch"
-    )
-endif()
-
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
@@ -152,6 +140,7 @@ vcpkg_cmake_configure(
         -DGGML_METAL_FUSE_MV_BIAS=${GGML_METAL_FUSE_MV_BIAS}
         -DGGML_LIB_OUTPUT_PREFIX=qvac-speech-
         ${GGML_CUDA_COMPILER_OPTION}
+        ${GGML_CUDA_ARCHITECTURES_OPTION}
         ${PLATFORM_OPTIONS}
 )
 

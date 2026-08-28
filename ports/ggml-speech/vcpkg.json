@@ -1,7 +1,6 @@
 {
   "name": "ggml-speech",
-  "version-date": "2026-08-26",
-  "port-version": 1,
+  "version-date": "2026-08-28",
   "description": "Speech-stack ggml flavour consumed by speech-cpp.",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml/tree/speech",
   "license": "MIT",
