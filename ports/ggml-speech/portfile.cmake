@@ -1,8 +1,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF b30fb1035f79543c55f0b31547341a9d4a3a9650
-    SHA512 1b33d873731b8b13126cafcccfa44a1f652874d099ad1f4c508d154d47b90e8bf812a9b7db632fbb1ce8c8a9bf7036e297fd64dfacc17a4ee6f88ac5a17867a6
+    REF 071bf9341e3400927800c10503d84a5b2eeceb5a
+    SHA512 1138ebd8b5b64440706ad2e529ba26e3da33e987a23034d1c85396c5719eb1e558b4aaa51351ffca195a368e20efb816706196b18311826b1b66c6d37ec27b4a
     HEAD_REF speech
 )
 
@@ -26,6 +26,12 @@ endif()
 if("vulkan" IN_LIST FEATURES)
     set(GGML_VULKAN ON)
 endif()
+
+# Replace the Vulkan shader payloads no speech engine dispatches (iq*/mxfp4/
+# nvfp4 weight quantizations, training/backward pipelines) with no-op stubs.
+# Keeps the prebuilt backend small enough for the npm size limit; loading a
+# model in one of the stripped quantizations on Vulkan is not supported.
+set(GGML_VULKAN_STRIP_UNUSED_SHADERS ${GGML_VULKAN})
 
 set(GGML_CUDA_COMPILER_OPTION "")
 
@@ -147,6 +153,7 @@ vcpkg_cmake_configure(
         -DGGML_BUILD_EXAMPLES=OFF
         -DGGML_METAL=${GGML_METAL}
         -DGGML_VULKAN=${GGML_VULKAN}
+        -DGGML_VULKAN_STRIP_UNUSED_SHADERS=${GGML_VULKAN_STRIP_UNUSED_SHADERS}
         -DGGML_CUDA=${GGML_CUDA}
         -DGGML_OPENCL=${GGML_OPENCL}
         -DGGML_METAL_FUSE_MV_BIAS=${GGML_METAL_FUSE_MV_BIAS}
