@@ -32,12 +32,24 @@ set(GGML_CUDA_ARCHITECTURES_OPTION "")
 
 if("cuda" IN_LIST FEATURES)
     set(GGML_CUDA ON)
-    find_program(NVCC_EXECUTABLE nvcc
-        PATHS /usr/local/cuda/bin /usr/local/cuda-12.8/bin
-        NO_DEFAULT_PATH
-    )
+    # An explicitly provisioned toolkit wins over whatever the host has at
+    # /usr/local/cuda: CI's setup-cuda exports CUDACXX and CUDA_PATH, and the
+    # 120a-real architecture below needs CUDA 13, so an older system toolkit
+    # must not silently shadow the pin. Mirrors qvac-fabric's discovery order.
+    if(DEFINED ENV{CUDACXX} AND EXISTS "$ENV{CUDACXX}")
+        set(NVCC_EXECUTABLE "$ENV{CUDACXX}")
+    endif()
+    if(NOT NVCC_EXECUTABLE AND DEFINED ENV{CUDA_PATH})
+        find_program(NVCC_EXECUTABLE nvcc PATHS "$ENV{CUDA_PATH}/bin" NO_DEFAULT_PATH)
+    endif()
     if(NOT NVCC_EXECUTABLE)
-        find_program(NVCC_EXECUTABLE nvcc REQUIRED)
+        find_program(NVCC_EXECUTABLE nvcc)
+    endif()
+    if(NOT NVCC_EXECUTABLE)
+        find_program(NVCC_EXECUTABLE nvcc PATHS /usr/local/cuda/bin NO_DEFAULT_PATH)
+    endif()
+    if(NOT NVCC_EXECUTABLE)
+        message(FATAL_ERROR "ggml-speech: the cuda feature requires a CUDA 13 toolkit providing nvcc (checked CUDACXX, CUDA_PATH/bin, PATH and /usr/local/cuda/bin).")
     endif()
     set(GGML_CUDA_COMPILER_OPTION "-DCMAKE_CUDA_COMPILER=${NVCC_EXECUTABLE}")
     set(GGML_CUDA_ARCHITECTURES_OPTION "-DCMAKE_CUDA_ARCHITECTURES=80-virtual\\;86-real\\;120a-real")
