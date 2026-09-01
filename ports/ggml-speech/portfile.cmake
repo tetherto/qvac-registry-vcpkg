@@ -51,9 +51,29 @@ if("cuda" IN_LIST FEATURES)
     if(NOT NVCC_EXECUTABLE)
         message(FATAL_ERROR "ggml-speech: the cuda feature requires a CUDA 13 toolkit providing nvcc (checked CUDACXX, CUDA_PATH/bin, PATH and /usr/local/cuda/bin).")
     endif()
+
+    # Refuse a pre-13 toolkit rather than failing deep in nvcc: CUDA 13 is what
+    # drops sm_50/61/70 (so those stay excluded without listing them) and what
+    # provides every target below. CI provisions 13.2 today and dev boxes run
+    # 13.3; both satisfy this.
+    execute_process(
+        COMMAND "${NVCC_EXECUTABLE}" --version
+        OUTPUT_VARIABLE NVCC_VERSION_OUTPUT
+        ERROR_QUIET
+    )
+    string(REGEX MATCH "release ([0-9]+)\\.([0-9]+)" _ "${NVCC_VERSION_OUTPUT}")
+    set(NVCC_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}")
+    if(NVCC_VERSION VERSION_LESS "13.0")
+        message(FATAL_ERROR "ggml-speech: the cuda feature needs CUDA >= 13.0, found ${NVCC_VERSION} at ${NVCC_EXECUTABLE}. Point CUDACXX or CUDA_PATH at a CUDA 13 toolkit.")
+    endif()
+
+    # Every architecture the published prebuilds target, native. Turing through
+    # Blackwell each get their own cubin, and 80-virtual carries the PTX the
+    # driver JITs forward from on anything newer than this list. sm_50/61/70
+    # need no exclusion: CUDA 13 no longer supports them.
+    set(GGML_CUDA_ARCHITECTURES_OPTION "-DCMAKE_CUDA_ARCHITECTURES=75-real\\;80-real\\;80-virtual\\;86-real\\;89-real\\;90-real\\;120a-real\\;121a-real")
     set(GGML_CUDA_COMPILER_OPTION "-DCMAKE_CUDA_COMPILER=${NVCC_EXECUTABLE}")
-    set(GGML_CUDA_ARCHITECTURES_OPTION "-DCMAKE_CUDA_ARCHITECTURES=80-virtual\\;86-real\\;120a-real")
-    message(STATUS "CUDA compiler: ${NVCC_EXECUTABLE}")
+    message(STATUS "CUDA compiler: ${NVCC_EXECUTABLE} (${NVCC_VERSION})")
 endif()
 
 if("opencl" IN_LIST FEATURES)
