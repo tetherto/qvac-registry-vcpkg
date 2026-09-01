@@ -1,6 +1,7 @@
 {
   "name": "speech-cpp",
   "version-date": "2026-09-01",
+  "port-version": 1,
   "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
@@ -8,7 +9,7 @@
     {
       "name": "ggml-speech",
       "default-features": false,
-      "version>=": "2026-08-28"
+      "version>=": "2026-09-01"
     },
     {
       "name": "vcpkg-cmake",
@@ -52,7 +53,7 @@
       ]
     },
     "cuda": {
-      "description": "Enable CUDA GPU acceleration for all enabled engines (Linux / Windows on NVIDIA, via ggml-speech[cuda]). Needs nvcc on the build host; the runtime needs only the driver.",
+      "description": "Enable CUDA GPU acceleration for all enabled engines (Linux / Windows on NVIDIA, via ggml-speech[cuda]). Needs nvcc on the build host; at runtime CUDA engages only where the NVIDIA driver and the CUDA 13 runtime libraries (cudart, cuBLAS) both resolve, and devices without compiled kernels are skipped in favor of Vulkan or CPU.",
       "supports": "!osx & !ios & !android",
       "dependencies": [
         {
