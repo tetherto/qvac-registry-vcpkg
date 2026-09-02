@@ -1,8 +1,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 2c7fbbeec6bd64c600803fa676d892810d0e6b94
-    SHA512 620a536c187761a043555db9a3c030a1ab8f80d1e2fd4cb6aecd1d86266c4660d2d748e10756636032590413a4e26861979fb1f491beac4a11c54860001296d6
+    REF 786b90434c529de597da3adb55610110e9ce1042
+    SHA512 861972f2d2118105f8aa719817893a76533c91e2d8732956425e695138fd58757c8fa80f5aec09750b03abe28410018d1175e6526df32994c713c7125c1c9f3f
     HEAD_REF speech
 )
 
@@ -32,16 +32,48 @@ set(GGML_CUDA_ARCHITECTURES_OPTION "")
 
 if("cuda" IN_LIST FEATURES)
     set(GGML_CUDA ON)
-    find_program(NVCC_EXECUTABLE nvcc
-        PATHS /usr/local/cuda/bin /usr/local/cuda-12.8/bin
-        NO_DEFAULT_PATH
-    )
-    if(NOT NVCC_EXECUTABLE)
-        find_program(NVCC_EXECUTABLE nvcc REQUIRED)
+    # An explicitly provisioned toolkit wins over whatever the host has at
+    # /usr/local/cuda: CI's setup-cuda exports CUDACXX and CUDA_PATH, and the
+    # 120a-real architecture below needs CUDA 13, so an older system toolkit
+    # must not silently shadow the pin. Mirrors qvac-fabric's discovery order.
+    if(DEFINED ENV{CUDACXX} AND EXISTS "$ENV{CUDACXX}")
+        set(NVCC_EXECUTABLE "$ENV{CUDACXX}")
     endif()
+    if(NOT NVCC_EXECUTABLE AND DEFINED ENV{CUDA_PATH})
+        find_program(NVCC_EXECUTABLE nvcc PATHS "$ENV{CUDA_PATH}/bin" NO_DEFAULT_PATH)
+    endif()
+    if(NOT NVCC_EXECUTABLE)
+        find_program(NVCC_EXECUTABLE nvcc)
+    endif()
+    if(NOT NVCC_EXECUTABLE)
+        find_program(NVCC_EXECUTABLE nvcc PATHS /usr/local/cuda/bin NO_DEFAULT_PATH)
+    endif()
+    if(NOT NVCC_EXECUTABLE)
+        message(FATAL_ERROR "ggml-speech: the cuda feature requires a CUDA 13 toolkit providing nvcc (checked CUDACXX, CUDA_PATH/bin, PATH and /usr/local/cuda/bin).")
+    endif()
+
+    # Refuse a pre-13 toolkit rather than failing deep in nvcc: CUDA 13 is what
+    # drops sm_50/61/70 (so those stay excluded without listing them) and what
+    # provides every target below. CI provisions 13.2 today and dev boxes run
+    # 13.3; both satisfy this.
+    execute_process(
+        COMMAND "${NVCC_EXECUTABLE}" --version
+        OUTPUT_VARIABLE NVCC_VERSION_OUTPUT
+        ERROR_QUIET
+    )
+    string(REGEX MATCH "release ([0-9]+)\\.([0-9]+)" _ "${NVCC_VERSION_OUTPUT}")
+    set(NVCC_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}")
+    if(NVCC_VERSION VERSION_LESS "13.0")
+        message(FATAL_ERROR "ggml-speech: the cuda feature needs CUDA >= 13.0, found ${NVCC_VERSION} at ${NVCC_EXECUTABLE}. Point CUDACXX or CUDA_PATH at a CUDA 13 toolkit.")
+    endif()
+
+    # Every architecture the published prebuilds target, native. Turing through
+    # Blackwell each get their own cubin, and 80-virtual carries the PTX the
+    # driver JITs forward from on anything newer than this list. sm_50/61/70
+    # need no exclusion: CUDA 13 no longer supports them.
+    set(GGML_CUDA_ARCHITECTURES_OPTION "-DCMAKE_CUDA_ARCHITECTURES=75-real\\;80-real\\;80-virtual\\;86-real\\;89-real\\;90-real\\;120a-real\\;121a-real")
     set(GGML_CUDA_COMPILER_OPTION "-DCMAKE_CUDA_COMPILER=${NVCC_EXECUTABLE}")
-    set(GGML_CUDA_ARCHITECTURES_OPTION "-DCMAKE_CUDA_ARCHITECTURES=80-virtual\\;86-real\\;89-real")
-    message(STATUS "CUDA compiler: ${NVCC_EXECUTABLE}")
+    message(STATUS "CUDA compiler: ${NVCC_EXECUTABLE} (${NVCC_VERSION})")
 endif()
 
 if("opencl" IN_LIST FEATURES)
