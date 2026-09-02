@@ -190,12 +190,22 @@ if(VCPKG_TARGET_IS_LINUX AND BUILD_GPU_BACKENDS AND BUILD_CUDA_BACKEND)
   # than our targets and the cubins are not free:
   #     ggml default (7 arches)              148.4 MB
   #     80-virtual;86-real;120a-real          78.9 MB
-  # measured on the built libqvac-ggml-cuda.so before the per-architecture
-  # tiering below; both tiers still need re-measuring. The 70 MB difference
-  # matters because the consumer prebuild is published to GitHub Packages, which
-  # caps a package at 256 MiB, and the llm-llamacpp linux-x64 prebuild already
-  # carries a 93 MB Vulkan module beside this one. The default list pushed it to
-  # 303 MB and the publish failed with a 413.
+  # measured on the built libqvac-ggml-cuda.so. The 70 MB difference matters
+  # because the consumer prebuild is published to GitHub Packages, which caps a
+  # package at 256 MiB, and the llm-llamacpp linux-x64 prebuild already carries
+  # a 93 MB Vulkan module beside this one. The default list pushed it to 303 MB
+  # and the publish failed with a 413.
+  #
+  # That figure still stands for the x64 tier below: it is the same three
+  # entries reordered, and each contributes its own section regardless of
+  # position, so the set is what determines size.
+  #
+  # THE ARM64 TIER HAS NO SIZE MEASUREMENT AT ALL. It is a different arch set
+  # that has never been built, and the 256 MiB budget above is x64-specific -
+  # it counts an x64 Vulkan module that an arm64 package may not carry. Measure
+  # the arm64 module and the whole arm64 consumer package against the cap
+  # before the first consumer requests cuda-backend there; do not assume it
+  # fits because x64 does.
   #
   #   86-real     RTX 3090, the qvac-ubuntu*-x64-gpu CI runners        (x64)
   #   120a-real   RTX 5090                                             (x64)
@@ -203,7 +213,7 @@ if(VCPKG_TARGET_IS_LINUX AND BUILD_GPU_BACKENDS AND BUILD_CUDA_BACKEND)
   #   80-virtual  PTX floor, both tiers. JITs onto sm_89, sm_90, sm_12x
   #               and anything newer that is not pinned above.
   #
-  # THE LOWEST ENTRY MUST STAY -virtual, ON BOTH TIERS.
+  # INVARIANT: the lowest entry must stay -virtual, on both tiers.
   #
   # From qvac-fabric v10297.2.0, ggml_cuda_compiled_code_available() in
   # ggml/src/ggml-cuda/common.cuh refuses at registration any NVIDIA device whose
@@ -217,7 +227,7 @@ if(VCPKG_TARGET_IS_LINUX AND BUILD_GPU_BACKENDS AND BUILD_CUDA_BACKEND)
   # -virtual. A device at or above the lowest entry therefore passes the guard
   # whether or not any PTX exists for it to JIT from. Replace 80-virtual with
   # 80-real, or drop it so a -real entry becomes the minimum, and the guard is
-  # silently disarmed for every architecture above the floor -- no build error,
+  # silently disarmed for every architecture above the floor — no build error,
   # no failing test. ports/ggml-speech/portfile.cmake is a live example of the
   # hazard: its floor is 75-real, and it is safe only because no NVIDIA device
   # exists between compute capability 7.5 and 8.0.
@@ -242,9 +252,16 @@ if(VCPKG_TARGET_IS_LINUX AND BUILD_GPU_BACKENDS AND BUILD_CUDA_BACKEND)
   #     -DCMAKE_CUDA_ARCHITECTURES=80-virtual / 86-real / 120a-real
   # which would build sm_80 only and not fail until something ran on a 5090.
   #
+  # ports/ggml-speech/portfile.cmake escapes the same kind of value as `\\;`
+  # rather than `\;`. Both are correct at their own nesting depth: it builds the
+  # whole -D string into a variable that is then spliced unquoted into OPTIONS,
+  # which costs one more round of list expansion, whereas the value here is
+  # interpolated inside an already-quoted OPTIONS entry. Copying either form
+  # into the other file would break it.
+  #
   # Tiered by target architecture: an arm64 package has no use for the x64
-  # cubins and vice versa. No consumer requests cuda-backend on arm64 yet --
-  # llm-llamacpp and embed-llamacpp both gate the feature on "linux & x64" --
+  # cubins and vice versa. No consumer requests cuda-backend on arm64 yet —
+  # llm-llamacpp and embed-llamacpp both gate the feature on "linux & x64" —
   # so the arm64 tier is correct but unexercised.
   if(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
     set(QVAC_CUDA_ARCHS "87-real\;80-virtual")
