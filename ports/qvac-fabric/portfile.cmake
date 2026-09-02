@@ -210,16 +210,26 @@ if(VCPKG_TARGET_IS_LINUX AND BUILD_GPU_BACKENDS AND BUILD_CUDA_BACKEND)
   #   86-real     RTX 3090, the qvac-ubuntu*-x64-gpu CI runners        (x64)
   #   120a-real   RTX 5090                                             (x64)
   #   87-real     Nvidia Jetson Orin                                   (arm64)
-  #   80-virtual  PTX floor, both tiers. JITs onto sm_89, sm_90, sm_12x
-  #               and anything newer that is not pinned above.
+  #   80-virtual  PTX floor, both tiers. JITs onto sm_89, sm_90, and anything
+  #               newer not pinned above — on x64 that excludes sm_120, which
+  #               120a-real covers natively, but includes sm_121, since sm_120a
+  #               SASS is not loadable on cc 12.1.
   #
   # INVARIANT: the lowest entry must stay -virtual, on both tiers.
+  #
+  # NOT YET ENFORCED AT THE VERSION THIS PORT FETCHES. REF above is
+  # v${VERSION}, the 10297.1.0 tag, and the guard described next does not exist
+  # in it. What ships today is the old behaviour: a card below the floor
+  # enumerates normally, wins the consumer's backend selection over Vulkan, and
+  # then aborts the process at the first kernel launch. The invariant is stated
+  # now because it constrains this list from the moment the retarget lands, and
+  # a list widened in the meantime would disarm the guard on arrival.
   #
   # From qvac-fabric v10297.2.0, ggml_cuda_compiled_code_available() in
   # ggml/src/ggml-cuda/common.cuh refuses at registration any NVIDIA device whose
   # compute capability is below every entry here. Such a device never reaches
   # ggml_backend_dev_count(), so a consumer's backend cascade falls through to
-  # Vulkan and then CPU. That is what stops a Turing card from enumerating,
+  # Vulkan and then CPU. That is what will stop a Turing card from enumerating,
   # winning selection, and then aborting at the first kernel launch.
   #
   # That guard is a floor test, not a loadability test: __CUDA_ARCH_LIST__
@@ -228,16 +238,22 @@ if(VCPKG_TARGET_IS_LINUX AND BUILD_GPU_BACKENDS AND BUILD_CUDA_BACKEND)
   # whether or not any PTX exists for it to JIT from. Replace 80-virtual with
   # 80-real, or drop it so a -real entry becomes the minimum, and the guard is
   # silently disarmed for every architecture above the floor — no build error,
-  # no failing test. ports/ggml-speech/portfile.cmake is a live example of the
-  # hazard: its floor is 75-real, and it is safe only because no NVIDIA device
-  # exists between compute capability 7.5 and 8.0.
+  # no failing test. ports/ggml-speech/portfile.cmake on registry main is a live
+  # example of the hazard: since #345 its floor is 75-real, and it is safe only
+  # because no NVIDIA device exists between compute capability 7.5 and 8.0. Read
+  # it on main, not at this branch's tree — this branch's base predates #345 and
+  # still shows that port flooring at 80-virtual, which is the safe pattern.
   #
   # Ordering within the list does not matter to the guard, which keys off the
   # minimum entry, so both tiers floor at 800.
   #
   # Which architectures we ship to is a product decision and is still open, so
   # this list is not a statement that the missing ones are unsupported. A local
-  # build on a Turing box needs -DCMAKE_CUDA_ARCHITECTURES=75 as an override.
+  # build on a Turing box needs 75-real;75-virtual added here — edit QVAC_CUDA_ARCHS
+  # below, since the define is hardcoded into PLATFORM_OPTIONS and no outer -D
+  # reaches it. Note that a bare 75 would floor the list at a -real entry and so
+  # disarm the guard for everything above cc 7.5, which is what the invariant
+  # above forbids; keep a -virtual entry at the bottom.
   #
   # Note for whoever widens this: the architectures served by PTX rather than
   # native SASS pay a JIT cost on first launch, cached by the driver under
@@ -245,19 +261,32 @@ if(VCPKG_TARGET_IS_LINUX AND BUILD_GPU_BACKENDS AND BUILD_CUDA_BACKEND)
   # the cost is paid on every process start. See the CUDA note in the
   # llm-llamacpp and embed-llamacpp READMEs.
   #
-  # The semicolons MUST stay backslash-escaped. vcpkg_cmake_configure(OPTIONS)
-  # treats its argument as a CMake list, so an unescaped value splits and the
-  # define silently truncates to its first element, leaving the other two as
-  # stray arguments:
-  #     -DCMAKE_CUDA_ARCHITECTURES=80-virtual / 86-real / 120a-real
-  # which would build sm_80 only and not fail until something ran on a 5090.
+  # The semicolons MUST stay backslash-escaped, and the OPTIONS entry below MUST
+  # stay quoted. vcpkg_cmake_configure(OPTIONS) receives its arguments through an
+  # unquoted ${PLATFORM_OPTIONS} expansion, so an unescaped value — or an escaped
+  # one spliced unquoted — splits, and the define truncates to its first element
+  # while the rest arrive as stray arguments. Measured with cmake -P, counting
+  # ARGC rather than foreach(IN LISTS), which re-splits and hides the difference:
   #
-  # ports/ggml-speech/portfile.cmake escapes the same kind of value as `\\;`
-  # rather than `\;`. Both are correct at their own nesting depth: it builds the
-  # whole -D string into a variable that is then spliced unquoted into OPTIONS,
-  # which costs one more round of list expansion, whereas the value here is
-  # interpolated inside an already-quoted OPTIONS entry. Copying either form
-  # into the other file would break it.
+  #   "-D...=${QVAC_CUDA_ARCHS}"   quoted, \; escaped   ARGC=3, define intact
+  #   ${SOME_VAR_HOLDING_THE_-D}   unquoted             ARGC=5, define split
+  #
+  # The reorder made this strictly more load-bearing, so the old example here was
+  # not just stale but understated the risk. A truncation on the x64 tier now
+  # leaves 86-real alone: __CUDA_ARCH_LIST__ becomes {860}, which RAISES the
+  # floor to 860 — an A100 at cc 8.0 is then refused at registration — while a
+  # 5090 still passes the guard at cc 12.0 and finds neither sm_120 SASS nor any
+  # PTX to JIT from, because the -virtual entry is the element that was dropped.
+  # That is precisely the abort the guard exists to prevent, in the one shape the
+  # guard cannot catch. Under the old 80-virtual-first ordering a truncation was
+  # survivable: it left PTX, and everything at cc >= 8.0 still ran.
+  #
+  # The \; versus \\; spelling is NOT what distinguishes this from
+  # ports/ggml-speech/portfile.cmake. Both spellings store the identical value
+  # (verified: same 30-character payload, list length 1). What differs is the
+  # splice: that port builds the whole -D string into a variable and expands it
+  # unquoted at its OPTIONS site, which is the ARGC=5 row above. So it is a
+  # cautionary example here, not a model to copy.
   #
   # Tiered by target architecture: an arm64 package has no use for the x64
   # cubins and vice versa. No consumer requests cuda-backend on arm64 yet —
