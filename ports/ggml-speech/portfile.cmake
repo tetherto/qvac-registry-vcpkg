@@ -1,8 +1,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF bc7da35f53be1b87d5d5935ef2ebf7ca8dac1fe3
-    SHA512 5cdde9dd5e8ed629aeded85b79342d921a2226ab053e87fd004285f16cf6d4ec77045a00092954ca7fdfd73e9aea01402a3e0c30318405f66891994730bc7293
+    REF c393f11b9303704afed3672867b677439d5beaa0
+    SHA512 22b10d84ce2e8f13c6c6fed4c4169fc11760ec114973651b9e5a7b219eca47e595dc662044aedaf65a26bed59549ed66e52baf6943433d16894b3adaa3d5de51
     HEAD_REF speech
 )
 
@@ -29,9 +29,13 @@ endif()
 
 set(GGML_CUDA_COMPILER_OPTION "")
 set(GGML_CUDA_ARCHITECTURES_OPTION "")
+set(GGML_CUDA_GRAPHS_OPTION "")
 
 if("cuda" IN_LIST FEATURES)
     set(GGML_CUDA ON)
+    # CUDA graph capture is off in the fork's CMake default; the speech stack
+    # turns it on here, where the decode loops are launch-bound.
+    set(GGML_CUDA_GRAPHS_OPTION -DGGML_CUDA_GRAPHS=ON)
     # An explicitly provisioned toolkit wins over whatever the host has at
     # /usr/local/cuda: CI's setup-cuda exports CUDACXX and CUDA_PATH, and the
     # 120a-real architecture below needs CUDA 13, so an older system toolkit
@@ -173,6 +177,7 @@ vcpkg_cmake_configure(
         -DGGML_LIB_OUTPUT_PREFIX=qvac-speech-
         ${GGML_CUDA_COMPILER_OPTION}
         ${GGML_CUDA_ARCHITECTURES_OPTION}
+        ${GGML_CUDA_GRAPHS_OPTION}
         ${PLATFORM_OPTIONS}
 )
 
