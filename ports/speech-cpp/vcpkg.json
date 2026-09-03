@@ -1,7 +1,8 @@
 {
   "name": "speech-cpp",
   "version-date": "2026-09-03",
-  "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
+  "port-version": 1,
+  "description": "This revision advances the shared source pin from 72e58771 to d484fc03, shipping the QVAC-24314 CUDA fixes: the chatterbox time_mlp graph cache moves off thread_local so engine unload no longer aborts under the Windows loader lock, the supertonic capability cache is keyed by device so recycled backend handles cannot replay stale capabilities, and two audiogen build fixes for the Windows and Ubuntu CI lanes. Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
   "dependencies": [
