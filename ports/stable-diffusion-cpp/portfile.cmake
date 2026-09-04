@@ -16,13 +16,21 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # 2026-08-11 (REF pinned to the branch tip for reproducibility).
 #
-# 4027059 is the 2026-08-11 tip after merging PR #29 (MiniMax-H3). Relative
-# to the 2026-07-03 line this brings the rebased upstream API: bool-returning
-# generate_image()/upscale() with out-params, sd_cancel_generation(),
-# ref_image_args replacing the per-field reference knobs, param residency via
-# backend assignment specs (params_backend/max_vram strings) instead of the
-# keep_*_on_cpu/offload_params_to_cpu booleans, and the SeFi/MiniT2I/hires/
-# adetailer additions. The ABot-World session/scene C API is unchanged.
+# port-version 1 (f817406, 2026-08-11 tip after merging PR #37): restores the
+# ABot-World scene-creation prompt-pad zeroing that the August forward-port
+# dropped (the blur regression), adds the "prompt rows N live / M" pack
+# diagnostic, and cuts walk overhead (retained compute buffer, fused masked
+# softmax, reused action planes, direct-conv decode, tensor-core score matmul).
+# ABot-only; no other model path or public C API changes.
+#
+# port-version 0 (4027059) was the 2026-08-11 tip after merging PR #29
+# (MiniMax-H3). Relative to the 2026-07-03 line that brought the rebased
+# upstream API: bool-returning generate_image()/upscale() with out-params,
+# sd_cancel_generation(), ref_image_args replacing the per-field reference
+# knobs, param residency via backend assignment specs (params_backend/max_vram
+# strings) instead of the keep_*_on_cpu/offload_params_to_cpu booleans, and the
+# SeFi/MiniT2I/hires/adetailer additions. The ABot-World session/scene C API is
+# unchanged.
 #
 # WebP/WebM support auto-disables: upstream vendors them as git submodules
 # under thirdparty/, which GitHub REF tarballs do not contain
@@ -30,8 +38,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 7e317016219b8f717d392c229ae6d82050a02196
-    SHA512 59c28651d635ea889e1acbe131b241ca7b86fea7f7d3faea87507073b26053c38cb919a355e96e23c8d7984fc5c2188c81bc9dbd7396d91b079c3d1ac2f83e25
+    REF f817406215aa1d27f3ac3306647b1e1ded2f6d1b
+    SHA512 5fa199dd2c74e17213d653d0079b5d8690df9075725d571228fea85c851714536db3916c550ea7de22a91f22eea56c37fbbf496bb5908fe25743aa0900a36976
 )
 
 # Even under SD_USE_SYSTEM_GGML the sources reach into one ggml *internal*
