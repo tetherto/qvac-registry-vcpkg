@@ -22,6 +22,7 @@ vcpkg_check_features(
     kleidiai BUILD_KLEIDIAI
     openmp BUILD_OPENMP
     hip-backend BUILD_HIP_BACKEND
+    cuda-backend BUILD_CUDA_BACKEND
 )
 
 # gpu-backends is default-on via default-features in vcpkg.json. CPU-only
@@ -122,6 +123,116 @@ if(VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "x64" AND BUILD_
     -DGGML_HIP=ON
     -DAMDGPU_TARGETS=gfx1151
     -DCMAKE_HIP_ARCHITECTURES=gfx1151)
+endif()
+
+# CUDA backend — opt-in via the 'cuda-backend' feature (Linux + NVIDIA only).
+# Mirrors hip-backend: builds libqvac-ggml-cuda.so as a standalone DL module
+# alongside Vulkan, so the addon dlopen's whichever GPU backend it picks at
+# runtime. Both x64 (RTX 30xx/50xx, Tesla) and arm64 (Jetson Orin) are in
+# scope, unlike HIP which is x64-only. Windows is deliberately excluded: it has
+# no GGML_BACKEND_DL support, so a second GPU backend cannot be stacked there.
+#
+# DETERMINISTIC, same reasoning as hip-backend above: requesting cuda-backend
+# REQUIRES nvcc at build time. A host-dependent skip would produce a no-CUDA
+# package with the SAME vcpkg ABI as a real CUDA build, which the binary cache
+# then conflates. So nvcc present => CUDA; nvcc absent => hard error.
+#
+# RUNTIME fail-safe: ggml handles a failed CUDA registration itself. An absent
+# or unloadable module, or a host with no NVIDIA driver, never reaches
+# ggml_backend_dev_count(), so device enumeration falls through to Vulkan and
+# then CPU with no addon involvement (verified on a Tesla T4, QVAC-23763).
+# DETERMINISTIC, continued: the block below only runs on linux with
+# gpu-backends on, so a cuda-backend request that misses either condition would
+# silently install a package with no CUDA in it and the same vcpkg ABI as a real
+# CUDA build, which is the cache conflation this feature exists to avoid. Refuse
+# it up front rather than one condition lower.
+if(BUILD_CUDA_BACKEND AND NOT VCPKG_TARGET_IS_LINUX)
+  message(FATAL_ERROR "qvac-fabric: cuda-backend is linux-only, Windows has no GGML_BACKEND_DL support and no other target builds it. Got ${VCPKG_TARGET_TRIPLET}.")
+endif()
+if(BUILD_CUDA_BACKEND AND NOT BUILD_GPU_BACKENDS)
+  message(FATAL_ERROR "qvac-fabric: cuda-backend requires the gpu-backends feature, which brings the GGML_BACKEND_DL setup the CUDA module is loaded through.")
+endif()
+
+if(VCPKG_TARGET_IS_LINUX AND BUILD_GPU_BACKENDS AND BUILD_CUDA_BACKEND)
+  if(NOT (VCPKG_TARGET_ARCHITECTURE STREQUAL "x64" OR VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64"))
+    message(FATAL_ERROR "qvac-fabric: cuda-backend supports linux x64 and arm64 only, got ${VCPKG_TARGET_ARCHITECTURE}.")
+  endif()
+
+  # ggml's own CUDA CMake calls enable_language(CUDA), which fails with "No
+  # CMAKE_CUDA_COMPILER could be found" whenever nvcc is off PATH — routine
+  # under vcpkg, which does not inherit an interactive shell. Locate nvcc and
+  # pass it explicitly, the same way ports/ggml-speech does.
+  # Order matters. An explicitly provisioned toolkit wins over whatever the host
+  # happens to have at /usr/local/cuda: CI's setup-cuda assembles a pinned
+  # 13.2.0 and exports CUDACXX and CUDA_PATH, and `120a-real` below needs CUDA
+  # 13, so a GPU runner or dev box carrying an older system toolkit must not
+  # silently shadow the pin. Searching /usr/local/cuda/bin first with
+  # NO_DEFAULT_PATH did exactly that.
+  if(DEFINED ENV{CUDACXX} AND EXISTS "$ENV{CUDACXX}")
+    set(NVCC_EXECUTABLE "$ENV{CUDACXX}")
+  endif()
+  if(NOT NVCC_EXECUTABLE AND DEFINED ENV{CUDA_PATH})
+    find_program(NVCC_EXECUTABLE nvcc PATHS "$ENV{CUDA_PATH}/bin" NO_DEFAULT_PATH)
+  endif()
+  if(NOT NVCC_EXECUTABLE)
+    find_program(NVCC_EXECUTABLE nvcc)
+  endif()
+  if(NOT NVCC_EXECUTABLE)
+    find_program(NVCC_EXECUTABLE nvcc PATHS /usr/local/cuda/bin NO_DEFAULT_PATH)
+  endif()
+  if(NOT NVCC_EXECUTABLE)
+    message(FATAL_ERROR "qvac-fabric: cuda-backend feature requires a CUDA toolkit — install one providing nvcc (checked CUDACXX, CUDA_PATH/bin, PATH and /usr/local/cuda/bin). Do not request cuda-backend on a host without nvcc.")
+  endif()
+  message(STATUS "qvac-fabric: cuda-backend using nvcc at ${NVCC_EXECUTABLE}")
+
+  # CMAKE_CUDA_ARCHITECTURES is pinned to what we actually ship to. ggml picks
+  # its own list when the variable is undefined, but that list is much wider
+  # than our targets and the cubins are not free:
+  #     ggml default (7 arches)              148.4 MB
+  #     80-virtual;86-real;120a-real          78.9 MB
+  # measured on the built libqvac-ggml-cuda.so. The 70 MB difference matters
+  # because the consumer prebuild is published to GitHub Packages, which caps a
+  # package at 256 MiB, and the llm-llamacpp linux-x64 prebuild already carries
+  # a 93 MB Vulkan module beside this one. The default list pushed it to 303 MB
+  # and the publish failed with a 413.
+  #
+  #   86-real     RTX 3090, the qvac-ubuntu*-x64-gpu CI runners
+  #   120a-real   RTX 5090
+  #   80-virtual  PTX, JITs onto sm_87 (Nvidia Jetson Orin) and onto anything
+  #               newer that is not pinned above
+  #
+  # Not built: 75 (Turing), 89 (Ada), 90 (Hopper), 121a. Ada and Hopper still
+  # reach the kernels by JIT from the 80-virtual PTX. Turing and anything below
+  # 8.0 do NOT, because PTX only JITs upward: those cards enumerate, get
+  # selected, and then fail at the first kernel launch instead of falling back.
+  # Which architectures we ship to is a product decision and is still open, so
+  # this list is not a statement that the missing ones are unsupported. A local
+  # build on a Turing box needs -DCMAKE_CUDA_ARCHITECTURES=75 as an override.
+  #
+  # The semicolons MUST stay backslash-escaped. vcpkg_cmake_configure(OPTIONS)
+  # treats its argument as a CMake list, so an unescaped value splits and the
+  # define silently truncates to its first element, leaving the other two as
+  # stray arguments:
+  #     -DCMAKE_CUDA_ARCHITECTURES=80-virtual / 86-real / 120a-real
+  # which would build sm_80 only and not fail until something ran on a 5090.
+  set(QVAC_CUDA_ARCHS "80-virtual\;86-real\;120a-real")
+  message(STATUS "qvac-fabric: cuda-backend ON — building GGML_CUDA (arch ${QVAC_CUDA_ARCHS}, nvcc ${NVCC_EXECUTABLE})")
+  list(APPEND PLATFORM_OPTIONS
+    -DGGML_CUDA=ON
+    "-DCMAKE_CUDA_ARCHITECTURES=${QVAC_CUDA_ARCHS}"
+    -DCMAKE_CUDA_COMPILER=${NVCC_EXECUTABLE}
+    # The triplet compiles C++ with clang and -stdlib=libc++. nvcc defaults its
+    # host compiler to g++, which then chokes on the clang-only -stdlib flag it
+    # inherits from the link flags. Point it at clang++ so one toolchain drives
+    # everything. CUDA refuses libc++ outright on x86 ("libc++ is not supported
+    # on x86 system"), but that never bites: CUDA flags do not inherit
+    # CMAKE_CXX_FLAGS, so the .cu compile never sees -stdlib=libc++ and only
+    # the link does, where clang++ handles it.
+    -DCMAKE_CUDA_HOST_COMPILER=clang++
+    # -allow-unsupported-compiler: CUDA 13.x caps the host at clang < 22 and the
+    # monorepo standardises on clang-22 (.github/actions/setup-llvm). Revisit
+    # when a CUDA release accepts clang 22.
+    "-DCMAKE_CUDA_FLAGS=-allow-unsupported-compiler")
 endif()
 
 if(VCPKG_TARGET_IS_ANDROID AND BUILD_KLEIDIAI)
