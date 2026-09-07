@@ -12,5 +12,6 @@ directly rather than relying on headers bundled in this port.
 GPU backends are controlled through the ggml dependency:
   metal  - Metal GPU backend (macOS/iOS, auto-enabled on Apple)
   vulkan - Vulkan GPU backend
-  cuda   - CUDA GPU backend
+  cuda         - CUDA 13 GPU backend on Linux and Windows
+  cuda-jetson  - CUDA 12 Jetson arm64 backend module
   opencl - OpenCL GPU backend (Android/Adreno)

@@ -19,8 +19,9 @@
 # Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-08-11
 # (REF pinned to that branch's tip commit for reproducibility).
 #
-# 7d9ce11 is the 2026-08-11 head after merging the two QVAC-23767 fixes on
-# top of f31dab0:
+# 31661db is based on the 2026-08-11 head and adds QVAC-23763 CUDA module
+# selection and Windows dynamic backend support. It also includes the two
+# QVAC-23767 fixes on top of f31dab0:
 # - PR #61: cmake-only, skips the x86 cpu-feats OBJECT helper in hybrid
 #   GGML_BACKEND_DL + GGML_CPU_STATIC builds, where the statically-linked CPU
 #   backend never consults the DL variant score and the un-exported helper
@@ -32,8 +33,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 7d9ce11cd47f338b361a00e866ffe7c224abedff
-    SHA512 0c7c99a799a6479d8fbf72d47240119da52d5d4b63ee1ecabf05cf84a0317588ee78939d9c6dba5a881d1bb4fc22765ac0991395cfc47204aa0548fe4c937d15
+    REF 31661dba3e7335f0e8a6abab6a424fd26c46f8fd
+    SHA512 f588b3041cd0a35dc9656f09c7c22d2ecdc07f129edc8062549a5da93d1615aea87a7ccc761c44e9066e3cb3844810406abea7ac8847bdea58989ef39ffec923
 )
 
 # --- GPU feature flags ---
@@ -51,20 +52,77 @@ if("vulkan" IN_LIST FEATURES)
 endif()
 
 set(GGML_CUDA_COMPILER_OPTION "")
+set(GGML_CUDA_OPTIONS)
 
-if("cuda" IN_LIST FEATURES)
+if("cuda" IN_LIST FEATURES OR "cuda-jetson" IN_LIST FEATURES)
     set(GGML_CUDA ON)
-    # Locate nvcc explicitly - /usr/local/cuda/bin may not be on the PATH that
-    # vcpkg's isolated cmake process inherits.
-    find_program(NVCC_EXECUTABLE nvcc
-        PATHS /usr/local/cuda/bin /usr/local/cuda-12.8/bin
-        NO_DEFAULT_PATH
-    )
-    if(NOT NVCC_EXECUTABLE)
-        find_program(NVCC_EXECUTABLE nvcc REQUIRED)
+    if("cuda" IN_LIST FEATURES AND "cuda-jetson" IN_LIST FEATURES)
+        message(FATAL_ERROR "ggml: cuda and cuda-jetson must be built separately")
     endif()
+    if("cuda-jetson" IN_LIST FEATURES)
+        if(NOT (VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64"))
+            message(FATAL_ERROR "ggml: cuda-jetson supports Linux arm64 only")
+        endif()
+        set(QVAC_CUDA_TOOLKIT "12.6.3-jetson")
+        set(QVAC_CUDA_VERSION_PATTERN "V12\\.6\\.85([^0-9]|$)")
+        set(QVAC_CUDA_ARCHS "87-real")
+        list(APPEND GGML_CUDA_OPTIONS
+            -DGGML_CUDA_NO_VMM=ON
+            -DGGML_CUDA_MODULE_SUFFIX=-jetson)
+    elseif(VCPKG_TARGET_IS_WINDOWS)
+        if(NOT VCPKG_TARGET_ARCHITECTURE STREQUAL "x64")
+            message(FATAL_ERROR "ggml: CUDA supports Windows x64 only")
+        endif()
+        set(QVAC_CUDA_TOOLKIT "13.0.3-server")
+        set(QVAC_CUDA_VERSION_PATTERN "V13\\.0\\.88([^0-9]|$)")
+        set(QVAC_CUDA_ARCHS "75-virtual\;80-virtual\;80-real\;86-real\;120a-real")
+    elseif(VCPKG_TARGET_IS_LINUX)
+        set(QVAC_CUDA_TOOLKIT "13.0.3-server")
+        set(QVAC_CUDA_VERSION_PATTERN "V13\\.0\\.88([^0-9]|$)")
+        if(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
+            set(QVAC_CUDA_ARCHS "80-virtual\;121-real")
+        elseif(VCPKG_TARGET_ARCHITECTURE STREQUAL "x64")
+            set(QVAC_CUDA_ARCHS "75-virtual\;80-virtual\;80-real\;86-real\;120a-real")
+        else()
+            message(FATAL_ERROR "ggml: CUDA supports Linux x64 and arm64 only")
+        endif()
+    else()
+        message(FATAL_ERROR "ggml: CUDA supports Linux and Windows only")
+    endif()
+
+    if(DEFINED ENV{CUDACXX} AND EXISTS "$ENV{CUDACXX}")
+        set(NVCC_EXECUTABLE "$ENV{CUDACXX}")
+    endif()
+    if(NOT NVCC_EXECUTABLE AND DEFINED ENV{CUDA_PATH})
+        find_program(NVCC_EXECUTABLE nvcc PATHS "$ENV{CUDA_PATH}/bin" NO_DEFAULT_PATH)
+    endif()
+    if(NOT NVCC_EXECUTABLE)
+        find_program(NVCC_EXECUTABLE nvcc)
+    endif()
+    if(NOT NVCC_EXECUTABLE)
+        find_program(NVCC_EXECUTABLE nvcc PATHS /usr/local/cuda/bin NO_DEFAULT_PATH)
+    endif()
+    if(NOT NVCC_EXECUTABLE)
+        message(FATAL_ERROR "ggml: CUDA feature needs a toolkit providing nvcc")
+    endif()
+
+    execute_process(
+        COMMAND "${NVCC_EXECUTABLE}" --version
+        RESULT_VARIABLE QVAC_NVCC_RESULT
+        OUTPUT_VARIABLE QVAC_NVCC_VERSION
+        ERROR_VARIABLE QVAC_NVCC_ERROR)
+    if(NOT QVAC_NVCC_RESULT EQUAL 0 OR NOT QVAC_NVCC_VERSION MATCHES "${QVAC_CUDA_VERSION_PATTERN}")
+        message(FATAL_ERROR "ggml: ${QVAC_CUDA_TOOLKIT} is required, but ${NVCC_EXECUTABLE} reported: ${QVAC_NVCC_VERSION}${QVAC_NVCC_ERROR}")
+    endif()
+
     set(GGML_CUDA_COMPILER_OPTION "-DCMAKE_CUDA_COMPILER=${NVCC_EXECUTABLE}")
-    message(STATUS "CUDA compiler: ${NVCC_EXECUTABLE}")
+    list(APPEND GGML_CUDA_OPTIONS "-DCMAKE_CUDA_ARCHITECTURES=${QVAC_CUDA_ARCHS}")
+    if(VCPKG_TARGET_IS_LINUX)
+        list(APPEND GGML_CUDA_OPTIONS
+            -DCMAKE_CUDA_HOST_COMPILER=clang++
+            "-DCMAKE_CUDA_FLAGS=-allow-unsupported-compiler")
+    endif()
+    message(STATUS "CUDA compiler: ${NVCC_EXECUTABLE}; toolkit: ${QVAC_CUDA_TOOLKIT}; archs: ${QVAC_CUDA_ARCHS}")
 endif()
 
 if("opencl" IN_LIST FEATURES)
@@ -95,7 +153,7 @@ endif()
 # dlopen and ggml falls back to CPU).  The CPU backend is statically linked
 # (GGML_CPU_STATIC) so that SD can call ggml_set_f32, ggml_backend_cpu_init,
 # etc. directly at link time.
-if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX)
+if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR VCPKG_TARGET_IS_WINDOWS)
     list(APPEND PLATFORM_OPTIONS
         -DGGML_BACKEND_DL=ON
         -DGGML_CPU_STATIC=ON
@@ -146,23 +204,25 @@ vcpkg_cmake_configure(
         -DGGML_OPENCL=${GGML_OPENCL}
         -DGGML_MAX_NAME=128  # stable-diffusion.cpp requires >= 128
         ${GGML_CUDA_COMPILER_OPTION}
+        ${GGML_CUDA_OPTIONS}
         ${PLATFORM_OPTIONS}
 )
 
 vcpkg_cmake_install()
 
-# Install DL backend .so files for Android and desktop Linux.  ggml builds
-# each backend as a MODULE target but does NOT install them via cmake
-# install().
-if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX)
-    file(GLOB _backend_sos
-        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libqvac-diffusion-ggml-*.so"
-        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libqvac-ggml-*.so"
-        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libggml-*.so"
-    )
-    if(_backend_sos)
-        file(INSTALL ${_backend_sos} DESTINATION "${CURRENT_PACKAGES_DIR}/lib")
+# The pinned source installs every DL module through its CMake install rules.
+# Fail here if a requested CUDA module was not produced or installed.
+if("cuda-jetson" IN_LIST FEATURES)
+    set(QVAC_EXPECTED_CUDA_MODULE "${CURRENT_PACKAGES_DIR}/lib/libqvac-diffusion-ggml-cuda-jetson.so")
+elseif("cuda" IN_LIST FEATURES)
+    if(VCPKG_TARGET_IS_WINDOWS)
+        set(QVAC_EXPECTED_CUDA_MODULE "${CURRENT_PACKAGES_DIR}/bin/qvac-diffusion-ggml-cuda.dll")
+    else()
+        set(QVAC_EXPECTED_CUDA_MODULE "${CURRENT_PACKAGES_DIR}/lib/libqvac-diffusion-ggml-cuda.so")
     endif()
+endif()
+if(DEFINED QVAC_EXPECTED_CUDA_MODULE AND NOT EXISTS "${QVAC_EXPECTED_CUDA_MODULE}")
+    message(FATAL_ERROR "ggml: expected CUDA module was not installed: ${QVAC_EXPECTED_CUDA_MODULE}")
 endif()
 
 # Fix up the CMake package config installed by ggml's own build system.
