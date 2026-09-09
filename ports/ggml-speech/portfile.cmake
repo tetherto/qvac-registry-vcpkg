@@ -1,8 +1,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 0ddc3660237e3ad9903c77abbad52cea8e20029b
-    SHA512 263874b1f9f4ff4de03e2fd9b89f3fed67fc810bc4b31395d50c41406b094a93f2e86717b6f4d993cced684067e1ed6f8946b257bc336b9e62b42bd07535dbf9
+    REF 70179b2bb60a9bd9ad1673032e2dd8844390528f
+    SHA512 4fa4732442cff0058d6cbf9e0abb1050a602fd379999e013dc03a28bed62cd9d43fac572354a1e9467ead3c6ec0ba3825cdf38a1fb70770f30ac532260a8bc33
     HEAD_REF speech
 )
 
@@ -112,6 +112,15 @@ endif()
 
 set(PLATFORM_OPTIONS)
 
+# tinyBLAS GEMM for the F16 and Q8_0 weights: measured 1.2x on x86 (7950X3D,
+# Ryzen AI MAX+ 395) and 1.7x at F16 on Apple silicon for Parakeet; other
+# targets are unmeasured and keep the plain ggml-cpu path.
+set(GGML_LLAMAFILE OFF)
+if((VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "x64")
+        OR (VCPKG_TARGET_IS_OSX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64"))
+    set(GGML_LLAMAFILE ON)
+endif()
+
 if(VCPKG_TARGET_IS_IOS)
     list(APPEND PLATFORM_OPTIONS -DGGML_BLAS=OFF -DGGML_ACCELERATE=OFF)
 endif()
@@ -146,14 +155,17 @@ endif()
 #   the CUDA backend module carries those references; the registry loader
 #   skips it on hosts that cannot resolve them and the cascade falls back to
 #   Vulkan or CPU.
+#
+# - Desktop x64 Linux without CUDA: the same per-arch CPU-variant packaging.
+#   A static non-native build is AVX2-only and leaves 11 to 14 percent of
+#   Parakeet encoder time on AVX-512 hosts.
 set(QVAC_LINUX_ARM64_DL_CPU OFF)
 if(VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
     set(QVAC_LINUX_ARM64_DL_CPU ON)
 endif()
 set(QVAC_DESKTOP_DL_GPU OFF)
-if((VCPKG_TARGET_IS_LINUX OR VCPKG_TARGET_IS_WINDOWS)
-        AND VCPKG_TARGET_ARCHITECTURE STREQUAL "x64"
-        AND "cuda" IN_LIST FEATURES)
+if(VCPKG_TARGET_ARCHITECTURE STREQUAL "x64"
+        AND (VCPKG_TARGET_IS_LINUX OR (VCPKG_TARGET_IS_WINDOWS AND "cuda" IN_LIST FEATURES)))
     set(QVAC_DESKTOP_DL_GPU ON)
 endif()
 set(QVAC_DESKTOP_DL OFF)
@@ -183,7 +195,7 @@ vcpkg_cmake_configure(
         -DGGML_NATIVE=OFF
         -DGGML_CCACHE=OFF
         -DGGML_OPENMP=OFF
-        -DGGML_LLAMAFILE=OFF
+        -DGGML_LLAMAFILE=${GGML_LLAMAFILE}
         -DGGML_BUILD_TESTS=OFF
         -DGGML_BUILD_EXAMPLES=OFF
         -DGGML_METAL=${GGML_METAL}
