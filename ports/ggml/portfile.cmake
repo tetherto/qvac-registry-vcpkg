@@ -19,7 +19,7 @@
 # Pulls from the tetherto/qvac-ext-ggml GitHub branch 2026-08-11
 # (REF pinned to that branch's tip commit for reproducibility).
 #
-# 31661db is based on the 2026-08-11 head and adds QVAC-23763 CUDA module
+# e651f75 is based on the 2026-08-11 head and adds QVAC-23763 CUDA module
 # selection and Windows dynamic backend support. It also includes the two
 # QVAC-23767 fixes on top of f31dab0:
 # - PR #61: cmake-only, skips the x86 cpu-feats OBJECT helper in hybrid
@@ -33,8 +33,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 31661dba3e7335f0e8a6abab6a424fd26c46f8fd
-    SHA512 f588b3041cd0a35dc9656f09c7c22d2ecdc07f129edc8062549a5da93d1615aea87a7ccc761c44e9066e3cb3844810406abea7ac8847bdea58989ef39ffec923
+    REF e651f757205359f35a683916c49b78b38308e920
+    SHA512 808c73b85c464775b9f5a2da391db4e67a480aebbfbc12487d9a4d773362dc7d0cf66b0da51a06c1f7037f8c078d499173ed2a0783e359c50a48ad04c54b9d31
 )
 
 # --- GPU feature flags ---
@@ -216,7 +216,7 @@ if("cuda-jetson" IN_LIST FEATURES)
     set(QVAC_EXPECTED_CUDA_MODULE "${CURRENT_PACKAGES_DIR}/lib/libqvac-diffusion-ggml-cuda-jetson.so")
 elseif("cuda" IN_LIST FEATURES)
     if(VCPKG_TARGET_IS_WINDOWS)
-        set(QVAC_EXPECTED_CUDA_MODULE "${CURRENT_PACKAGES_DIR}/bin/qvac-diffusion-ggml-cuda.dll")
+        set(QVAC_EXPECTED_CUDA_MODULE "${CURRENT_PACKAGES_DIR}/lib/qvac-diffusion-ggml-cuda.dll")
     else()
         set(QVAC_EXPECTED_CUDA_MODULE "${CURRENT_PACKAGES_DIR}/lib/libqvac-diffusion-ggml-cuda.so")
     endif()
