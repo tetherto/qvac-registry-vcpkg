@@ -1,8 +1,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 77107cbf8fe202588c4b78c5d81a42c6c484933e
-    SHA512 867090af414b4a653dff56c45c79e34b4290df58f4d98fab6be4834b6556cd65c58a5a128c7e18b4fd0f8d0991b856b78ffc3cbf23f6c5a7790271c2e83e72c0
+    REF 70179b2bb60a9bd9ad1673032e2dd8844390528f
+    SHA512 4fa4732442cff0058d6cbf9e0abb1050a602fd379999e013dc03a28bed62cd9d43fac572354a1e9467ead3c6ec0ba3825cdf38a1fb70770f30ac532260a8bc33
     HEAD_REF speech
 )
 
@@ -75,7 +75,14 @@ if("cuda" IN_LIST FEATURES)
     # Blackwell each get their own cubin, and 80-virtual carries the PTX the
     # driver JITs forward from on anything newer than this list. sm_50/61/70
     # need no exclusion: CUDA 13 no longer supports them.
-    set(GGML_CUDA_ARCHITECTURES_OPTION "-DCMAKE_CUDA_ARCHITECTURES=75-real\\;80-real\\;80-virtual\\;86-real\\;89-real\\;90-real\\;120a-real\\;121a-real")
+    if(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
+        # arm64 counterparts: Jetson Orin (sm_87), Grace-Hopper (sm_90) and
+        # GB10 / DGX Spark (sm_121a) native; 80-virtual covers discrete
+        # Ampere+ cards on arm64 hosts and newer parts through PTX JIT.
+        set(GGML_CUDA_ARCHITECTURES_OPTION "-DCMAKE_CUDA_ARCHITECTURES=80-virtual\\;87-real\\;90-real\\;121a-real")
+    else()
+        set(GGML_CUDA_ARCHITECTURES_OPTION "-DCMAKE_CUDA_ARCHITECTURES=75-real\\;80-real\\;80-virtual\\;86-real\\;89-real\\;90-real\\;120a-real\\;121a-real")
+    endif()
     set(GGML_CUDA_COMPILER_OPTION "-DCMAKE_CUDA_COMPILER=${NVCC_EXECUTABLE}")
     message(STATUS "CUDA compiler: ${NVCC_EXECUTABLE} (${NVCC_VERSION})")
 endif()
@@ -105,6 +112,15 @@ endif()
 
 set(PLATFORM_OPTIONS)
 
+# tinyBLAS GEMM for the F16 and Q8_0 weights: measured 1.2x on x86 (7950X3D,
+# Ryzen AI MAX+ 395) and 1.7x at F16 on Apple silicon for Parakeet; other
+# targets are unmeasured and keep the plain ggml-cpu path.
+set(GGML_LLAMAFILE OFF)
+if((VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "x64")
+        OR (VCPKG_TARGET_IS_OSX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64"))
+    set(GGML_LLAMAFILE ON)
+endif()
+
 if(VCPKG_TARGET_IS_IOS)
     list(APPEND PLATFORM_OPTIONS -DGGML_BLAS=OFF -DGGML_ACCELERATE=OFF)
 endif()
@@ -122,41 +138,54 @@ if(VCPKG_TARGET_IS_ANDROID)
     )
 endif()
 
-# Desktop aarch64 Linux: same per-arch CPU-variant packaging as Android.
-# Without it, this non-GGML_NATIVE build lands on a plain armv8-a baseline
-# and compiles out the dotprod/fp16/i8mm kernels; per-tier MODULE .so files
-# scored at first use keep the prebuild fast and SIGILL-safe on any host.
+# Desktop hybrid MODULE packaging, in two flavours sharing one option set:
+#
+# - Desktop aarch64 Linux, always: same per-arch CPU-variant packaging as
+#   Android. Without it, this non-GGML_NATIVE build lands on a plain armv8-a
+#   baseline and compiles out the dotprod/fp16/i8mm kernels; per-tier MODULE
+#   .so files scored at first use keep the prebuild fast and SIGILL-safe on
+#   any host. With the cuda feature, the CUDA backend simply becomes one
+#   more runtime-loaded module.
+#
+# - Desktop x64 (Linux and Windows) with CUDA: a statically linked ggml-cuda
+#   hands the consuming addon hard references on the CUDA runtime libraries
+#   (DT_NEEDED entries on libcuda/libcudart/libcublas; DLL imports on
+#   cudart64/cublas64/nvcuda), so the addon fails to load on every host
+#   without an NVIDIA driver plus the CUDA runtime. Built as MODULEs, only
+#   the CUDA backend module carries those references; the registry loader
+#   skips it on hosts that cannot resolve them and the cascade falls back to
+#   Vulkan or CPU.
+#
+# - Desktop x64 Linux without CUDA: the same per-arch CPU-variant packaging.
+#   A static non-native build is AVX2-only and leaves 11 to 14 percent of
+#   Parakeet encoder time on AVX-512 hosts.
 set(QVAC_LINUX_ARM64_DL_CPU OFF)
 if(VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
     set(QVAC_LINUX_ARM64_DL_CPU ON)
+endif()
+set(QVAC_DESKTOP_DL_GPU OFF)
+if(VCPKG_TARGET_ARCHITECTURE STREQUAL "x64"
+        AND (VCPKG_TARGET_IS_LINUX OR (VCPKG_TARGET_IS_WINDOWS AND "cuda" IN_LIST FEATURES)))
+    set(QVAC_DESKTOP_DL_GPU ON)
+endif()
+set(QVAC_DESKTOP_DL OFF)
+if(QVAC_LINUX_ARM64_DL_CPU OR QVAC_DESKTOP_DL_GPU)
+    set(QVAC_DESKTOP_DL ON)
     list(APPEND PLATFORM_OPTIONS
         -DGGML_BACKEND_DL=ON
         -DGGML_CPU_ALL_VARIANTS=ON
         -DGGML_CPU_REPACK=ON
+    )
+    if(NOT VCPKG_TARGET_IS_WINDOWS)
         # Link the C++ runtime statically into the modules: a module with
         # NEEDED libc++.so.1 fails to dlopen on a stock host and the registry
         # loader skips it silently, leaving no CPU device registered. Composed
         # with VCPKG_LINKER_FLAGS so the triplet's own -stdlib flag survives.
-        "-DCMAKE_MODULE_LINKER_FLAGS=${VCPKG_LINKER_FLAGS} -static-libstdc++"
-    )
-endif()
-
-# Desktop x64 Linux with CUDA: same hybrid MODULE packaging. A statically
-# linked ggml-cuda hands the consuming addon hard DT_NEEDED entries on
-# libcuda/libcudart/libcublas, so the addon fails to dlopen on every host
-# without an NVIDIA driver plus the CUDA runtime libraries. Built as MODULEs,
-# only the CUDA backend .so carries those entries; the registry loader skips
-# it on hosts that cannot resolve them and the cascade falls back to Vulkan
-# or CPU.
-set(QVAC_LINUX_X64_DL_GPU OFF)
-if(VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "x64" AND "cuda" IN_LIST FEATURES)
-    set(QVAC_LINUX_X64_DL_GPU ON)
-    list(APPEND PLATFORM_OPTIONS
-        -DGGML_BACKEND_DL=ON
-        -DGGML_CPU_ALL_VARIANTS=ON
-        -DGGML_CPU_REPACK=ON
-        "-DCMAKE_MODULE_LINKER_FLAGS=${VCPKG_LINKER_FLAGS} -static-libstdc++"
-    )
+        # On Windows the triplet's static CRT covers this instead.
+        list(APPEND PLATFORM_OPTIONS
+            "-DCMAKE_MODULE_LINKER_FLAGS=${VCPKG_LINKER_FLAGS} -static-libstdc++"
+        )
+    endif()
 endif()
 
 vcpkg_cmake_configure(
@@ -166,7 +195,7 @@ vcpkg_cmake_configure(
         -DGGML_NATIVE=OFF
         -DGGML_CCACHE=OFF
         -DGGML_OPENMP=OFF
-        -DGGML_LLAMAFILE=OFF
+        -DGGML_LLAMAFILE=${GGML_LLAMAFILE}
         -DGGML_BUILD_TESTS=OFF
         -DGGML_BUILD_EXAMPLES=OFF
         -DGGML_METAL=${GGML_METAL}
@@ -195,14 +224,21 @@ if(VCPKG_TARGET_IS_ANDROID)
     endif()
 endif()
 
-# Desktop Linux MODULE backend pickup: ggml installs versioned modules plus
-# symlinks into bin/, but the runtime loader matches only a plain `.so` and
-# the addons stage backends by copying a lib/ glob, which would copy a symlink
-# without its target. Dereference onto real files in lib/ and drop bin/.
-if(QVAC_LINUX_ARM64_DL_CPU OR QVAC_LINUX_X64_DL_GPU)
+# Desktop MODULE backend pickup: ggml installs the modules into bin/ (on
+# Linux as versioned files plus symlinks), but the runtime loader matches
+# only a plain `.so`/`.dll` and the addons stage backends by copying a lib/
+# glob, which would copy a symlink without its target. Dereference onto real
+# files in lib/ and drop bin/ (which also keeps the static triplet's
+# post-build checks quiet).
+if(QVAC_DESKTOP_DL)
+    if(VCPKG_TARGET_IS_WINDOWS)
+        set(_backend_mod_glob "qvac-speech-ggml-*.dll")
+    else()
+        set(_backend_mod_glob "libqvac-speech-ggml-*.so")
+    endif()
     foreach(_cfg "" "/debug")
         file(GLOB _backend_mods
-            "${CURRENT_PACKAGES_DIR}${_cfg}/bin/libqvac-speech-ggml-*.so")
+            "${CURRENT_PACKAGES_DIR}${_cfg}/bin/${_backend_mod_glob}")
         foreach(_mod IN LISTS _backend_mods)
             get_filename_component(_mod_name "${_mod}" NAME)
             file(REAL_PATH "${_mod}" _mod_real)
@@ -246,6 +282,12 @@ file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
+if(QVAC_DESKTOP_DL_GPU AND VCPKG_TARGET_IS_WINDOWS)
+    # The runtime-loaded backend DLLs are payload of a static-linkage port,
+    # not linked libraries; without this the static-build post-build check
+    # rejects them.
+    set(VCPKG_POLICY_DLLS_IN_STATIC_LIBRARY enabled)
+endif()
 
 file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
 vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
