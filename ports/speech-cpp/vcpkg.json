@@ -1,7 +1,6 @@
 {
   "name": "speech-cpp",
-  "version-date": "2026-09-10",
-  "port-version": 1,
+  "version-date": "2026-09-14",
   "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
@@ -98,7 +97,7 @@
       "description": "Build the Parakeet engine (NVIDIA FastConformer ASR: CTC / TDT / EOU, Nemotron 3.5, plus Sortformer diarization) from engines/parakeet. CMake package: find_package(qvac-parakeet CONFIG) + qvac::parakeet."
     },
     "tts": {
-      "description": "Build the TTS engine collection from engines/tts: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS, Audio8 and LavaSR speech enhancement, as one library. CMake package: find_package(tts-cpp CONFIG) + tts-cpp::tts-cpp.",
+      "description": "Build the TTS engine collection from engines/tts: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS, Pocket TTS, Audio8 and LavaSR speech enhancement, as one library. CMake package: find_package(tts-cpp CONFIG) + tts-cpp::tts-cpp.",
       "dependencies": [
         "mecab"
       ]
