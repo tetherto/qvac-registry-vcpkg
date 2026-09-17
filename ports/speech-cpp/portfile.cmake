@@ -31,8 +31,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-fabric-speech.cpp
-    REF 2878f5136271a85e5beea6cd4bdc4b74a0addb49
-    SHA512 8d903d0e0b97e14eec252241b4220c93d52419fe5b44b90c8a4ce8e557239d442a8ef2bb4e43c68ccd4278a347bdbacaf7327a778b0d46afc6265813593dcd3a
+    REF 1e7ab16683aec47afef997a3a5b5147dc6092558
+    SHA512 d2c417bd54d8aeac9e0d60444027a3a5837948abb965efcd5dd059b3c700145b4cd9d5b3827b1acaa255a9b2b4d4cc7aa35d1d2e6fc5d848c70dcfaf86e98dba
     HEAD_REF master
 )
 
