@@ -68,7 +68,11 @@ if (NOT SPEECH_ENABLED_ENGINES)
 endif()
 
 # Engine-side GPU gating (the actual backends are compiled into ggml-speech;
-# see the header comment).
+# see the header comment). The coreml feature fans out to every engine that
+# has an Apple Core ML sidecar: the Parakeet encoder, the Audio8 codec
+# synthesis stack (tts) and the ACE-Step VAE decoder (audiogen). Each flag is
+# read only by its own engine, so the ones of engines that are not enabled go
+# unused by design (MAYBE_UNUSED_VARIABLES below).
 vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
     FEATURES
         metal   GGML_METAL
@@ -76,6 +80,8 @@ vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
         opencl  GGML_OPENCL
         cuda    GGML_CUDA
         coreml  PARAKEET_COREML
+        coreml  TTS_CPP_COREML
+        coreml  AUDIOGEN_COREML
 )
 
 set(PLATFORM_OPTIONS)
@@ -131,6 +137,10 @@ vcpkg_cmake_configure(
         -DGGML_CCACHE=OFF
         ${FEATURE_OPTIONS}
         ${PLATFORM_OPTIONS}
+    MAYBE_UNUSED_VARIABLES
+        PARAKEET_COREML
+        TTS_CPP_COREML
+        AUDIOGEN_COREML
 )
 
 vcpkg_cmake_install()
