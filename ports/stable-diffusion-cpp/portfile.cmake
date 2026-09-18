@@ -16,6 +16,8 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # 2026-08-11 (REF pinned to the branch tip for reproducibility).
 #
+# port-version 2 adds ABot-World layer streaming through the ABI-safe v2 API.
+#
 # port-version 1 (f817406, 2026-08-11 tip after merging PR #37): restores the
 # ABot-World scene-creation prompt-pad zeroing that the August forward-port
 # dropped (the blur regression), adds the "prompt rows N live / M" pack
@@ -38,8 +40,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF f817406215aa1d27f3ac3306647b1e1ded2f6d1b
-    SHA512 5fa199dd2c74e17213d653d0079b5d8690df9075725d571228fea85c851714536db3916c550ea7de22a91f22eea56c37fbbf496bb5908fe25743aa0900a36976
+    REF c9a39f365f9983b31c43892750ec0fe56263e173
+    SHA512 854feba8ce96c51521234b581d56b58a9534e7f1389e6758eb45d5eb82ae1606ff478abdc0b5b5f9e24a4d6faa069c9580714ae5dbb037aff724b3a2e4f3e41b
 )
 
 # Even under SD_USE_SYSTEM_GGML the sources reach into one ggml *internal*
