@@ -1,8 +1,7 @@
 {
   "name": "speech-cpp",
-  "version-date": "2026-09-16",
-  "port-version": 1,
-  "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines. Revision #1 of 2026-09-16 keeps the source pin (2878f513, which already carries qvac-fabric-speech.cpp #254, the Apple Core ML sidecar for the Audio8 codec synthesis stack behind TTS_CPP_COREML) and widens the coreml feature to every engine with a sidecar (PARAKEET_COREML, TTS_CPP_COREML, AUDIOGEN_COREML) instead of implying parakeet. No ggml-speech change.",
+  "version-date": "2026-09-18",
+  "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
   "dependencies": [
