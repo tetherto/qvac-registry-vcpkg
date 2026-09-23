@@ -2,7 +2,7 @@ vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-fabric-llm.cpp
   REF v${VERSION}
-  SHA512 442ebbf9f24cb4f7fc7afd457640e0ca9e1f7b98eac9fa73acb9556df34298275b1822c63580b1c1be8e64e7758c3569a05fc17176784f6747936e056b42a2f8
+  SHA512 a6c98cc0e469f935a3782aaa2b7b23869b3ea64c003d0d9d4f4df627d71651935d0e02ed080f10888704a51e2757d3a0b25f32909f58140847ed1d989cf853cc
 )
 
 # Upstream CMake options only — passed through to vcpkg_cmake_configure.
@@ -22,6 +22,8 @@ vcpkg_check_features(
     kleidiai BUILD_KLEIDIAI
     openmp BUILD_OPENMP
     hip-backend BUILD_HIP_BACKEND
+    rpc-server BUILD_RPC_SERVER
+    rpc-rdma BUILD_RPC_RDMA
 )
 
 # gpu-backends is default-on via default-features in vcpkg.json. CPU-only
@@ -72,11 +74,13 @@ endif()
 # to dispatch the variants at runtime; the existing #ifdef guard around
 # `ggml_backend_load_all_from_path()` in ggml-backend-reg.cpp keeps the search
 # scoped to the consumer's own prebuilds dir.
-if(VCPKG_TARGET_IS_ANDROID OR (VCPKG_TARGET_IS_LINUX AND BUILD_GPU_BACKENDS))
-  # Desktop Linux also needs GGML_BACKEND_DL=ON so that multiple GPU backends
-  # (Vulkan + HIP/ROCm) can coexist as separately-loaded modules, the same way
-  # Android dispatches CPU variants at runtime. Without DL the Linux build links
-  # a single static GPU backend and a second one (HIP) cannot be stacked.
+# Desktop Linux and Windows also need GGML_BACKEND_DL=ON so that GPU backends
+# and CPU variants are runtime-loaded modules. This keeps optional backend DLL
+# dependencies out of the core Windows module and lets CPU variant scoring pick
+# the best instruction set at runtime.
+if(VCPKG_TARGET_IS_ANDROID OR ((VCPKG_TARGET_IS_LINUX OR VCPKG_TARGET_IS_WINDOWS) AND BUILD_GPU_BACKENDS))
+  # Without DL, the desktop build links a single static GPU backend and a
+  # second backend cannot be stacked.
   # GGML_NATIVE is incompatible with DL, so CPU variants are dispatched via
   # GGML_CPU_ALL_VARIANTS instead. Consumers must ship the core ggml/llama libs
   # alongside their backend modules so the dynamically-linked .bare can resolve
@@ -180,6 +184,27 @@ else()
   )
 endif()
 
+set(BUILD_RPC_SERVER_TOOL OFF)
+if(BUILD_RPC_SERVER)
+  if(NOT BUILD_LLAMA)
+    message(FATAL_ERROR "qvac-fabric: rpc-server feature requires the llama feature so the tools tree can be configured")
+  else()
+    set(BUILD_RPC_SERVER_TOOL ON)
+  endif()
+endif()
+
+set(BUILD_RPC_RDMA_TRANSPORT OFF)
+if(BUILD_RPC_RDMA)
+  if(NOT VCPKG_TARGET_IS_LINUX)
+    message(FATAL_ERROR "qvac-fabric: rpc-rdma feature is supported only on Linux because qvac-fabric RDMA uses libibverbs.")
+  endif()
+
+  message(STATUS "qvac-fabric: rpc-rdma feature ON - requiring system libibverbs")
+  set(BUILD_RPC_RDMA_TRANSPORT ON)
+else()
+  message(STATUS "qvac-fabric: rpc-rdma feature OFF - building RPC over TCP only")
+endif()
+
 vcpkg_cmake_configure(
   SOURCE_PATH "${SOURCE_PATH}"
   DISABLE_PARALLEL_CONFIGURE
@@ -187,9 +212,13 @@ vcpkg_cmake_configure(
     -DGGML_NATIVE=OFF
     -DGGML_CCACHE=OFF
     -DGGML_LLAMAFILE=OFF
+    -DGGML_RPC=ON
+    -DGGML_RPC_RDMA=${BUILD_RPC_RDMA_TRANSPORT}
+    -DLLAMA_CURL=OFF
     -DLLAMA_OPENSSL=OFF
     -DLLAMA_BUILD_TESTS=OFF
-    -DLLAMA_BUILD_TOOLS=OFF
+    -DLLAMA_BUILD_TOOLS=${BUILD_RPC_SERVER_TOOL}
+    -DLLAMA_TOOLS_INSTALL=${BUILD_RPC_SERVER_TOOL}
     -DLLAMA_BUILD_EXAMPLES=OFF
     -DLLAMA_BUILD_SERVER=OFF
     -DLLAMA_BUILD_APP=OFF
@@ -206,6 +235,10 @@ vcpkg_cmake_config_fixup(
 
 if(BUILD_LLAMA)
   vcpkg_cmake_config_fixup(PACKAGE_NAME llama)
+endif()
+
+if(BUILD_RPC_SERVER_TOOL)
+  vcpkg_copy_tools(TOOL_NAMES ggml-rpc-server AUTO_CLEAN)
 endif()
 
 vcpkg_copy_pdbs()
