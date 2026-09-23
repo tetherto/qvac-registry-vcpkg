@@ -55,7 +55,8 @@
       "description": "Enable openmp on Android."
     },
     "rpc-rdma": {
-      "description": "Enable libibverbs/RDMA auto-negotiation for ggml RPC on Linux builds. Requires the system libibverbs development package to be discoverable through pkg-config."
+      "description": "Enable libibverbs/RDMA auto-negotiation for ggml RPC on Linux builds. Requires the system libibverbs development headers and library.",
+      "supports": "linux"
     },
     "rpc-server": {
       "description": "Build and install the ggml-rpc-server tool from the same qvac-fabric revision.",
