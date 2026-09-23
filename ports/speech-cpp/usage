@@ -25,9 +25,9 @@ GPU backends (fan out to ggml-speech, shared by all engines):
   opencl - OpenCL (default on Android)
 Apple extra (macOS / iOS):
   coreml - Apple Core ML (Neural Engine) sidecars for every enabled engine that
-           has one: Parakeet encoder, Audio8 codec synthesis (tts), ACE-Step
-           VAE decoder (audiogen); presence-driven on a .mlmodelc next to the
-           model file, ggml fallback otherwise
+           has one: Parakeet encoder, Audio8 codec synthesis and the Supertonic
+           vocoder (tts), ACE-Step VAE decoder (audiogen); presence-driven on a
+           .mlmodelc next to the model file, ggml fallback otherwise
 
 Example consumer manifest dependency:
   { "name": "speech-cpp", "default-features": false,

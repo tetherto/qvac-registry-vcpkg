@@ -1,6 +1,7 @@
 {
   "name": "speech-cpp",
   "version-date": "2026-09-23",
+  "port-version": 2,
   "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
@@ -39,7 +40,7 @@
       "description": "Build the audiogen engine (ACE-Step music generation) from engines/audiogen. CMake package: find_package(audiogen-cpp CONFIG) + audiogen-cpp::audiogen-cpp."
     },
     "coreml": {
-      "description": "Enable the Apple Core ML (Neural Engine) sidecars of every enabled engine that has one: the Parakeet FastConformer encoder (PARAKEET_COREML), the Audio8 codec synthesis stack in tts (TTS_CPP_COREML) and the ACE-Step VAE decoder in audiogen (AUDIOGEN_COREML). All presence-driven at runtime: each engine runs its stage on a compiled .mlmodelc found next to the model file and falls back to ggml when it is absent. Combine with the engine features you build; this feature no longer implies parakeet.",
+      "description": "Enable the Apple Core ML (Neural Engine) sidecars of every enabled engine that has one: the Parakeet FastConformer encoder (PARAKEET_COREML), the Audio8 codec synthesis stack and the Supertonic vocoder in tts (TTS_CPP_COREML) and the ACE-Step VAE decoder in audiogen (AUDIOGEN_COREML). All presence-driven at runtime: each engine runs its stage on a compiled .mlmodelc found next to the model file and falls back to ggml when it is absent. Combine with the engine features you build; this feature no longer implies parakeet.",
       "supports": "osx | ios"
     },
     "cuda": {
@@ -110,6 +111,5 @@
     "whisper": {
       "description": "Build the whisper engine from third_party/whisper.cpp (upstream whisper.cpp with the QVAC delta; upstream's bundled parakeet is gated off). CMake package: find_package(whisper CONFIG) + whisper::whisper."
     }
-  },
-  "port-version": 1
+  }
 }
