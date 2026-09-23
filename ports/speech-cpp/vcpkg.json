@@ -8,7 +8,7 @@
     {
       "name": "ggml-speech",
       "default-features": false,
-      "version>=": "2026-09-15"
+      "version>=": "2026-09-23"
     },
     {
       "name": "vcpkg-cmake",
@@ -110,5 +110,6 @@
     "whisper": {
       "description": "Build the whisper engine from third_party/whisper.cpp (upstream whisper.cpp with the QVAC delta; upstream's bundled parakeet is gated off). CMake package: find_package(whisper CONFIG) + whisper::whisper."
     }
-  }
+  },
+  "port-version": 1
 }
