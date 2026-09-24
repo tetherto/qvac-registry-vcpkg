@@ -1,15 +1,30 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 544d7661437e46d18d3bb9329bab5f842fcc868f
-    SHA512 689051bf05ae9bc50ad481798116ee786ca68d6be779bb42778d73631f7d8d399ffdd90adac74c6ea75446eddd455a0c7c0a64ff87caa3de12af85f50906b4f5
-    HEAD_REF speech
+    REF 0826b4e41fd5b6f5ae879230fda0c7c5691eeec3
+    SHA512 c0c7fb7d33b4db13254ab4de381561eecf71795b224127ce9dc5120bcc8d97a099e7340b26f2863f10aa3c3987c374f6e903912fb855ed13b8c6f27ea8d91874
+    HEAD_REF temp-feature/QVAC-25495-parakeet-hexagon
 )
 
 set(GGML_METAL  OFF)
 set(GGML_VULKAN OFF)
 set(GGML_CUDA   OFF)
 set(GGML_OPENCL OFF)
+set(GGML_HEXAGON OFF)
+set(GGML_HEXAGON_OPTIONS)
+if("hexagon" IN_LIST FEATURES)
+    if(NOT VCPKG_TARGET_IS_ANDROID OR NOT VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
+        message(FATAL_ERROR "ggml-speech[hexagon] requires Android ARM64.")
+    endif()
+    foreach(_sdk_var HEXAGON_SDK_ROOT HEXAGON_TOOLS_ROOT)
+        if(NOT DEFINED ENV{${_sdk_var}} OR NOT IS_DIRECTORY "$ENV{${_sdk_var}}")
+            message(FATAL_ERROR "ggml-speech[hexagon] requires ${_sdk_var} pointing to a locally installed official Hexagon SDK/toolchain. Forward these variables through VCPKG_ENV_PASSTHROUGH in the triplet.")
+        endif()
+        list(APPEND GGML_HEXAGON_OPTIONS "-D${_sdk_var}=$ENV{${_sdk_var}}")
+    endforeach()
+    list(APPEND GGML_HEXAGON_OPTIONS -DPREBUILT_LIB_DIR=android_aarch64)
+    set(GGML_HEXAGON ON)
+endif()
 set(GGML_METAL_FUSE_MV_BIAS OFF)
 
 if("metal" IN_LIST FEATURES)
@@ -202,16 +217,30 @@ vcpkg_cmake_configure(
         -DGGML_VULKAN=${GGML_VULKAN}
         -DGGML_CUDA=${GGML_CUDA}
         -DGGML_OPENCL=${GGML_OPENCL}
+        -DGGML_HEXAGON=${GGML_HEXAGON}
         -DGGML_METAL_FUSE_MV_BIAS=${GGML_METAL_FUSE_MV_BIAS}
         -DGGML_LIB_OUTPUT_PREFIX=qvac-speech-
         -DGGML_VULKAN_STRIP_SHADER_PAYLOADS=ON
         ${GGML_CUDA_COMPILER_OPTION}
         ${GGML_CUDA_ARCHITECTURES_OPTION}
         ${GGML_CUDA_GRAPHS_OPTION}
+        ${GGML_HEXAGON_OPTIONS}
         ${PLATFORM_OPTIONS}
 )
 
 vcpkg_cmake_install()
+
+# Skeletons run on the DSP, not the Android host. Keep their upstream names:
+# the FastRPC loader requests libggml-htp-<architecture>.so at runtime.
+if(GGML_HEXAGON)
+    foreach(_arch v73 v75 v79 v81)
+        if(NOT EXISTS "${CURRENT_PACKAGES_DIR}/lib/libggml-htp-${_arch}.so")
+            message(FATAL_ERROR "ggml-speech[hexagon]: missing installed ${_arch} DSP skeleton")
+        endif()
+    endforeach()
+    # DSP ELF files intentionally do not have the Android host architecture.
+    set(VCPKG_POLICY_SKIP_ARCHITECTURE_CHECK enabled)
+endif()
 
 # Pick up the MODULE backend .so files ggml builds into the buildtree's
 # bin/ directory (Android dynamic-backend mode). cmake install() doesn't

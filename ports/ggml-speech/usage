@@ -8,3 +8,14 @@ Available vcpkg features:
   vulkan - Vulkan GPU backend
   cuda   - CUDA GPU backend
   opencl - OpenCL GPU backend
+  hexagon - Experimental Hexagon HTP backend (Android ARM64, opt-in)
+
+Hexagon builds use a locally installed official Qualcomm SDK/compiler. Set
+HEXAGON_SDK_ROOT and HEXAGON_TOOLS_ROOT, and forward both through the triplet's
+VCPKG_ENV_PASSTHROUGH. The port does not download the SDK. It builds and installs
+libggml-htp-v73/v75/v79/v81.so alongside the Android backend; consumers must stage
+the skeletons and make their directory available to FastRPC via DSP_LIBRARY_PATH
+before backend enumeration. Use the same build for host backend and DSP skeletons.
+
+The SDK and runtime artifacts are for authorized internal evaluation; enabling
+this feature does not establish redistribution rights.

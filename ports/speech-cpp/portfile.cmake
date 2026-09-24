@@ -31,9 +31,9 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-fabric-speech.cpp
-    REF dcc2fa6057a2f3147c2bbba973d265c5232646d7
-    SHA512 4045e84ca8cdd8317665cc5f84d62a9b7f2b4130d07f92c33ec4c99ef0802f5ab548fda18adab1e36d60da97c8587355d282a989115251146a3dfe4c1f6c6fb5
-    HEAD_REF master
+    REF 1bc44323af147721470cb04c2bfee77aa1511678
+    SHA512 4325858ed7db6fbc3fd326dea4fde766f3f1f5192a65d820f0b7bc9fe4254a6450087aeb0dc0e725dfe5b9e9f1324249d3af2100232a17011f777dfe9bdd0e7a
+    HEAD_REF temp-feature/QVAC-25495-parakeet-hexagon
 )
 
 if (NOT EXISTS "${SOURCE_PATH}/CMakeLists.txt")
