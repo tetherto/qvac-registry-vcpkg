@@ -16,6 +16,9 @@
 # Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
 # 2026-08-11 (REF pinned to the branch tip for reproducibility).
 #
+# port-version 3 enables header-only safetensors fitting and validates tensor
+# dimensions before size calculation in normal and metadata-only reads.
+#
 # port-version 2 adds ABot-World layer streaming through the ABI-safe v2 API.
 #
 # port-version 1 (f817406, 2026-08-11 tip after merging PR #37): restores the
@@ -40,8 +43,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF c9a39f365f9983b31c43892750ec0fe56263e173
-    SHA512 854feba8ce96c51521234b581d56b58a9534e7f1389e6758eb45d5eb82ae1606ff478abdc0b5b5f9e24a4d6faa069c9580714ae5dbb037aff724b3a2e4f3e41b
+    REF 60bd9de60c6f33afa32a742cac58cf7e8e897242
+    SHA512 8f695bb7c0b7b3535685aa3f8db89be7299f254455e200062e8d5ed4be8f1da8778e77cb27f84ce3b3433524dc32a40d9ccb2c939a56aeadf1ccc8e83c646662
 )
 
 # Even under SD_USE_SYSTEM_GGML the sources reach into one ggml *internal*
