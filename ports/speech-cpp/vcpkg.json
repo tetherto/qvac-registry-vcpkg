@@ -1,6 +1,7 @@
 {
   "name": "speech-cpp",
-  "version-date": "2026-09-14",
+  "version-date": "2026-09-29",
+  "port-version": 1,
   "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
@@ -8,7 +9,7 @@
     {
       "name": "ggml-speech",
       "default-features": false,
-      "version>=": "2026-09-09#1"
+      "version>=": "2026-09-28"
     },
     {
       "name": "vcpkg-cmake",
@@ -39,17 +40,8 @@
       "description": "Build the audiogen engine (ACE-Step music generation) from engines/audiogen. CMake package: find_package(audiogen-cpp CONFIG) + audiogen-cpp::audiogen-cpp."
     },
     "coreml": {
-      "description": "Parakeet only: enable the Apple Core ML (Neural Engine) encoder sidecar (presence-driven at runtime; falls back to the ggml encoder when the .mlmodelc sidecar is absent).",
-      "supports": "osx | ios",
-      "dependencies": [
-        {
-          "name": "speech-cpp",
-          "default-features": false,
-          "features": [
-            "parakeet"
-          ]
-        }
-      ]
+      "description": "Enable the Apple Core ML (Neural Engine) sidecars of every enabled engine that has one: the Parakeet FastConformer encoder (PARAKEET_COREML), the Audio8 codec synthesis stack and the Supertonic vocoder in tts (TTS_CPP_COREML) and the ACE-Step VAE decoder in audiogen (AUDIOGEN_COREML). All presence-driven at runtime: each engine runs its stage on a compiled .mlmodelc found next to the model file and falls back to ggml when it is absent. Combine with the engine features you build; this feature no longer implies parakeet.",
+      "supports": "osx | ios"
     },
     "cuda": {
       "description": "Enable CUDA GPU acceleration for all enabled engines (Linux / Windows on NVIDIA, via ggml-speech[cuda]). Needs nvcc on the build host; at runtime CUDA engages only where the NVIDIA driver and the CUDA 13 runtime libraries (cudart, cuBLAS) both resolve, and devices without compiled kernels are skipped in favor of Vulkan or CPU.",
@@ -94,10 +86,10 @@
       ]
     },
     "parakeet": {
-      "description": "Build the Parakeet engine (NVIDIA FastConformer ASR: CTC / TDT / EOU, Nemotron 3.5, plus Sortformer diarization) from engines/parakeet. CMake package: find_package(qvac-parakeet CONFIG) + qvac::parakeet."
+      "description": "Build the Parakeet engine (NVIDIA FastConformer ASR: CTC / TDT / EOU, Nemotron 3.5, Sortformer and Nemotron 3 diarization, plus MOSS-Transcribe-Diarize) from engines/parakeet. CMake package: find_package(qvac-parakeet CONFIG) + qvac::parakeet."
     },
     "tts": {
-      "description": "Build the TTS engine collection from engines/tts: Resemble Chatterbox (Turbo + Multilingual), Supertonic, Fun-CosyVoice3, Parler-TTS, Pocket TTS, Audio8 and LavaSR speech enhancement, as one library. CMake package: find_package(tts-cpp CONFIG) + tts-cpp::tts-cpp.",
+      "description": "Build the TTS engine collection from engines/tts: Chatterbox, Supertonic, CosyVoice3, Parler-TTS, Pocket TTS, Audio8, MOSS Delay, MOSS-SoundEffect, MOSS-Speech and LavaSR speech enhancement, as one library. CMake package: find_package(tts-cpp CONFIG) + tts-cpp::tts-cpp.",
       "dependencies": [
         "mecab"
       ]
