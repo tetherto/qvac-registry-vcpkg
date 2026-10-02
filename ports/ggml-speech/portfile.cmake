@@ -264,7 +264,7 @@ if(QVAC_LINUX_ARM64_DL_CPU)
     endforeach()
 endif()
 
-vcpkg_cmake_config_fixup(PACKAGE_NAME ggml CONFIG_PATH lib/cmake/ggml)
+vcpkg_cmake_config_fixup(PACKAGE_NAME ggml CONFIG_PATH share/ggml)
 
 if(EXISTS "${CURRENT_PACKAGES_DIR}/share/pkgconfig/ggml.pc")
     file(MAKE_DIRECTORY "${CURRENT_PACKAGES_DIR}/lib/pkgconfig")
