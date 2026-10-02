@@ -1,8 +1,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 02d426a0754befa15b53c222827c402774727df9
-    SHA512 34d02370aea99af95d03e07e6a27c962cea28a7d6a85904edd00319c3d700cb0b5f2fc744efae36f6f5f5e5e61288f8be4025ee5e038400c2fcd03c48bc884e5
+    REF cd493ef0198041c4eefedb2b601eb9571d2a6881
+    SHA512 cf3326744f3929f020d0516afeadf0a4e3630f449adbc7eb00ba4da37b749275cd5b72635ec0441c7a99d9813aa746b0d1b7b80fbbb43a5c5f605afe1159a930
     HEAD_REF speech
 )
 
@@ -250,15 +250,16 @@ if(QVAC_DESKTOP_DL)
     endforeach()
 endif()
 
-# Do not ship the SVE-bearing CPU variants: ggml's SVE paths are
-# several times slower than NEON dotprod/fp16 on the 128-bit-vector
-# cores of the desktop arm64-linux fleet, and the runtime score would
-# pick them on SVE hardware. Revisit with an SVE-free i8mm tier.
+# Ship only the NEON dotprod/fp16 CPU variants on arm64-linux. ggml no
+# longer builds SVE tiers there; the two tiers above armv8.2_2 are now
+# SVE-free (armv8.6_1 adds i8mm, armv9.2_1 adds SME) but have not been
+# measured on the desktop arm64-linux fleet, and the runtime score would
+# pick them where the hardware allows. Ship them once they are measured.
 if(QVAC_LINUX_ARM64_DL_CPU)
     foreach(_cfg "" "/debug")
-        foreach(_sve_tier armv8.2_3 armv8.6_1 armv8.6_2 armv9.2_1 armv9.2_2)
+        foreach(_unmeasured_tier armv8.6_1 armv9.2_1)
             file(REMOVE
-                "${CURRENT_PACKAGES_DIR}${_cfg}/lib/libqvac-speech-ggml-cpu-${_sve_tier}.so")
+                "${CURRENT_PACKAGES_DIR}${_cfg}/lib/libqvac-speech-ggml-cpu-${_unmeasured_tier}.so")
         endforeach()
     endforeach()
 endif()
