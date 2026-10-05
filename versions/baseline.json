@@ -26,7 +26,7 @@
     },
     "ggml-speech": {
       "baseline": "2026-10-02",
-      "port-version": 0
+      "port-version": 1
     },
     "hip": {
       "baseline": "7.13.0",
@@ -61,7 +61,7 @@
       "port-version": 0
     },
     "qvac-fabric": {
-      "baseline": "10549.5.0",
+      "baseline": "10549.5.1",
       "port-version": 0
     },
     "qvac-lib-inference-addon-cpp": {
@@ -89,7 +89,7 @@
       "port-version": 0
     },
     "speech-cpp": {
-      "baseline": "2026-10-02",
+      "baseline": "2026-10-05",
       "port-version": 0
     },
     "ssplit": {
