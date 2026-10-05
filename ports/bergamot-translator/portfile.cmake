@@ -1,12 +1,12 @@
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-bergamot-translator
-  # 99ef81e = b6788a8 (port-enabled lineage with install rules / cmake
-  # config) + removal of leftover debug stderr prints (same fix as
-  # upstream main 28cdbe7, which is not yet port-buildable: the squash
-  # in qvac-ext-bergamot-translator#4 dropped the install/export rules).
-  REF 99ef81e
-  SHA512 a7ebee8ac56c74c7054f08439d092e832e62873d2a5e01ca20d55b4070523ef5c4cc62569bd6c9466fb5b02d7e2ae4df3c7f6de060d9489f21cf0bcfed1cf8a6
+  # 277df45 = merge of qvac-ext-bergamot-translator#19 into temp-vcpkg.
+  # That is 99ef81e (the 1.0.1 pin: port-enabled lineage plus the stderr
+  # print removal) plus dropping CMAKE_STATIC_LINKER_FLAGS
+  # /LTCG:incremental, which llvm-lib rejects.
+  REF 277df45
+  SHA512 6d8098c951a671477247b2bcb50f94f7120eea3a91359954e9e9c4fe2f21f91654dbcb539cdbb720c6b1f665f08471ca21e14e0baaa795d18500633be33831a2
   PATCHES
     remove_build_type_flag.patch
 )
