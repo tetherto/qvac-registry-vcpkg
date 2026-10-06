@@ -13,29 +13,15 @@
 # on Android and desktop Linux the GPU backends are dlopen'd modules
 # (hybrid GGML_BACKEND_DL, see the ggml port).
 #
-# Pulls from the tetherto/qvac-ext-stable-diffusion.cpp GitHub branch
-# 2026-08-11 (REF pinned to the branch tip for reproducibility).
-#
-# port-version 3 enables header-only safetensors fitting and validates tensor
-# dimensions before size calculation in normal and metadata-only reads.
-#
-# port-version 2 adds ABot-World layer streaming through the ABI-safe v2 API.
-#
-# port-version 1 (f817406, 2026-08-11 tip after merging PR #37): restores the
-# ABot-World scene-creation prompt-pad zeroing that the August forward-port
-# dropped (the blur regression), adds the "prompt rows N live / M" pack
-# diagnostic, and cuts walk overhead (retained compute buffer, fused masked
-# softmax, reused action planes, direct-conv decode, tensor-core score matmul).
-# ABot-only; no other model path or public C API changes.
-#
-# port-version 0 (4027059) was the 2026-08-11 tip after merging PR #29
-# (MiniMax-H3). Relative to the 2026-07-03 line that brought the rebased
-# upstream API: bool-returning generate_image()/upscale() with out-params,
-# sd_cancel_generation(), ref_image_args replacing the per-field reference
-# knobs, param residency via backend assignment specs (params_backend/max_vram
-# strings) instead of the keep_*_on_cpu/offload_params_to_cpu booleans, and the
-# SeFi/MiniT2I/hires/adetailer additions. The ABot-World session/scene C API is
-# unchanged.
+# Pins tetherto/qvac-ext-stable-diffusion.cpp commit
+# 107121df3ee9664cd47f80b19add495002d0232f from the 2026-08-11 line,
+# including merged MiniMax-H3 and ConvRot support. Relative to the 2026-07-03
+# line this brings the rebased upstream API: bool-returning
+# generate_image()/upscale() with out-params, sd_cancel_generation(),
+# ref_image_args replacing the per-field reference knobs, param residency via
+# backend assignment specs (params_backend/max_vram strings) instead of the
+# keep_*_on_cpu/offload_params_to_cpu booleans, and the SeFi/MiniT2I/hires/
+# adetailer additions. The ABot-World session/scene C API is unchanged.
 #
 # WebP/WebM support auto-disables: upstream vendors them as git submodules
 # under thirdparty/, which GitHub REF tarballs do not contain
@@ -43,8 +29,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 60bd9de60c6f33afa32a742cac58cf7e8e897242
-    SHA512 8f695bb7c0b7b3535685aa3f8db89be7299f254455e200062e8d5ed4be8f1da8778e77cb27f84ce3b3433524dc32a40d9ccb2c939a56aeadf1ccc8e83c646662
+    REF 107121df3ee9664cd47f80b19add495002d0232f
+    SHA512 f0e4b70f8005b45169c17cb9f097450d00a9f3d9acee046a31c085f1745ae9a8ebb6f5308f5cf260f7b4905932f5ea4fce2f0ccc73e23bbd67e3c1966888bd31
 )
 
 # Even under SD_USE_SYSTEM_GGML the sources reach into one ggml *internal*
@@ -56,8 +42,8 @@ vcpkg_from_github(
 vcpkg_from_github(
     OUT_SOURCE_PATH GGML_SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 7d9ce11cd47f338b361a00e866ffe7c224abedff
-    SHA512 0c7c99a799a6479d8fbf72d47240119da52d5d4b63ee1ecabf05cf84a0317588ee78939d9c6dba5a881d1bb4fc22765ac0991395cfc47204aa0548fe4c937d15
+    REF 9a7d2b36e96a198c1c67c013cafcde4e4c2c60eb
+    SHA512 814f00ef4f0e80a2a536a005800e483a2ba9bbcdc72ac6f98a3561b4d3fa0dee7e401b8fd2a68f60d14ecb3a993b0451d1516e4e9157331bdf55e11712309bb5
 )
 file(REMOVE_RECURSE "${SOURCE_PATH}/ggml")
 file(MAKE_DIRECTORY "${SOURCE_PATH}/ggml")
@@ -68,6 +54,27 @@ file(COPY ${_ggml_tree} DESTINATION "${SOURCE_PATH}/ggml")
 # fail with MSVC iterator-debug-level mismatches.
 set(VCPKG_BUILD_TYPE release)
 
+# The linked ggml config calls find_dependency(CUDAToolkit) when its CUDA
+# feature is enabled. Point that lookup at the same nvcc used to build ggml;
+# otherwise vcpkg's isolated CMake process may inspect /usr/local instead of
+# the installed toolkit and fail before stable-diffusion.cpp configures.
+set(SD_CUDA_TOOLKIT_OPTIONS "")
+if("cuda" IN_LIST FEATURES)
+    find_program(SD_NVCC_EXECUTABLE nvcc
+        HINTS "$ENV{CUDA_PATH}/bin" "$ENV{CUDA_HOME}/bin"
+        PATHS /usr/local/cuda/bin /usr/local/cuda-12.8/bin
+    )
+    if(NOT SD_NVCC_EXECUTABLE)
+        message(FATAL_ERROR "CUDA feature requires nvcc")
+    endif()
+    file(REAL_PATH "${SD_NVCC_EXECUTABLE}" SD_NVCC_REAL)
+    get_filename_component(SD_CUDA_BIN_DIR "${SD_NVCC_REAL}" DIRECTORY)
+    get_filename_component(SD_CUDA_ROOT "${SD_CUDA_BIN_DIR}" DIRECTORY)
+    list(APPEND SD_CUDA_TOOLKIT_OPTIONS
+        "-DCMAKE_CUDA_COMPILER=${SD_NVCC_REAL}"
+        "-DCUDAToolkit_ROOT=${SD_CUDA_ROOT}")
+endif()
+
 # --- Configure & build ---
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
@@ -76,6 +83,7 @@ vcpkg_cmake_configure(
         -DSD_BUILD_EXAMPLES=OFF
         -DSD_BUILD_SHARED_LIBS=OFF
         -DSD_USE_SYSTEM_GGML=ON
+        ${SD_CUDA_TOOLKIT_OPTIONS}
 )
 
 vcpkg_cmake_install()
