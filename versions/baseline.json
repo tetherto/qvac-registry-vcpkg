@@ -1,120 +1,120 @@
 {
-  "default": {
-    "abseil": {
-      "baseline": "20260526.0",
-      "port-version": 0
-    },
-    "benchmark": {
-      "baseline": "1.9.1",
-      "port-version": 0
-    },
-    "bergamot-translator": {
-      "baseline": "1.0.2",
-      "port-version": 0
-    },
-    "cpuinfo": {
-      "baseline": "onnxruntime",
-      "port-version": 0
-    },
-    "fuzztest": {
-      "baseline": "2026-06-29",
-      "port-version": 0
-    },
-    "ggml": {
-      "baseline": "2026-08-11",
-      "port-version": 1
-    },
-    "ggml-speech": {
-      "baseline": "2026-10-06",
-      "port-version": 0
-    },
-    "hip": {
-      "baseline": "7.13.0",
-      "port-version": 0
-    },
-    "intgemm": {
-      "baseline": "1.0.0",
-      "port-version": 0
-    },
-    "llama-cpp": {
-      "baseline": "7248.1.2",
-      "port-version": 0
-    },
-    "marian-dev": {
-      "baseline": "1.0.0",
-      "port-version": 1
-    },
-    "mecab": {
-      "baseline": "2019-09-25",
-      "port-version": 0
-    },
-    "opencl": {
-      "baseline": "2024.10.24",
-      "port-version": 0
-    },
-    "opencl-headers": {
-      "baseline": "2024.10.24",
-      "port-version": 0
-    },
-    "protobuf": {
-      "baseline": "onnxruntime",
-      "port-version": 0
-    },
-    "qvac-fabric": {
-      "baseline": "11018.0.0",
-      "port-version": 0
-    },
-    "qvac-lib-inference-addon-cpp": {
-      "baseline": "1.4.0",
-      "port-version": 0
-    },
-    "qvac-lint-cpp": {
-      "baseline": "1.4.5",
-      "port-version": 0
-    },
-    "re2": {
-      "baseline": "2025-11-05",
-      "port-version": 0
-    },
-    "ruy": {
-      "baseline": "1.0.0",
-      "port-version": 0
-    },
-    "sentencepiece": {
-      "baseline": "0.2.0",
-      "port-version": 2
-    },
-    "simd-utils": {
-      "baseline": "1.0.0",
-      "port-version": 0
-    },
-    "speech-cpp": {
-      "baseline": "2026-10-06",
-      "port-version": 3
-    },
-    "ssplit": {
-      "baseline": "1.0.0",
-      "port-version": 0
-    },
-    "stable-diffusion-cpp": {
-      "baseline": "2026-08-11",
-      "port-version": 4
-    },
-    "tokenizers-cpp": {
-      "baseline": "0.1.1",
-      "port-version": 2
-    },
-    "vcpkg-cmake": {
-      "baseline": "2024-04-23",
-      "port-version": 0
-    },
-    "vcpkg-cmake-config": {
-      "baseline": "2024-05-23",
-      "port-version": 0
-    },
-    "vcpkg-cmake-get-vars": {
-      "baseline": "2024-09-22",
-      "port-version": 0
+    "default": {
+        "abseil": {
+            "baseline": "20260526.0",
+            "port-version": 0
+        },
+        "benchmark": {
+            "baseline": "1.9.1",
+            "port-version": 0
+        },
+        "bergamot-translator": {
+            "baseline": "1.0.2",
+            "port-version": 0
+        },
+        "cpuinfo": {
+            "baseline": "onnxruntime",
+            "port-version": 0
+        },
+        "fuzztest": {
+            "baseline": "2026-06-29",
+            "port-version": 0
+        },
+        "ggml": {
+            "baseline": "2026-08-11",
+            "port-version": 1
+        },
+        "ggml-speech": {
+            "baseline": "2026-10-06",
+            "port-version": 0
+        },
+        "hip": {
+            "baseline": "7.13.0",
+            "port-version": 0
+        },
+        "intgemm": {
+            "baseline": "1.0.0",
+            "port-version": 0
+        },
+        "llama-cpp": {
+            "baseline": "7248.1.2",
+            "port-version": 0
+        },
+        "marian-dev": {
+            "baseline": "1.0.0",
+            "port-version": 1
+        },
+        "mecab": {
+            "baseline": "2019-09-25",
+            "port-version": 0
+        },
+        "opencl": {
+            "baseline": "2024.10.24",
+            "port-version": 0
+        },
+        "opencl-headers": {
+            "baseline": "2024.10.24",
+            "port-version": 0
+        },
+        "protobuf": {
+            "baseline": "onnxruntime",
+            "port-version": 0
+        },
+        "qvac-fabric": {
+            "baseline": "11018.0.0",
+            "port-version": 0
+        },
+        "qvac-lib-inference-addon-cpp": {
+            "baseline": "1.4.0",
+            "port-version": 0
+        },
+        "qvac-lint-cpp": {
+            "baseline": "1.4.5",
+            "port-version": 0
+        },
+        "re2": {
+            "baseline": "2025-11-05",
+            "port-version": 0
+        },
+        "ruy": {
+            "baseline": "1.0.0",
+            "port-version": 0
+        },
+        "sentencepiece": {
+            "baseline": "0.2.0",
+            "port-version": 2
+        },
+        "simd-utils": {
+            "baseline": "1.0.0",
+            "port-version": 0
+        },
+        "speech-cpp": {
+            "baseline": "2026-10-06",
+            "port-version": 4
+        },
+        "ssplit": {
+            "baseline": "1.0.0",
+            "port-version": 0
+        },
+        "stable-diffusion-cpp": {
+            "baseline": "2026-08-11",
+            "port-version": 4
+        },
+        "tokenizers-cpp": {
+            "baseline": "0.1.1",
+            "port-version": 2
+        },
+        "vcpkg-cmake": {
+            "baseline": "2024-04-23",
+            "port-version": 0
+        },
+        "vcpkg-cmake-config": {
+            "baseline": "2024-05-23",
+            "port-version": 0
+        },
+        "vcpkg-cmake-get-vars": {
+            "baseline": "2024-09-22",
+            "port-version": 0
+        }
     }
-  }
 }
