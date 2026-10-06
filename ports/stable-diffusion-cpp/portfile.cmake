@@ -54,27 +54,6 @@ file(COPY ${_ggml_tree} DESTINATION "${SOURCE_PATH}/ggml")
 # fail with MSVC iterator-debug-level mismatches.
 set(VCPKG_BUILD_TYPE release)
 
-# The linked ggml config calls find_dependency(CUDAToolkit) when its CUDA
-# feature is enabled. Point that lookup at the same nvcc used to build ggml;
-# otherwise vcpkg's isolated CMake process may inspect /usr/local instead of
-# the installed toolkit and fail before stable-diffusion.cpp configures.
-set(SD_CUDA_TOOLKIT_OPTIONS "")
-if("cuda" IN_LIST FEATURES)
-    find_program(SD_NVCC_EXECUTABLE nvcc
-        HINTS "$ENV{CUDA_PATH}/bin" "$ENV{CUDA_HOME}/bin"
-        PATHS /usr/local/cuda/bin /usr/local/cuda-12.8/bin
-    )
-    if(NOT SD_NVCC_EXECUTABLE)
-        message(FATAL_ERROR "CUDA feature requires nvcc")
-    endif()
-    file(REAL_PATH "${SD_NVCC_EXECUTABLE}" SD_NVCC_REAL)
-    get_filename_component(SD_CUDA_BIN_DIR "${SD_NVCC_REAL}" DIRECTORY)
-    get_filename_component(SD_CUDA_ROOT "${SD_CUDA_BIN_DIR}" DIRECTORY)
-    list(APPEND SD_CUDA_TOOLKIT_OPTIONS
-        "-DCMAKE_CUDA_COMPILER=${SD_NVCC_REAL}"
-        "-DCUDAToolkit_ROOT=${SD_CUDA_ROOT}")
-endif()
-
 # --- Configure & build ---
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
@@ -83,7 +62,6 @@ vcpkg_cmake_configure(
         -DSD_BUILD_EXAMPLES=OFF
         -DSD_BUILD_SHARED_LIBS=OFF
         -DSD_USE_SYSTEM_GGML=ON
-        ${SD_CUDA_TOOLKIT_OPTIONS}
 )
 
 vcpkg_cmake_install()
