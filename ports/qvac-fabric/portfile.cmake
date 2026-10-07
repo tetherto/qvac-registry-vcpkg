@@ -22,6 +22,8 @@ vcpkg_check_features(
     kleidiai BUILD_KLEIDIAI
     openmp BUILD_OPENMP
     hip-backend BUILD_HIP_BACKEND
+    cuda-backend BUILD_CUDA_BACKEND
+    cuda-jetson-backend BUILD_CUDA_JETSON_BACKEND
     rpc-server BUILD_RPC_SERVER
     rpc-rdma BUILD_RPC_RDMA
 )
@@ -128,6 +130,72 @@ if(VCPKG_TARGET_IS_LINUX AND VCPKG_TARGET_ARCHITECTURE STREQUAL "x64" AND BUILD_
     -DCMAKE_HIP_ARCHITECTURES=gfx1151)
 endif()
 
+# CUDA backend, opt-in via 'cuda-backend': a runtime-loaded module beside Vulkan.
+# vcpkg.json limits it to Linux x64/arm64 and Windows x64 and pulls in
+# gpu-backends; 'cuda-jetson-backend' builds the CUDA 12.6 Jetson Orin variant.
+# Requesting it without nvcc is an error, never a silent skip: a no-CUDA package
+# would share the real CUDA build's binary-cache ABI.
+if(BUILD_CUDA_BACKEND)
+  # vcpkg does not hash the host nvcc, so the expected version lives here and a
+  # new pin changes the port hash. x64 and arm64 ship ggml's default CUDA 13
+  # list plus 80-real; Jetson Orin needs only its own arch. The semicolons stay
+  # escaped so vcpkg passes one argument.
+  if(BUILD_CUDA_JETSON_BACKEND)
+    set(QVAC_CUDA_NVCC_VERSION "12.6.85")
+    set(QVAC_CUDA_ARCHS "87-real")
+    # Ships beside the CUDA 13 module, so it needs its own file name.
+    set(QVAC_CUDA_MODULE_SUFFIX "-jetson")
+  else()
+    set(QVAC_CUDA_NVCC_VERSION "13.0.88")
+    set(QVAC_CUDA_ARCHS "75-virtual\;80-virtual\;80-real\;86-real\;89-real\;90-virtual\;120a-real\;121a-real")
+    set(QVAC_CUDA_MODULE_SUFFIX "")
+  endif()
+  # A provisioned toolkit (CUDACXX, then CUDA_PATH) wins over PATH and
+  # /usr/local/cuda. On Windows vcpkg resets PATH unless VCPKG_KEEP_ENV_VARS
+  # keeps it.
+  if(NOT "$ENV{CUDACXX}" STREQUAL "")
+    set(NVCC_EXECUTABLE "$ENV{CUDACXX}")
+  else()
+    find_program(NVCC_EXECUTABLE nvcc HINTS ENV CUDA_PATH PATHS /usr/local/cuda PATH_SUFFIXES bin REQUIRED)
+  endif()
+  execute_process(
+    COMMAND "${NVCC_EXECUTABLE}" --version
+    OUTPUT_VARIABLE QVAC_NVCC_VERSION_OUT
+    COMMAND_ERROR_IS_FATAL ANY)
+  string(REGEX MATCH "V([0-9]+\\.[0-9]+\\.[0-9]+)" _ "${QVAC_NVCC_VERSION_OUT}")
+  set(QVAC_NVCC_VERSION "${CMAKE_MATCH_1}")
+  # setup-cuda sets QVAC_CUDA_TOOLKIT and the qvac triplets hash it into the
+  # ABI, so with it set only the pinned toolkit may build.
+  if(NOT QVAC_NVCC_VERSION VERSION_EQUAL QVAC_CUDA_NVCC_VERSION)
+    if(NOT "$ENV{QVAC_CUDA_TOOLKIT}" STREQUAL "")
+      message(FATAL_ERROR "qvac-fabric: ${NVCC_EXECUTABLE} is CUDA ${QVAC_NVCC_VERSION}, port expects ${QVAC_CUDA_NVCC_VERSION}")
+    endif()
+    message(WARNING "qvac-fabric: building with unpinned CUDA ${QVAC_NVCC_VERSION}, port expects ${QVAC_CUDA_NVCC_VERSION}. Not for release builds.")
+  endif()
+  message(STATUS "qvac-fabric: cuda-backend ON, nvcc ${NVCC_EXECUTABLE} (V${QVAC_NVCC_VERSION}), arch ${QVAC_CUDA_ARCHS}")
+
+  list(APPEND PLATFORM_OPTIONS
+    -DGGML_CUDA=ON
+    "-DCMAKE_CUDA_ARCHITECTURES=${QVAC_CUDA_ARCHS}"
+    "-DCMAKE_CUDA_COMPILER=${NVCC_EXECUTABLE}"
+    # Pin the kernel set rather than inheriting defaults that can move on a
+    # fabric sync. The same cache identity must always mean the same module.
+    -DGGML_CUDA_GRAPHS=ON
+    -DGGML_CUDA_FA=ON
+    "-DGGML_CUDA_FA_QUANTS=q4_0-q4_0\;q8_0-q8_0\;f16-f16\;bf16-bf16")
+  if(QVAC_CUDA_MODULE_SUFFIX)
+    list(APPEND PLATFORM_OPTIONS "-DGGML_CUDA_MODULE_SUFFIX=${QVAC_CUDA_MODULE_SUFFIX}")
+  endif()
+  if(VCPKG_TARGET_IS_LINUX)
+    list(APPEND PLATFORM_OPTIONS
+    # nvcc defaults to g++ as host compiler, which rejects the clang-only
+    # -stdlib=libc++ link flag the triplet sets.
+    -DCMAKE_CUDA_HOST_COMPILER=clang++
+    # Neither pinned toolkit accepts clang 22 yet.
+    "-DCMAKE_CUDA_FLAGS=-allow-unsupported-compiler")
+  endif()
+endif()
+
 if(VCPKG_TARGET_IS_ANDROID AND BUILD_KLEIDIAI)
   message(STATUS "qvac-fabric: kleidiai feature ON — building with ARM KleidiAI optimized kernels")
   # ggml only vendors KleidiAI via FetchContent; registry vcpkg-cmake sets
@@ -232,6 +300,13 @@ vcpkg_cmake_configure(
 vcpkg_cmake_install()
 vcpkg_cmake_config_fixup(
   PACKAGE_NAME ggml)
+
+if(BUILD_CUDA_BACKEND)
+  set(QVAC_CUDA_MODULE "${CURRENT_PACKAGES_DIR}/lib/${VCPKG_TARGET_SHARED_LIBRARY_PREFIX}qvac-ggml-cuda${QVAC_CUDA_MODULE_SUFFIX}${VCPKG_TARGET_SHARED_LIBRARY_SUFFIX}")
+  if(NOT EXISTS "${QVAC_CUDA_MODULE}")
+    message(FATAL_ERROR "qvac-fabric: expected CUDA module was not installed at ${QVAC_CUDA_MODULE}")
+  endif()
+endif()
 
 if(BUILD_LLAMA)
   vcpkg_cmake_config_fixup(PACKAGE_NAME llama)
