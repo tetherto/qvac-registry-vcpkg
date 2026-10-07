@@ -1,7 +1,6 @@
 {
   "name": "speech-cpp",
-  "version-date": "2026-10-06",
-  "port-version": 4,
+  "version-date": "2026-10-07",
   "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
@@ -9,7 +8,7 @@
     {
       "name": "ggml-speech",
       "default-features": false,
-      "version>=": "2026-10-06"
+      "version>=": "2026-10-07"
     },
     {
       "name": "vcpkg-cmake",
@@ -111,5 +110,6 @@
     "whisper": {
       "description": "Build the whisper engine from third_party/whisper.cpp (upstream whisper.cpp with the QVAC delta; upstream's bundled parakeet is gated off). CMake package: find_package(whisper CONFIG) + whisper::whisper."
     }
-  }
+  },
+  "port-version": 1
 }
