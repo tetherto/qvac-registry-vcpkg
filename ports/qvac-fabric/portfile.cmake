@@ -138,9 +138,11 @@ endif()
 if(BUILD_CUDA_BACKEND)
   # vcpkg does not hash the host nvcc, so the expected version lives here and a
   # new pin changes the port hash. x64 ships ggml's default CUDA 13 list plus
-  # 80-real, minus 121a-real: DGX Spark is arm64 only. arm64 ships only the DGX
-  # Spark arch and Jetson Orin its own, since arm64 PCIe GPU servers are not
-  # supported. The semicolons stay escaped so vcpkg passes one argument.
+  # 80-real, minus 121a-real (DGX Spark is arm64 only) and 80-virtual: every
+  # x64 sm_8x card runs the 80/86/89 cubins, and newer cards JIT the sm_90 PTX.
+  # arm64 ships only the DGX Spark arch and Jetson Orin its own, since arm64
+  # PCIe GPU servers are not supported. The semicolons stay escaped so vcpkg
+  # passes one argument.
   if(BUILD_CUDA_JETSON_BACKEND)
     set(QVAC_CUDA_NVCC_VERSION "12.6.85")
     set(QVAC_CUDA_ARCHS "87-real")
@@ -151,7 +153,7 @@ if(BUILD_CUDA_BACKEND)
     if(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
       set(QVAC_CUDA_ARCHS "121a-real")
     else()
-      set(QVAC_CUDA_ARCHS "75-virtual\;80-virtual\;80-real\;86-real\;89-real\;90-virtual\;120a-real")
+      set(QVAC_CUDA_ARCHS "75-virtual\;80-real\;86-real\;89-real\;90-virtual\;120a-real")
     endif()
     set(QVAC_CUDA_MODULE_SUFFIX "")
   endif()
