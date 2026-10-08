@@ -137,9 +137,10 @@ endif()
 # would share the real CUDA build's binary-cache ABI.
 if(BUILD_CUDA_BACKEND)
   # vcpkg does not hash the host nvcc, so the expected version lives here and a
-  # new pin changes the port hash. x64 and arm64 ship ggml's default CUDA 13
-  # list plus 80-real; Jetson Orin needs only its own arch. The semicolons stay
-  # escaped so vcpkg passes one argument.
+  # new pin changes the port hash. x64 ships ggml's default CUDA 13 list plus
+  # 80-real. arm64 ships only the DGX Spark arch and Jetson Orin its own, since
+  # arm64 PCIe GPU servers are not supported. The semicolons stay escaped so
+  # vcpkg passes one argument.
   if(BUILD_CUDA_JETSON_BACKEND)
     set(QVAC_CUDA_NVCC_VERSION "12.6.85")
     set(QVAC_CUDA_ARCHS "87-real")
@@ -147,7 +148,11 @@ if(BUILD_CUDA_BACKEND)
     set(QVAC_CUDA_MODULE_SUFFIX "-jetson")
   else()
     set(QVAC_CUDA_NVCC_VERSION "13.0.88")
-    set(QVAC_CUDA_ARCHS "75-virtual\;80-virtual\;80-real\;86-real\;89-real\;90-virtual\;120a-real\;121a-real")
+    if(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
+      set(QVAC_CUDA_ARCHS "121a-real")
+    else()
+      set(QVAC_CUDA_ARCHS "75-virtual\;80-virtual\;80-real\;86-real\;89-real\;90-virtual\;120a-real\;121a-real")
+    endif()
     set(QVAC_CUDA_MODULE_SUFFIX "")
   endif()
   # A provisioned toolkit (CUDACXX, then CUDA_PATH) wins over PATH and
