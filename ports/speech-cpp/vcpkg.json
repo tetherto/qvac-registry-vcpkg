@@ -1,7 +1,6 @@
 {
   "name": "speech-cpp",
-  "version-date": "2026-10-07",
-  "port-version": 2,
+  "version-date": "2026-10-09",
   "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
@@ -40,7 +39,7 @@
       "description": "Build the audiogen engine (ACE-Step music generation) from engines/audiogen. CMake package: find_package(audiogen-cpp CONFIG) + audiogen-cpp::audiogen-cpp."
     },
     "coreml": {
-      "description": "Enable the Apple Core ML (Neural Engine) sidecars of every enabled engine that has one: the Parakeet FastConformer encoder (PARAKEET_COREML), the Audio8 codec synthesis stack and the Supertonic vocoder in tts (TTS_CPP_COREML) and the ACE-Step VAE decoder in audiogen (AUDIOGEN_COREML). All presence-driven at runtime: each engine runs its stage on a compiled .mlmodelc found next to the model file and falls back to ggml when it is absent. Combine with the engine features you build; this feature no longer implies parakeet.",
+      "description": "Enable the Apple Core ML (Neural Engine) sidecars of every enabled engine that has one: the Parakeet FastConformer encoder and the MOSS-Transcribe-Diarize audio encoder in parakeet (PARAKEET_COREML); the Audio8 codec synthesis stack, the Supertonic vocoder, the MOSS-TTS codec decoder, the MOSS-SoundEffect DiT and VAE, and the MOSS-Speech speech tokenizer in tts (TTS_CPP_COREML); and the ACE-Step VAE decoder in audiogen (AUDIOGEN_COREML). All presence-driven at runtime: each engine runs its stage on a compiled .mlmodelc found next to the model file and falls back to ggml when it is absent. Combine with the engine features you build; this feature no longer implies parakeet.",
       "supports": "osx | ios"
     },
     "cuda": {
