@@ -193,19 +193,14 @@ if(BUILD_CUDA_BACKEND)
   if(QVAC_CUDA_MODULE_SUFFIX)
     list(APPEND PLATFORM_OPTIONS "-DGGML_CUDA_MODULE_SUFFIX=${QVAC_CUDA_MODULE_SUFFIX}")
   endif()
-  if(VCPKG_TARGET_IS_LINUX)
-    # Neither pinned toolkit accepts clang 22 yet.
-    set(QVAC_CUDA_FLAGS "-allow-unsupported-compiler")
-    if(BUILD_CUDA_JETSON_BACKEND)
-      # ggml compresses the kernels only for CUDA 12.8+, so the 12.6 Jetson
-      # module would otherwise ship them uncompressed.
-      string(APPEND QVAC_CUDA_FLAGS " -Xfatbin=-compress-all")
-    endif()
+  # The CUDA host compiler and -allow-unsupported-compiler come from the
+  # consumer's toolchain, e.g. qvac's linux-clang.cmake.
+  if(VCPKG_TARGET_IS_LINUX AND BUILD_CUDA_JETSON_BACKEND)
+    # ggml compresses the kernels only for CUDA 12.8+, so the 12.6 Jetson
+    # module would otherwise ship them uncompressed. Setting CMAKE_CUDA_FLAGS
+    # replaces the toolchain's CMAKE_CUDA_FLAGS_INIT, so repeat its flag.
     list(APPEND PLATFORM_OPTIONS
-    # nvcc defaults to g++ as host compiler, which rejects the clang-only
-    # -stdlib=libc++ link flag the triplet sets.
-    -DCMAKE_CUDA_HOST_COMPILER=clang++
-    "-DCMAKE_CUDA_FLAGS=${QVAC_CUDA_FLAGS}")
+      "-DCMAKE_CUDA_FLAGS=-allow-unsupported-compiler -Xfatbin=-compress-all")
   endif()
 endif()
 
