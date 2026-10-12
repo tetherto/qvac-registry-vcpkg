@@ -14,8 +14,8 @@
 # (hybrid GGML_BACKEND_DL, see the ggml port).
 #
 # Pins tetherto/qvac-ext-stable-diffusion.cpp commit
-# 107121df3ee9664cd47f80b19add495002d0232f from the 2026-08-11 line,
-# including merged MiniMax-H3 and ConvRot support. Relative to the 2026-07-03
+# 8b3efc68c64befbf01ccc2ac9816ee1cde4dda4f from the 2026-08-11 line,
+# including ESRGAN and ABot memory fit. Relative to the 2026-07-03
 # line this brings the rebased upstream API: bool-returning
 # generate_image()/upscale() with out-params, sd_cancel_generation(),
 # ref_image_args replacing the per-field reference knobs, param residency via
@@ -29,8 +29,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 107121df3ee9664cd47f80b19add495002d0232f
-    SHA512 f0e4b70f8005b45169c17cb9f097450d00a9f3d9acee046a31c085f1745ae9a8ebb6f5308f5cf260f7b4905932f5ea4fce2f0ccc73e23bbd67e3c1966888bd31
+    REF 8b3efc68c64befbf01ccc2ac9816ee1cde4dda4f
+    SHA512 a114759453690616e50757fe8ea8e1d0125875a1c37a908ff6cb714bb8a2aeb289dbc6c01bc9007c724acedaa57e1b81a7ac749fa468507290faa8ee805e6b91
 )
 
 # Even under SD_USE_SYSTEM_GGML the sources reach into one ggml *internal*
