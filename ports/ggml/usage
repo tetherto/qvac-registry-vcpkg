@@ -3,6 +3,9 @@ The package ggml provides CMake integration:
   find_package(ggml CONFIG REQUIRED)
   target_link_libraries(main PRIVATE ggml::ggml)
 
+Windows builds enable LTO. Libraries built with clang-cl require a compatible
+LLVM toolchain and lld-link in the consuming application.
+
 Available vcpkg features:
   metal  - Metal GPU backend (macOS/iOS, auto-enabled on Apple)
   vulkan - Vulkan GPU backend

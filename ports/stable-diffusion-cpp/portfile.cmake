@@ -13,24 +13,16 @@
 # on Android and desktop Linux the GPU backends are dlopen'd modules
 # (hybrid GGML_BACKEND_DL, see the ggml port).
 #
-# Pins tetherto/qvac-ext-stable-diffusion.cpp commit
-# 8b3efc68c64befbf01ccc2ac9816ee1cde4dda4f from the 2026-08-11 line,
-# including ESRGAN and ABot memory fit. Relative to the 2026-07-03
-# line this brings the rebased upstream API: bool-returning
-# generate_image()/upscale() with out-params, sd_cancel_generation(),
-# ref_image_args replacing the per-field reference knobs, param residency via
-# backend assignment specs (params_backend/max_vram strings) instead of the
-# keep_*_on_cpu/offload_params_to_cpu booleans, and the SeFi/MiniT2I/hires/
-# adetailer additions. The ABot-World session/scene C API is unchanged.
-#
+# Windows size optimizations merged into the 2026-08-11 branch:
+# https://github.com/tetherto/qvac-ext-stable-diffusion.cpp/pull/56
 # WebP/WebM support auto-disables: upstream vendors them as git submodules
 # under thirdparty/, which GitHub REF tarballs do not contain
 # (SD_WEBP_DEFAULT/SD_WEBM_DEFAULT fall back to OFF).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 8b3efc68c64befbf01ccc2ac9816ee1cde4dda4f
-    SHA512 a114759453690616e50757fe8ea8e1d0125875a1c37a908ff6cb714bb8a2aeb289dbc6c01bc9007c724acedaa57e1b81a7ac749fa468507290faa8ee805e6b91
+    REF 886c66f60aca623145da6ec6261b02e5728ac109
+    SHA512 7873d4dd395e470c4bb93a08ce2cbbc63e169402eaa0826fd6b2e5411bb0fcd8e480b1990c8706f4e8a6ba3c223ae09e9319992ef330093be7e80e88298f9694
 )
 
 # Even under SD_USE_SYSTEM_GGML the sources reach into one ggml *internal*
@@ -42,8 +34,8 @@ vcpkg_from_github(
 vcpkg_from_github(
     OUT_SOURCE_PATH GGML_SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 9a7d2b36e96a198c1c67c013cafcde4e4c2c60eb
-    SHA512 814f00ef4f0e80a2a536a005800e483a2ba9bbcdc72ac6f98a3561b4d3fa0dee7e401b8fd2a68f60d14ecb3a993b0451d1516e4e9157331bdf55e11712309bb5
+    REF 9f94f330ac196e0a2e3176e798b36226b22091a5
+    SHA512 bee8af038163d1d787a6f3e54625a0a2b4b7e3e4d04ff0a7074d8f29887d35564dbd74750a18d1f08057abc84d2f104dab9877738784356b55a670a351feb13b
 )
 file(REMOVE_RECURSE "${SOURCE_PATH}/ggml")
 file(MAKE_DIRECTORY "${SOURCE_PATH}/ggml")
@@ -54,6 +46,11 @@ file(COPY ${_ggml_tree} DESTINATION "${SOURCE_PATH}/ggml")
 # fail with MSVC iterator-debug-level mismatches.
 set(VCPKG_BUILD_TYPE release)
 
+set(SD_LTO OFF)
+if(VCPKG_TARGET_IS_WINDOWS)
+    set(SD_LTO ON)
+endif()
+
 # --- Configure & build ---
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
@@ -62,6 +59,7 @@ vcpkg_cmake_configure(
         -DSD_BUILD_EXAMPLES=OFF
         -DSD_BUILD_SHARED_LIBS=OFF
         -DSD_USE_SYSTEM_GGML=ON
+        -DSD_LTO=${SD_LTO}
 )
 
 vcpkg_cmake_install()

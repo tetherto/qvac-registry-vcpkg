@@ -16,22 +16,13 @@
 #   cuda   -> GGML_CUDA=ON
 #   opencl -> GGML_OPENCL=ON
 
-# Pins tetherto/qvac-ext-ggml commit
-# 9a7d2b36e96a198c1c67c013cafcde4e4c2c60eb from the 2026-08-11 line.
-# It includes the merged H3 ConvRot work and the two QVAC-23767 fixes:
-# - PR #61: cmake-only, skips the x86 cpu-feats OBJECT helper in hybrid
-#   GGML_BACKEND_DL + GGML_CPU_STATIC builds, where the statically-linked CPU
-#   backend never consults the DL variant score and the un-exported helper
-#   broke install(EXPORT ggml-targets). Required for the desktop-Linux hybrid
-#   mode below.
-# - PR #64: drops a duplicated `case GGML_OP_POOL_2D` in the OpenCL backend
-#   that made ggml-opencl fail to compile (Android is the only OpenCL
-#   consumer in this family).
+# Windows size optimizations merged into the 2026-08-11 branch:
+# https://github.com/tetherto/qvac-ext-ggml/pull/120
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 9a7d2b36e96a198c1c67c013cafcde4e4c2c60eb
-    SHA512 814f00ef4f0e80a2a536a005800e483a2ba9bbcdc72ac6f98a3561b4d3fa0dee7e401b8fd2a68f60d14ecb3a993b0451d1516e4e9157331bdf55e11712309bb5
+    REF 9f94f330ac196e0a2e3176e798b36226b22091a5
+    SHA512 bee8af038163d1d787a6f3e54625a0a2b4b7e3e4d04ff0a7074d8f29887d35564dbd74750a18d1f08057abc84d2f104dab9877738784356b55a670a351feb13b
 )
 
 # --- GPU feature flags ---
@@ -71,6 +62,10 @@ endif()
 
 # --- Platform options ---
 set(PLATFORM_OPTIONS)
+
+if(VCPKG_TARGET_IS_WINDOWS)
+    list(APPEND PLATFORM_OPTIONS -DGGML_LTO=ON)
+endif()
 
 if(VCPKG_TARGET_IS_IOS)
     list(APPEND PLATFORM_OPTIONS -DGGML_BLAS=OFF -DGGML_ACCELERATE=OFF)

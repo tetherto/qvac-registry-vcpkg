@@ -3,6 +3,9 @@ The package stable-diffusion-cpp provides CMake integration:
   find_package(stable-diffusion-cpp CONFIG REQUIRED)
   target_link_libraries(main PRIVATE stable-diffusion::stable-diffusion)
 
+Windows builds enable LTO for the engine and ggml. Libraries built with clang-cl
+require a compatible LLVM toolchain and lld-link in the consuming application.
+
 The following header is available:
   #include <stable-diffusion.h>   // main C API
 
