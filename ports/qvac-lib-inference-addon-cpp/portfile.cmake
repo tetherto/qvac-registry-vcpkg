@@ -1,7 +1,7 @@
 vcpkg_from_git(
   OUT_SOURCE_PATH SOURCE_PATH
   URL https://github.com/tetherto/qvac.git
-  REF 852c10164f61b6121e0f8ea3ed6b83375d2dd5c6
+  REF 35990e64bae8e6fa59b6c4ffb297c8fc838c06e0
 )
 
 vcpkg_check_features(
