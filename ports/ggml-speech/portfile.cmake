@@ -188,6 +188,32 @@ if(QVAC_LINUX_ARM64_DL_CPU OR QVAC_DESKTOP_DL_GPU)
     endif()
 endif()
 
+set(GGML_SPEECH_BUILD_DIR_SUFFIXES rel)
+if(NOT VCPKG_BUILD_TYPE)
+    list(APPEND GGML_SPEECH_BUILD_DIR_SUFFIXES dbg)
+endif()
+
+function(ggml_speech_refuse_hexagon_cache cmake_cache)
+    file(STRINGS "${cmake_cache}" hexagon_entry REGEX "^GGML_HEXAGON:[A-Z]+=")
+    string(REGEX MATCH "^GGML_HEXAGON:[A-Z]+=(.*)$" hexagon_match "${hexagon_entry}")
+    set(hexagon_enabled "${CMAKE_MATCH_1}")
+    if(hexagon_enabled)
+        message(FATAL_ERROR
+            "ggml-speech: ${cmake_cache} has GGML_HEXAGON=${hexagon_enabled}. The Hexagon "
+            "backend and its DSP skeletons (libggml-htp-v*.so) are not released with the "
+            "speech addons, so this port must not build or ship them. Remove the "
+            "GGML_HEXAGON override, for example from the triplet's "
+            "VCPKG_CMAKE_CONFIGURE_OPTIONS.")
+    endif()
+endfunction()
+
+function(ggml_speech_refuse_hexagon_builds)
+    foreach(build_dir_suffix IN LISTS GGML_SPEECH_BUILD_DIR_SUFFIXES)
+        ggml_speech_refuse_hexagon_cache(
+            "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-${build_dir_suffix}/CMakeCache.txt")
+    endforeach()
+endfunction()
+
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
@@ -202,6 +228,7 @@ vcpkg_cmake_configure(
         -DGGML_VULKAN=${GGML_VULKAN}
         -DGGML_CUDA=${GGML_CUDA}
         -DGGML_OPENCL=${GGML_OPENCL}
+        -DGGML_HEXAGON=OFF
         -DGGML_METAL_FUSE_MV_BIAS=${GGML_METAL_FUSE_MV_BIAS}
         -DGGML_LIB_OUTPUT_PREFIX=qvac-speech-
         -DGGML_VULKAN_STRIP_SHADER_PAYLOADS=ON
@@ -210,6 +237,8 @@ vcpkg_cmake_configure(
         ${GGML_CUDA_GRAPHS_OPTION}
         ${PLATFORM_OPTIONS}
 )
+
+ggml_speech_refuse_hexagon_builds()
 
 vcpkg_cmake_install()
 
