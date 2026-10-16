@@ -31,8 +31,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-fabric-speech.cpp
-    REF 6b35542b31a7b87152a7551c936e37e39af2025f
-    SHA512 af1496328ed793e5c85e77c0f186a1005eec8ca0b1bc3d40e785bfd576a6d0786309cd6fda0e1466017a9ba089a2a4925633c4846f33f8164f0be65e8c6cd7cf
+    REF 18949569d8d08fb149c7bbcbaa9007f7d38e93ef
+    SHA512 9c9ad0cc249475b3c298f69551b3060427792092be5d4a256620dd3a62fc011ba8eb68ecee0ecb1f9848bf70e407faa9faff176bd859c3c3cb59d866ee206f8a
     HEAD_REF master
 )
 
@@ -83,6 +83,23 @@ vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
         coreml  TTS_CPP_COREML
         coreml  AUDIOGEN_COREML
 )
+
+set(SPEECH_GGML_CONFIG "${CURRENT_INSTALLED_DIR}/share/ggml/ggml-config.cmake")
+
+function(speech_refuse_hexagon_ggml ggml_config)
+    file(STRINGS "${ggml_config}" hexagon_entry REGEX "^set\\(GGML_HEXAGON \"")
+    string(REGEX MATCH "^set\\(GGML_HEXAGON \"([^\"]*)\"\\)" hexagon_match "${hexagon_entry}")
+    set(hexagon_enabled "${CMAKE_MATCH_1}")
+    if(hexagon_enabled)
+        message(FATAL_ERROR
+            "speech-cpp: the installed ggml-speech was built with GGML_HEXAGON="
+            "${hexagon_enabled} (${ggml_config}). The Hexagon backend is not released "
+            "with the speech addons, so speech-cpp must not be built against it. "
+            "Rebuild ggml-speech without the GGML_HEXAGON override.")
+    endif()
+endfunction()
+
+speech_refuse_hexagon_ggml("${SPEECH_GGML_CONFIG}")
 
 set(PLATFORM_OPTIONS)
 if(NOT VCPKG_TARGET_IS_OSX)
