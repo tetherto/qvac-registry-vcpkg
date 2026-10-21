@@ -31,8 +31,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-fabric-speech.cpp
-    REF 303198cf7a6e7c46c0e6b1be2add68468026793b
-    SHA512 c0c3be68113b23e1f9b70783924d0f75d5ca5a427ad32ce603ae44ce4ad05d078e7ebb0884877ca959f555f7339093a91045db0bd2871b6503d17ff7c7557ff6
+    REF efdce57316738d54987f5ad850c153d9ce576727
+    SHA512 5513658b2f90d5df03174a0d03928337a3f6224309a68c7be98e3ae796ec432142520bf738df97acf8388c07c41ad236a896b91913e2c184f0de03ff5bca10c2
     HEAD_REF master
 )
 
@@ -69,8 +69,8 @@ endif()
 
 # Engine-side GPU gating (the actual backends are compiled into ggml-speech;
 # see the header comment). The coreml feature fans out to every engine that
-# has an Apple Core ML sidecar: the Parakeet encoder, the Audio8 codec
-# synthesis stack (tts) and the ACE-Step VAE decoder (audiogen). Each flag is
+# has an Apple Core ML sidecar: the Parakeet encoder, the Audio8 codec and Parler DAC/decoder
+# synthesis stacks (tts) and the ACE-Step VAE decoder (audiogen). Each flag is
 # read only by its own engine, so the ones of engines that are not enabled go
 # unused by design (MAYBE_UNUSED_VARIABLES below).
 vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
