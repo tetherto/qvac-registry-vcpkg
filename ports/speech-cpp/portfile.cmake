@@ -69,8 +69,8 @@ endif()
 
 # Engine-side GPU gating (the actual backends are compiled into ggml-speech;
 # see the header comment). The coreml feature fans out to every engine that
-# has an Apple Core ML sidecar: the Parakeet encoder, the Audio8 codec and Parler DAC/decoder
-# synthesis stacks (tts) and the ACE-Step VAE decoder (audiogen). Each flag is
+# has an Apple Core ML sidecar: the Parakeet encoder, the Audio8 codec
+# synthesis stack (tts) and the ACE-Step VAE decoder (audiogen). Each flag is
 # read only by its own engine, so the ones of engines that are not enabled go
 # unused by design (MAYBE_UNUSED_VARIABLES below).
 vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
