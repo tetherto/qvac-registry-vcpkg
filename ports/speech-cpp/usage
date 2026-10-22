@@ -25,6 +25,8 @@ GPU backends (fan out to ggml-speech, shared by all engines):
   metal  - Metal (macOS/iOS; default on Apple platforms)
   vulkan - Vulkan (default on Windows/Linux/Android)
   opencl - OpenCL (default on Android)
+  webgpu - WebGPU via Dawn (opt-in everywhere; runtime selection with
+           backend = "webgpu" / --backend webgpu)
 Apple extra (macOS / iOS):
   coreml - Apple Core ML (Neural Engine) sidecars for every enabled engine that
            has one: Parakeet encoder, Audio8 codec synthesis and the Supertonic

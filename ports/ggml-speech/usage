@@ -8,3 +8,4 @@ Available vcpkg features:
   vulkan - Vulkan GPU backend
   cuda   - CUDA GPU backend
   opencl - OpenCL GPU backend
+  webgpu - WebGPU GPU backend (Dawn; opt-in on every platform)

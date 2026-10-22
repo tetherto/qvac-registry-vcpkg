@@ -1,7 +1,7 @@
 {
   "name": "ggml-speech",
-  "version-date": "2026-10-19",
-  "description": "Speech-stack ggml flavour consumed by speech-cpp.",
+  "version-date": "2026-10-20",
+  "description": "Speech-stack ggml flavour consumed by speech-cpp. 2026-10-20: WebGPU backend (webgpu feature on Google Dawn) made usable: loader probes the webgpu module, high-performance adapter, Dawn's Null adapter refused, unaligned tensor I/O and large dispatch grids fixed (qvac-ext-ggml#127, merge a6122941).",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml/tree/speech",
   "license": "MIT",
   "dependencies": [
@@ -50,6 +50,25 @@
         {
           "name": "spirv-headers",
           "version>=": "1.4.341.0"
+        }
+      ]
+    },
+    "webgpu": {
+      "description": "Enable the WebGPU GPU backend (ggml-webgpu on Google Dawn, driven natively through webgpu.h; no browser involved). Opt-in on every platform: Dawn targets Vulkan on Linux/Windows/Android and Metal on Apple. Dawn comes from microsoft/vcpkg's dawn port, which the consumer pins: route dawn, vulkan-headers, vulkan-utility-libraries and vcpkg-get-python-packages to microsoft/vcpkg in vcpkg-configuration.json, override dawn to 20260410.140140 (the newest version the speech-branch backend compiles against), and list dawn as a top-level dependency with default-features false so its Linux x11/gl/gles defaults stay off.",
+      "dependencies": [
+        {
+          "name": "dawn",
+          "default-features": false,
+          "features": [
+            {
+              "name": "metal",
+              "platform": "osx | ios"
+            },
+            {
+              "name": "vulkan",
+              "platform": "(windows & !uwp) | linux | android"
+            }
+          ]
         }
       ]
     }
