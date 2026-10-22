@@ -7,7 +7,6 @@ A [vcpkg](https://vcpkg.io/) custom registry used by QVAC projects. It provides 
 - **QVAC packages**: `qvac-lib-inference-addon-cpp`, `qvac-lint-cpp`
 - **Inference / ML**: `llama-cpp`, `qvac-fabric`, `speech-cpp`, `stable-diffusion-cpp`, `tokenizers-cpp`, `sentencepiece`
 - **ggml flavours**: `ggml`, `ggml-speech`
-- **GPU runtimes**: `dawn` (WebGPU, pinned for `ggml-speech[webgpu]`)
 - **Build / runtime deps**: `vcpkg-cmake`, `vcpkg-cmake-config`, `vcpkg-cmake-get-vars`, `abseil`, `cpuinfo`, `opencl`, `opencl-headers`, `protobuf`, `re2`, and others
 
 Exact versions and baselines are defined in `versions/baseline.json`.
@@ -25,13 +24,31 @@ The ONNX Runtime stack — `onnxruntime`, `onnx`, and the `eigen3`, `pybind11`, 
 | `tts` | Chatterbox, Supertonic, CosyVoice3, Parler, Audio8, LavaSR | `tts-cpp` | `tts-cpp::tts-cpp` |
 | `audiogen` | ACE-Step music generation | `audiogen-cpp` | `audiogen-cpp::audiogen-cpp` |
 
-Backend features (`metal`, `vulkan`, `opencl`, `cuda`, `webgpu`) fan out to the matching `ggml-speech` features, so a manifest entry like the one below resolves one shared `ggml-speech` with unified features. `webgpu` is opt-in on every platform and builds Google Dawn from this registry's `dawn` port (the official port pinned at the version the speech-branch `ggml-webgpu` compiles against, with Linux default features trimmed to Vulkan), so a consumer that enables it must also import `vulkan-headers`, `vulkan-utility-libraries` and `vcpkg-get-python-packages` from microsoft/vcpkg:
+Backend features (`metal`, `vulkan`, `opencl`, `cuda`, `webgpu`) fan out to the matching `ggml-speech` features, so a manifest entry like the one below resolves one shared `ggml-speech` with unified features:
 
 ```json
 {
   "name": "speech-cpp",
   "default-features": false,
   "features": ["whisper", "parakeet", "vulkan"]
+}
+```
+
+`webgpu` is opt-in on every platform and builds Google Dawn from the `dawn` port of microsoft/vcpkg, which this registry does not carry. A consumer that enables it pins Dawn itself:
+
+- Add `dawn`, `vulkan-headers`, `vulkan-utility-libraries` and `vcpkg-get-python-packages` to the microsoft/vcpkg entry's `packages` in `vcpkg-configuration.json`. The override below resolves `dawn` even when that entry's baseline predates the port.
+- Pin `dawn` to `20260410.140140` in the manifest's `overrides`. It is the newest version the speech-branch `ggml-webgpu` compiles against; 20260911 changed the uncaptured-error callback signature.
+- List `dawn` as a top-level dependency with `"default-features": false`. vcpkg only honours that flag in the top-level manifest, and Dawn's Linux defaults (`x11`, `gl`, `gles`) need X11 development headers on the build host. `ggml-speech[webgpu]` still requests the `vulkan` or `metal` feature it needs.
+
+```json
+{
+  "dependencies": [
+    { "name": "dawn", "default-features": false },
+    { "name": "speech-cpp", "default-features": false, "features": ["tts", "webgpu"] }
+  ],
+  "overrides": [
+    { "name": "dawn", "version": "20260410.140140" }
+  ]
 }
 ```
 

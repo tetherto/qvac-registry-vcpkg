@@ -16,10 +16,6 @@
       "baseline": "onnxruntime",
       "port-version": 0
     },
-    "dawn": {
-      "baseline": "20260410.140140",
-      "port-version": 1
-    },
     "fuzztest": {
       "baseline": "2026-06-29",
       "port-version": 0

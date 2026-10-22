@@ -54,7 +54,7 @@
       ]
     },
     "webgpu": {
-      "description": "Enable the WebGPU GPU backend (ggml-webgpu on Google Dawn, driven natively through webgpu.h; no browser involved). Opt-in on every platform: Dawn targets Vulkan on Linux/Windows/Android and Metal on Apple. Dawn comes from this registry's dawn port (the official port pinned at a version the speech-branch backend compiles against, with Linux defaults trimmed to Vulkan); a consumer must import vulkan-headers, vulkan-utility-libraries and vcpkg-get-python-packages from microsoft/vcpkg in its vcpkg-configuration.json.",
+      "description": "Enable the WebGPU GPU backend (ggml-webgpu on Google Dawn, driven natively through webgpu.h; no browser involved). Opt-in on every platform: Dawn targets Vulkan on Linux/Windows/Android and Metal on Apple. Dawn comes from microsoft/vcpkg's dawn port, which the consumer pins: route dawn, vulkan-headers, vulkan-utility-libraries and vcpkg-get-python-packages to microsoft/vcpkg in vcpkg-configuration.json, override dawn to 20260410.140140 (the newest version the speech-branch backend compiles against), and list dawn as a top-level dependency with default-features false so its Linux x11/gl/gles defaults stay off.",
       "dependencies": [
         {
           "name": "dawn",
