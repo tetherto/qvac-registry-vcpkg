@@ -1,7 +1,7 @@
 {
   "name": "ggml-speech",
-  "version-date": "2026-10-20",
-  "description": "Speech-stack ggml flavour consumed by speech-cpp. 2026-10-20: WebGPU backend (webgpu feature on Google Dawn) made usable: loader probes the webgpu module, high-performance adapter, Dawn's Null adapter refused, unaligned tensor I/O and large dispatch grids fixed (qvac-ext-ggml#127, merge a6122941).",
+  "version-date": "2026-10-23",
+  "description": "Speech-stack ggml flavour consumed by speech-cpp. 2026-10-23: the Adreno OpenCL q8_0 prefill GEMM sums its 32-wide blocks in fp32, so a dot product past the fp16 range no longer comes back as inf (qvac-ext-ggml#129); buffer-size projections count backend guard padding through the new ggml_backend_buft_get_buffer_alloc_size (qvac-ext-ggml#128); merge fe6ee5f4.",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml/tree/speech",
   "license": "MIT",
   "dependencies": [
