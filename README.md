@@ -52,6 +52,12 @@ Backend features (`metal`, `vulkan`, `opencl`, `cuda`, `webgpu`) fan out to the 
 }
 ```
 
+For the explicit full MiniMax Core ML route on macOS, use
+`speech-cpp[minimax-coreml]`. This feature includes `audiogen`, enables
+`AUDIOGEN_MINIMAX_COREML`, and leaves the other engines' automatic Core ML
+sidecars disabled. At runtime set both `coreml_profile_dir` and
+`coreml_compute_units`; the full stateful runtime requires macOS 15+.
+
 `speech-cpp` replaced the per-engine `whisper-cpp`, `parakeet-cpp`, `tts-cpp` and `audiogen-cpp` ports, which pinned the same upstream repo at four different commits. Those ports were removed once every consumer had migrated, so manifests that still name them no longer resolve — depend on the matching `speech-cpp` feature instead.
 
 ## Prerequisites

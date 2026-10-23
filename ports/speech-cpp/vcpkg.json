@@ -1,7 +1,7 @@
 {
   "name": "speech-cpp",
   "version-date": "2026-10-23",
-  "port-version": 2,
+  "port-version": 3,
   "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
@@ -68,6 +68,19 @@
             "metal"
           ],
           "platform": "osx | ios"
+        }
+      ]
+    },
+    "minimax-coreml": {
+      "description": "Enable the explicit full MiniMax Core ML runtime on macOS 15+, with CPU_ONLY, CPU_AND_GPU, CPU_AND_NE and ALL policies. Does not enable automatic sidecars in other engines.",
+      "supports": "osx",
+      "dependencies": [
+        {
+          "name": "speech-cpp",
+          "default-features": false,
+          "features": [
+            "audiogen"
+          ]
         }
       ]
     },
