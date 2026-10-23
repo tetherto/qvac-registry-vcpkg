@@ -31,8 +31,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-fabric-speech.cpp
-    REF faed3c8134538de85825561f984e2942bbcc78ef
-    SHA512 dc293c9f526199e2dc807e2304146012f036b5414328cbbe5f1412a2b56c2a2e1bb2942813e6b31a111bab03df6491d8e5ef7e00ebe87a7f3bfd61561326e2ce
+    REF db0d167813f41db0147044e387cfe7a20a761b2c
+    SHA512 d7e987a18e572457a163fda6d14f6621bf1b1cc7389cbd48dae93763f346fd9554429cb541a82cc9413db83eb70a713d47a302843b486ca786c50d76f1955634
     HEAD_REF master
 )
 
@@ -83,6 +83,7 @@ vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
         coreml  PARAKEET_COREML
         coreml  TTS_CPP_COREML
         coreml  AUDIOGEN_COREML
+        minimax-coreml AUDIOGEN_MINIMAX_COREML
 )
 
 set(SPEECH_GGML_CONFIG "${CURRENT_INSTALLED_DIR}/share/ggml/ggml-config.cmake")
@@ -160,6 +161,7 @@ vcpkg_cmake_configure(
         PARAKEET_COREML
         TTS_CPP_COREML
         AUDIOGEN_COREML
+        AUDIOGEN_MINIMAX_COREML
 )
 
 vcpkg_cmake_install()
