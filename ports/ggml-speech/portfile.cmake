@@ -1,8 +1,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF fe6ee5f4b5a0e4a0ea972e354318670494857126
-    SHA512 aebd5fb70af52512ae6669bb5b342b184d8bca4a1b2d8ea8fd1a1ed65470bc3539aac98a5c1bcdd2a2989d87e93d93b8d4b956bb860dd1ad8dc231b4cc2a2034
+    REF 4bebf6cd0e16da44b9efd3c73cf2e18d0ac3940d
+    SHA512 6a6c9b695964adfab868e3006cee64f7456aee0b28d15e45cbeaabd539a4d45bc2d8d9c9ae49ac2641fb31cfb145832b7bd6a8893ed41d6437352cc330db9fd7
     HEAD_REF speech
 )
 
