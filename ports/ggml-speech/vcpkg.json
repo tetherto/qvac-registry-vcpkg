@@ -1,7 +1,7 @@
 {
   "name": "ggml-speech",
-  "version-date": "2026-10-23",
-  "description": "Speech-stack ggml flavour consumed by speech-cpp. 2026-10-23: the Adreno OpenCL q8_0 prefill GEMM sums its 32-wide blocks in fp32, so a dot product past the fp16 range no longer comes back as inf (qvac-ext-ggml#129); buffer-size projections count backend guard padding through the new ggml_backend_buft_get_buffer_alloc_size (qvac-ext-ggml#128); merge fe6ee5f4.",
+  "version-date": "2026-10-26",
+  "description": "Speech-stack ggml flavour consumed by speech-cpp. 2026-10-26: every Adreno OpenCL prefill GEMM (q4_0, q4_1, q5_0, q5_1, q1_0, q4_K, q5_K, q6_K, iq4_nl, q8_0) sums its 32-product blocks in fp32 and recomputes a tile in fp32 when a block sum overflows, so a dot product past the fp16 range no longer comes back as inf (qvac-ext-ggml#132); merge 6eead4c5.",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml/tree/speech",
   "license": "MIT",
   "dependencies": [
