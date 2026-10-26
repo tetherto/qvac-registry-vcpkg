@@ -31,8 +31,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-fabric-speech.cpp
-    REF d4b0c065aac978ff9d11bb4d85bc09b7d06473cb
-    SHA512 12ff47c4cdd57ee1da8c677a71533c4ea57fef0d75b0adb06392cb6678e51854b45a1ff3be99959dd1c5fbd0f20d239f484972ad55057a7ccf0a77aeba35a1f7
+    REF 8d4d54ef8ba27490fff6a50e8549dad1096447fd
+    SHA512 157830190d968ca8dc77db6cefa1ee4e2500170fe35d18a161f358f1e009162ba6f58417257214851a5e42fbcbf435705546ac46c2efad421ff9c669c2a10d29
     HEAD_REF master
 )
 
@@ -57,6 +57,11 @@ foreach(SPEECH_ENGINE IN LISTS SPEECH_ENGINE_FEATURES)
         list(APPEND SPEECH_ENABLED_ENGINES "${SPEECH_ENGINE}")
     endif()
 endforeach()
+
+set(SPEECH_MINIMAX_COREML OFF)
+if(VCPKG_TARGET_IS_OSX AND SPEECH_BUILD_AUDIOGEN)
+    set(SPEECH_MINIMAX_COREML ON)
+endif()
 
 # Unreachable through a default install (the whisper feature is a default);
 # guards a manifest that sets default-features false and picks only backends.
@@ -83,7 +88,6 @@ vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
         coreml  PARAKEET_COREML
         coreml  TTS_CPP_COREML
         coreml  AUDIOGEN_COREML
-        minimax-coreml AUDIOGEN_MINIMAX_COREML
 )
 
 set(SPEECH_GGML_CONFIG "${CURRENT_INSTALLED_DIR}/share/ggml/ggml-config.cmake")
@@ -150,6 +154,7 @@ vcpkg_cmake_configure(
         -DAUDIOGEN_BUILD_LIBRARY=ON
         -DAUDIOGEN_INSTALL=ON
         -DAUDIOGEN_CCACHE=OFF
+        -DAUDIOGEN_MINIMAX_COREML=${SPEECH_MINIMAX_COREML}
         # shared ggml-side knobs the engines forward
         -DGGML_NATIVE=OFF
         -DGGML_OPENMP=OFF
