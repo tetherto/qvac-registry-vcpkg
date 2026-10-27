@@ -8,6 +8,7 @@
 #   include/ggml.h  (+ other ggml public headers)
 #   lib/libggml.a, lib/libggml-base.a, lib/libggml-cpu.a, ...
 #   lib/libqvac-diffusion-ggml-*.so  (dlopen'd GPU backend modules, see below)
+#   lib/qvac-diffusion-ggml-*.dll    (the same modules on Windows)
 #   share/ggml/      (CMake package config)
 #
 # GPU backend selection via vcpkg features:
@@ -16,13 +17,14 @@
 #   cuda   -> GGML_CUDA=ON
 #   opencl -> GGML_OPENCL=ON
 
-# Windows size optimizations merged into the 2026-08-11 branch:
-# https://github.com/tetherto/qvac-ext-ggml/pull/120
+# Windows backend modules against a static ggml core (QVAC-25560), on top of
+# the CUDA device compatibility and backend fallback work from
+# https://github.com/tetherto/qvac-ext-ggml/pull/130
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 9f94f330ac196e0a2e3176e798b36226b22091a5
-    SHA512 bee8af038163d1d787a6f3e54625a0a2b4b7e3e4d04ff0a7074d8f29887d35564dbd74750a18d1f08057abc84d2f104dab9877738784356b55a670a351feb13b
+    REF a98582045925ca61fe908d60eabbae3c62238cad
+    SHA512 92d2d75a54fc0436c0c16f8670f36c52a40cc361583f1bb722154e09d2a4c2ac6b371e797079de072035058d4a634b26e36ca9560c89558632419f3ee8ee5f2a
 )
 
 # --- GPU feature flags ---
@@ -81,14 +83,14 @@ if(VCPKG_TARGET_IS_ANDROID AND "vulkan" IN_LIST FEATURES)
     list(APPEND PLATFORM_OPTIONS -DFETCHCONTENT_FULLY_DISCONNECTED=OFF)
 endif()
 
-# Hybrid backend mode for Android and desktop Linux: GPU backends (Vulkan,
-# OpenCL) are MODULE .so files loaded at runtime via dlopen - the consuming
-# addon carries no libvulkan.so.1 / libOpenCL.so NEEDED dependency, so it
-# loads on hosts without any graphics stack (the GPU module simply fails to
-# dlopen and ggml falls back to CPU).  The CPU backend is statically linked
-# (GGML_CPU_STATIC) so that SD can call ggml_set_f32, ggml_backend_cpu_init,
-# etc. directly at link time.
-if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX)
+# Hybrid backend mode for Android, desktop Linux and Windows: GPU backends
+# (Vulkan, OpenCL) are MODULE .so / .dll files loaded at runtime via dlopen or
+# LoadLibrary - the consuming addon carries no libvulkan.so.1 / libOpenCL.so /
+# vulkan-1.dll import, so it loads on hosts without any graphics stack (the
+# GPU module simply fails to load and ggml falls back to CPU).  The CPU
+# backend is statically linked (GGML_CPU_STATIC) so that SD can call
+# ggml_set_f32, ggml_backend_cpu_init, etc. directly at link time.
+if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR VCPKG_TARGET_IS_WINDOWS)
     list(APPEND PLATFORM_OPTIONS
         -DGGML_BACKEND_DL=ON
         -DGGML_CPU_STATIC=ON
@@ -144,6 +146,19 @@ vcpkg_cmake_configure(
 
 vcpkg_cmake_install()
 
+# Windows DL backend pickup: cmake install() puts the MODULE .dll files in
+# bin/, but the consuming addon stages backends from a lib/ glob, and a
+# static-linkage triplet must not ship a bin/ directory.  Move them.
+if(VCPKG_TARGET_IS_WINDOWS)
+    file(GLOB _backend_dlls "${CURRENT_PACKAGES_DIR}/bin/qvac-diffusion-ggml-*.dll")
+    foreach(_dll IN LISTS _backend_dlls)
+        get_filename_component(_dll_name "${_dll}" NAME)
+        file(RENAME "${_dll}" "${CURRENT_PACKAGES_DIR}/lib/${_dll_name}")
+    endforeach()
+    file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/bin"
+                        "${CURRENT_PACKAGES_DIR}/debug/bin")
+endif()
+
 # Install DL backend .so files for Android and desktop Linux.  ggml builds
 # each backend as a MODULE target but does NOT install them via cmake
 # install().
@@ -182,6 +197,12 @@ file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
 # DL backends are only built for release; debug build produces fewer binaries.
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
+if(VCPKG_TARGET_IS_WINDOWS)
+    # The runtime-loaded backend DLLs are payload of a static-linkage port,
+    # not linked libraries; without this the static-build post-build check
+    # rejects them.
+    set(VCPKG_POLICY_DLLS_IN_STATIC_LIBRARY enabled)
+endif()
 
 file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
 # The 2026-08-11 source tree ships no LICENSE file; install the fork's MIT

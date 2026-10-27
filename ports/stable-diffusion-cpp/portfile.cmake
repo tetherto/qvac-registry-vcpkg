@@ -10,8 +10,8 @@
 #   share/stable-diffusion-cpp/  (CMake package config)
 #
 # GPU backend selection is handled at runtime via ggml's backend registry;
-# on Android and desktop Linux the GPU backends are dlopen'd modules
-# (hybrid GGML_BACKEND_DL, see the ggml port).
+# on Android, desktop Linux and Windows the GPU backends are runtime-loaded
+# modules (hybrid GGML_BACKEND_DL, see the ggml port).
 #
 # Windows size optimizations merged into the 2026-08-11 branch:
 # https://github.com/tetherto/qvac-ext-stable-diffusion.cpp/pull/56
@@ -34,8 +34,8 @@ vcpkg_from_github(
 vcpkg_from_github(
     OUT_SOURCE_PATH GGML_SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 9f94f330ac196e0a2e3176e798b36226b22091a5
-    SHA512 bee8af038163d1d787a6f3e54625a0a2b4b7e3e4d04ff0a7074d8f29887d35564dbd74750a18d1f08057abc84d2f104dab9877738784356b55a670a351feb13b
+    REF a98582045925ca61fe908d60eabbae3c62238cad
+    SHA512 92d2d75a54fc0436c0c16f8670f36c52a40cc361583f1bb722154e09d2a4c2ac6b371e797079de072035058d4a634b26e36ca9560c89558632419f3ee8ee5f2a
 )
 file(REMOVE_RECURSE "${SOURCE_PATH}/ggml")
 file(MAKE_DIRECTORY "${SOURCE_PATH}/ggml")
