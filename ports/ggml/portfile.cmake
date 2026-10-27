@@ -63,6 +63,12 @@ endif()
 # --- Platform options ---
 set(PLATFORM_OPTIONS)
 
+if(VCPKG_TARGET_IS_LINUX AND GGML_CUDA)
+    list(APPEND PLATFORM_OPTIONS
+        "-DCMAKE_PROJECT_ggml_INCLUDE=${CMAKE_CURRENT_LIST_DIR}/linux-cuda-runtime.cmake"
+    )
+endif()
+
 if(VCPKG_TARGET_IS_WINDOWS)
     list(APPEND PLATFORM_OPTIONS -DGGML_LTO=ON)
 endif()
@@ -110,9 +116,9 @@ endif()
 # dlopen fail silently and the GPU backend never registers.  Statically link
 # the C++ runtime into the modules so they are self-contained, matching
 # qvac-fabric's DL modules and how the consuming addons link themselves.  The
-# module<->addon boundary is the C ggml-backend ABI, so per-module libc++
-# copies never exchange C++ objects.  Android ships libc++_shared via the NDK
-# STL instead.
+# module<->addon boundary is the C ggml-backend ABI. Vulkan uses libc++;
+# linux-cuda-runtime.cmake gives nvcc and its private GGML core a static
+# libstdc++ runtime instead. Android ships libc++_shared via the NDK STL.
 if(VCPKG_TARGET_IS_LINUX)
     string(APPEND VCPKG_LINKER_FLAGS " -static-libstdc++")
 endif()

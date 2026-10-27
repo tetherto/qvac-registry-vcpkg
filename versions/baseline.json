@@ -22,7 +22,7 @@
     },
     "ggml": {
       "baseline": "2026-08-11",
-      "port-version": 4
+      "port-version": 5
     },
     "ggml-speech": {
       "baseline": "2026-10-23",
