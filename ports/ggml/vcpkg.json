@@ -31,7 +31,8 @@
   ],
   "features": {
     "cuda": {
-      "description": "Enable CUDA GPU backend"
+      "description": "Enable CUDA GPU backend",
+      "supports": "(linux & (x64 | arm64)) | (windows & x64)"
     },
     "metal": {
       "description": "Enable Metal GPU backend (macOS/iOS)"

@@ -54,7 +54,8 @@ function(qvac_isolate_cuda_runtime)
         target_compile_options(ggml-base-cuda PRIVATE
             $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libstdc++>)
         target_compile_options(ggml-cuda PRIVATE
-            $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libstdc++>)
+            $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libstdc++>
+            $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-stdlib=libstdc++>)
         target_link_options(ggml-cuda PRIVATE -stdlib=libstdc++)
     endif()
     target_link_options(ggml-cuda PRIVATE

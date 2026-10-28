@@ -22,8 +22,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF dca9e57674db917531819afb1709d83afb2dba64
-    SHA512 5df26bfcdd4f3ae72cbd118f9b6639a918086ca21186f787fbf1780e7fba9a97052dd2e5ce6645f6a52981456278926c67d04f25e0f9309c418cc567851a08c3
+    REF 6250f45a43e8361f8eb94b76704814e706255400
+    SHA512 2b48f57cb21c45f1d71df96d7d038b069e112c559b232a36aeec328e9e590d405c21aa1bc7df6b364688b5bb9085281a64941442530e805ed3418c3d297ab953
 )
 
 # --- GPU feature flags ---
@@ -65,6 +65,15 @@ if(VCPKG_TARGET_IS_WINDOWS)
     list(APPEND PLATFORM_OPTIONS -DGGML_LTO=ON)
 endif()
 
+if(GGML_CUDA)
+    # Keep the supported four FlashAttention combinations fixed. This fork's
+    # CUDA graphs implementation is llama.cpp-only and is not used by diffusion.
+    list(APPEND GGML_CUDA_OPTIONS
+        -DGGML_CUDA_FA=ON
+        -DGGML_CUDA_FA_ALL_QUANTS=OFF
+        -DGGML_CUDA_GRAPHS=OFF)
+endif()
+
 if(VCPKG_TARGET_IS_IOS)
     list(APPEND PLATFORM_OPTIONS -DGGML_BLAS=OFF -DGGML_ACCELERATE=OFF)
 endif()
@@ -79,14 +88,14 @@ if(VCPKG_TARGET_IS_ANDROID AND "vulkan" IN_LIST FEATURES)
     list(APPEND PLATFORM_OPTIONS -DFETCHCONTENT_FULLY_DISCONNECTED=OFF)
 endif()
 
-# Hybrid backend mode for Android and desktop Linux: GPU backends (Vulkan,
-# OpenCL) are MODULE .so files loaded at runtime via dlopen - the consuming
+# Hybrid backend mode for Android/Linux and Windows CUDA builds: GPU backends
+# are runtime-loaded modules. The consuming
 # addon carries no libvulkan.so.1 / libOpenCL.so NEEDED dependency, so it
 # loads on hosts without any graphics stack (the GPU module simply fails to
 # dlopen and ggml falls back to CPU).  The CPU backend is statically linked
 # (GGML_CPU_STATIC) so that SD can call ggml_set_f32, ggml_backend_cpu_init,
 # etc. directly at link time.
-if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX)
+if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR (VCPKG_TARGET_IS_WINDOWS AND GGML_CUDA))
     list(APPEND PLATFORM_OPTIONS
         -DGGML_BACKEND_DL=ON
         -DGGML_CPU_STATIC=ON
@@ -142,25 +151,30 @@ vcpkg_cmake_configure(
 
 vcpkg_cmake_install()
 
-# Install DL backend .so files for Android and desktop Linux.  ggml builds
-# each backend as a MODULE target but does NOT install them via cmake
-# install().
-if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX)
-    file(GLOB _backend_sos
-        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libqvac-diffusion-ggml-*.so"
-        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libqvac-ggml-*.so"
-        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libggml-*.so"
-    )
-    if(_backend_sos)
-        file(INSTALL ${_backend_sos} DESTINATION "${CURRENT_PACKAGES_DIR}/lib")
+# Keep runtime modules in lib/, matching qvac-fabric's package layout.
+# Windows CMake exports still reference bin/, so retain that installed copy.
+if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR (VCPKG_TARGET_IS_WINDOWS AND GGML_CUDA))
+    set(backend_prefix "${VCPKG_TARGET_SHARED_LIBRARY_PREFIX}")
+    set(backend_suffix "${VCPKG_TARGET_SHARED_LIBRARY_SUFFIX}")
+    file(GLOB _backend_modules
+        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/${backend_prefix}qvac-diffusion-ggml-*${backend_suffix}"
+        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/Release/${backend_prefix}qvac-diffusion-ggml-*${backend_suffix}")
+    if(_backend_modules)
+        file(INSTALL ${_backend_modules} DESTINATION "${CURRENT_PACKAGES_DIR}/lib")
     endif()
 endif()
 
-# Linux CUDA is a runtime-loaded module. A successful build that omits it
-# must not populate the CUDA feature's binary cache entry. Windows currently
-# links CUDA statically and does not install this module.
-if(VCPKG_TARGET_IS_LINUX AND GGML_CUDA)
-    set(cuda_module "${CURRENT_PACKAGES_DIR}/lib/libqvac-diffusion-ggml-cuda.so")
+if(VCPKG_TARGET_IS_WINDOWS AND GGML_CUDA)
+    # These DLLs are plugins loaded at runtime, not shared dependencies of
+    # the static core, and MODULE targets do not produce import libraries.
+    set(VCPKG_POLICY_DLLS_IN_STATIC_LIBRARY enabled)
+    set(VCPKG_POLICY_DLLS_WITHOUT_LIBS enabled)
+    set(VCPKG_POLICY_ALLOW_DLLS_IN_LIB enabled)
+endif()
+
+# A missing CUDA module must never populate the CUDA feature's cache entry.
+if(GGML_CUDA)
+    set(cuda_module "${CURRENT_PACKAGES_DIR}/lib/${VCPKG_TARGET_SHARED_LIBRARY_PREFIX}qvac-diffusion-ggml-cuda${VCPKG_TARGET_SHARED_LIBRARY_SUFFIX}")
     if(NOT EXISTS "${cuda_module}")
         message(FATAL_ERROR "ggml: expected CUDA module was not installed at ${cuda_module}")
     endif()
