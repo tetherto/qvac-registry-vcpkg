@@ -155,9 +155,10 @@ if(VCPKG_TARGET_IS_WINDOWS)
                         "${CURRENT_PACKAGES_DIR}/debug/bin")
 endif()
 
-# Install DL backend .so files for Android and desktop Linux.  ggml builds
-# each backend as a MODULE target but does NOT install them via cmake
-# install().
+# Install DL backend .so files for Android and desktop Linux.  ggml's own
+# install(TARGETS) already puts each MODULE in lib/ (the Windows block above
+# relies on that); this also copies the matching .so files from the build
+# tree into lib/.
 if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX)
     file(GLOB _backend_sos
         "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libqvac-diffusion-ggml-*.so"
