@@ -16,13 +16,14 @@
 #   cuda   -> GGML_CUDA=ON
 #   opencl -> GGML_OPENCL=ON
 
-# CUDA device compatibility, backend fallback, and VMM reservation recovery:
+# Server CUDA architectures and merged compatibility/fallback support:
+# https://github.com/tetherto/qvac-ext-ggml/pull/141
 # https://github.com/tetherto/qvac-ext-ggml/pull/130
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 1f77a81c373cec71c08261ca470c1388462b97e6
-    SHA512 626757a7cc661c5af17045583e0b519af5d4f66c729da4103348c5ad1ab00a5715b2db2b8975c059dea08d86ddf2309b5bd29524341e6c785284a28ca3f3c168
+    REF cb65c0f798cac66c40fa75f2155d5dcdd7556ad8
+    SHA512 846757cb837a53a934c4f4abf9dfc48c4673ffb27bebcac15de550007465ad7fa64531c30ea5bbfc718470aaf4568b50ba2f31ae2d15ef5c876407a38678a738
 )
 
 # --- GPU feature flags ---
@@ -39,21 +40,12 @@ if("vulkan" IN_LIST FEATURES)
     set(GGML_VULKAN ON)
 endif()
 
-set(GGML_CUDA_COMPILER_OPTION "")
+set(GGML_CUDA_OPTIONS "")
 
 if("cuda" IN_LIST FEATURES)
     set(GGML_CUDA ON)
-    # Locate nvcc explicitly - /usr/local/cuda/bin may not be on the PATH that
-    # vcpkg's isolated cmake process inherits.
-    find_program(NVCC_EXECUTABLE nvcc
-        PATHS /usr/local/cuda/bin /usr/local/cuda-12.8/bin
-        NO_DEFAULT_PATH
-    )
-    if(NOT NVCC_EXECUTABLE)
-        find_program(NVCC_EXECUTABLE nvcc REQUIRED)
-    endif()
-    set(GGML_CUDA_COMPILER_OPTION "-DCMAKE_CUDA_COMPILER=${NVCC_EXECUTABLE}")
-    message(STATUS "CUDA compiler: ${NVCC_EXECUTABLE}")
+    include("${CMAKE_CURRENT_LIST_DIR}/cuda-toolkit.cmake")
+    qvac_ggml_cuda_options(GGML_CUDA_OPTIONS)
 endif()
 
 if("opencl" IN_LIST FEATURES)
@@ -144,7 +136,7 @@ vcpkg_cmake_configure(
         -DGGML_CUDA=${GGML_CUDA}
         -DGGML_OPENCL=${GGML_OPENCL}
         -DGGML_MAX_NAME=128  # stable-diffusion.cpp requires >= 128
-        ${GGML_CUDA_COMPILER_OPTION}
+        ${GGML_CUDA_OPTIONS}
         ${PLATFORM_OPTIONS}
 )
 
@@ -161,6 +153,16 @@ if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX)
     )
     if(_backend_sos)
         file(INSTALL ${_backend_sos} DESTINATION "${CURRENT_PACKAGES_DIR}/lib")
+    endif()
+endif()
+
+# Linux CUDA is a runtime-loaded module. A successful build that omits it
+# must not populate the CUDA feature's binary cache entry. Windows currently
+# links CUDA statically and does not install this module.
+if(VCPKG_TARGET_IS_LINUX AND GGML_CUDA)
+    set(cuda_module "${CURRENT_PACKAGES_DIR}/lib/libqvac-diffusion-ggml-cuda.so")
+    if(NOT EXISTS "${cuda_module}")
+        message(FATAL_ERROR "ggml: expected CUDA module was not installed at ${cuda_module}")
     endif()
 endif()
 

@@ -13,6 +13,8 @@
 # on Android and desktop Linux the GPU backends are dlopen'd modules
 # (hybrid GGML_BACKEND_DL, see the ggml port).
 #
+# Server CUDA build documentation and matching ggml submodule:
+# https://github.com/tetherto/qvac-ext-stable-diffusion.cpp/pull/59
 # Windows size optimizations merged into the 2026-08-11 branch:
 # https://github.com/tetherto/qvac-ext-stable-diffusion.cpp/pull/56
 # WebP/WebM support auto-disables: upstream vendors them as git submodules
@@ -21,8 +23,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 4ec33ca21eec64b9778b6fd16d58e88cd501936d
-    SHA512 9bb29bd7fa19899a131287df21281162a5fbbb703229f3391516728b4466798d56d0b381e7f26faf1dec2b480cce4bfc75c95b936b4b1d2975cc7cebc1b54e28
+    REF 83295ca8a0e03ee385a6072636143fd013ee7be4
+    SHA512 fad71f13c11769121bec168e8f2b1f172c9e136ede1721db1eec61d5b4babdf58740a882cadf13b8a291ce96c42586b57185d01e76ba1f33cce97cfc292c5a27
 )
 
 # Even under SD_USE_SYSTEM_GGML the sources reach into one ggml *internal*
@@ -34,8 +36,8 @@ vcpkg_from_github(
 vcpkg_from_github(
     OUT_SOURCE_PATH GGML_SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 1f77a81c373cec71c08261ca470c1388462b97e6
-    SHA512 626757a7cc661c5af17045583e0b519af5d4f66c729da4103348c5ad1ab00a5715b2db2b8975c059dea08d86ddf2309b5bd29524341e6c785284a28ca3f3c168
+    REF cb65c0f798cac66c40fa75f2155d5dcdd7556ad8
+    SHA512 846757cb837a53a934c4f4abf9dfc48c4673ffb27bebcac15de550007465ad7fa64531c30ea5bbfc718470aaf4568b50ba2f31ae2d15ef5c876407a38678a738
 )
 file(REMOVE_RECURSE "${SOURCE_PATH}/ggml")
 file(MAKE_DIRECTORY "${SOURCE_PATH}/ggml")
