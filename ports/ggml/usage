@@ -12,18 +12,20 @@ Available vcpkg features:
   cuda   - CUDA GPU backend
   opencl - OpenCL GPU backend
 
-Server CUDA builds target:
-  75-virtual;80-virtual;80-real;86-real;89-real;90-virtual;120a-real;121a-real
+Server CUDA builds match qvac-fabric's packaged targets:
+  Linux x64:   75-virtual;80-real;86-real;89-real;90-virtual;120a-real
+  Linux ARM64: 121a-real
 
 The virtual targets contain PTX for driver JIT compilation; real targets
-contain native GPU code. T4 (7.5) is covered by PTX, so it can use CUDA when
-the installed driver/runtime can load the code. This feature does not build
-a separate Jetson CUDA module.
+contain native GPU code. The x64 module includes T4 PTX and native SM80
+code. ARM64 ships only DGX Spark code to keep the npm platform package
+within its size limit. This feature does not build a separate Jetson module.
 
 Release builds use CUDA 13.0.3 (nvcc 13.0.88). With QVAC_CUDA_TOOLKIT set,
 the marker must be 13.0.3-server and nvcc must match. Other local toolkits
->= 12.9 warn and are not release builds. CUDACXX selects nvcc explicitly;
-otherwise CUDA_PATH selects the toolkit before /usr/local/cuda and PATH.
+require >= 12.8 on x64 or >= 12.9 on ARM64 and warn; they are not release
+builds. CUDACXX selects nvcc explicitly; otherwise CUDA_PATH selects the
+toolkit before /usr/local/cuda and PATH.
 Consumer triplets must hash QVAC_CUDA_TOOLKIT with VCPKG_ENV_PASSTHROUGH
 and preserve CUDACXX/CUDA_PATH with VCPKG_ENV_PASSTHROUGH_UNTRACKED.
 

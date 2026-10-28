@@ -2,7 +2,15 @@
 function(qvac_ggml_cuda_options out_options)
     set(expected_nvcc "13.0.88")
     set(expected_toolkit "13.0.3-server")
-    set(archs "75-virtual;80-virtual;80-real;86-real;89-real;90-virtual;120a-real;121a-real")
+    # Match qvac-fabric's packaged CUDA 13 targets. ARM64 ships only Spark
+    # to keep the npm platform package within its size limit.
+    if(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
+        set(archs "121a-real")
+        set(minimum_cuda "12.9")
+    else()
+        set(archs "75-virtual;80-real;86-real;89-real;90-virtual;120a-real")
+        set(minimum_cuda "12.8")
+    endif()
 
     if(NOT "$ENV{QVAC_CUDA_TOOLKIT}" STREQUAL "" AND
        NOT "$ENV{QVAC_CUDA_TOOLKIT}" STREQUAL "${expected_toolkit}")
@@ -40,8 +48,8 @@ function(qvac_ggml_cuda_options out_options)
         if(NOT "$ENV{QVAC_CUDA_TOOLKIT}" STREQUAL "")
             message(FATAL_ERROR "ggml: ${nvcc} is CUDA ${actual_nvcc}, expected ${expected_nvcc}")
         endif()
-        if(actual_nvcc VERSION_LESS "12.9")
-            message(FATAL_ERROR "ggml: server architectures including 121a-real require CUDA 12.9 or newer")
+        if(actual_nvcc VERSION_LESS minimum_cuda)
+            message(FATAL_ERROR "ggml: ${VCPKG_TARGET_ARCHITECTURE} server architectures require CUDA ${minimum_cuda} or newer")
         endif()
         message(WARNING "ggml: unpinned local CUDA ${actual_nvcc}; release builds require ${expected_nvcc}. Not for release builds.")
     endif()
