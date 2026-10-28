@@ -146,15 +146,11 @@ vcpkg_cmake_configure(
 
 vcpkg_cmake_install()
 
-# Windows DL backend pickup: cmake install() puts the MODULE .dll files in
-# bin/, but the consuming addon stages backends from a lib/ glob, and a
-# static-linkage triplet must not ship a bin/ directory.  Move them.
+# Windows DL backends: install(TARGETS) treats a MODULE as a LIBRARY
+# artifact, so the .dll files already land in lib/, where the consuming addon
+# stages them from, and the exported ggml-targets.cmake records that path.
+# A static-linkage triplet must not ship a bin/ directory.
 if(VCPKG_TARGET_IS_WINDOWS)
-    file(GLOB _backend_dlls "${CURRENT_PACKAGES_DIR}/bin/qvac-diffusion-ggml-*.dll")
-    foreach(_dll IN LISTS _backend_dlls)
-        get_filename_component(_dll_name "${_dll}" NAME)
-        file(RENAME "${_dll}" "${CURRENT_PACKAGES_DIR}/lib/${_dll_name}")
-    endforeach()
     file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/bin"
                         "${CURRENT_PACKAGES_DIR}/debug/bin")
 endif()
@@ -199,9 +195,10 @@ file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
 if(VCPKG_TARGET_IS_WINDOWS)
     # The runtime-loaded backend DLLs are payload of a static-linkage port,
-    # not linked libraries; without this the static-build post-build check
-    # rejects them.
+    # not linked libraries, and live in lib/ next to the static archives;
+    # without these the post-build checks flag them.
     set(VCPKG_POLICY_DLLS_IN_STATIC_LIBRARY enabled)
+    set(VCPKG_POLICY_ALLOW_DLLS_IN_LIB enabled)
 endif()
 
 file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
