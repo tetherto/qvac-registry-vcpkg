@@ -1,7 +1,7 @@
 {
   "name": "ggml-speech",
-  "version-date": "2026-10-23",
-  "description": "Speech-stack ggml flavour consumed by speech-cpp. 2026-10-23: the Adreno OpenCL q8_0 prefill GEMM sums its 32-wide blocks in fp32, so a dot product past the fp16 range no longer comes back as inf (qvac-ext-ggml#129); buffer-size projections count backend guard padding through the new ggml_backend_buft_get_buffer_alloc_size (qvac-ext-ggml#128); merge fe6ee5f4.",
+  "version-date": "2026-10-27",
+  "description": "Speech-stack ggml flavour consumed by speech-cpp. 2026-10-27: Metal falls back to separate kernels when gallocr places a fused gate/up SwiGLU mat-vec output over its inputs (qvac-ext-ggml#134), single-query Metal softmax launches up to 8192 threads (#135), Metal copies write to the right destination coordinates and Vulkan rejects unaligned speech-op views (#131), and WebGPU honours GGML_PREC_F32 and runs vec4 matmuls on strided rows (#133, #136); merge 380c5f9f.",
   "homepage": "https://github.com/tetherto/qvac-ext-ggml/tree/speech",
   "license": "MIT",
   "dependencies": [
