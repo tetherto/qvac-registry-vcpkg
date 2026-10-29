@@ -73,6 +73,16 @@ def feature_options(features, platform):
 
 
 class SpeechCppFeatures(unittest.TestCase):
+    def test_hexagon_is_an_explicit_tts_feature(self):
+        default = feature_options(["tts"], "android")
+        requested = feature_options(["tts", "hexagon"], "android")
+        self.assertEqual(default["GGML_HEXAGON"], "OFF")
+        self.assertEqual(requested["GGML_HEXAGON"], "ON")
+        manifest = json.loads((PORT / "vcpkg.json").read_text())
+        dependency = manifest["features"]["hexagon"]["dependencies"][0]
+        self.assertEqual(dependency["name"], "ggml-speech")
+        self.assertIn("hexagon", dependency["features"])
+
     def test_audiogen_enables_full_minimax_coreml_on_macos(self):
         options = feature_options(["audiogen"], "osx")
         self.assertEqual(options.get("AUDIOGEN_MINIMAX_COREML", "OFF"), "ON")

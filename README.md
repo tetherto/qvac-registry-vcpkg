@@ -24,7 +24,7 @@ The ONNX Runtime stack — `onnxruntime`, `onnx`, and the `eigen3`, `pybind11`, 
 | `tts` | Chatterbox, Supertonic, CosyVoice3, Parler, Audio8, LavaSR | `tts-cpp` | `tts-cpp::tts-cpp` |
 | `audiogen` | ACE-Step music generation | `audiogen-cpp` | `audiogen-cpp::audiogen-cpp` |
 
-Backend features (`metal`, `vulkan`, `opencl`, `cuda`, `webgpu`) fan out to the matching `ggml-speech` features, so a manifest entry like the one below resolves one shared `ggml-speech` with unified features:
+Backend features (`metal`, `vulkan`, `opencl`, `cuda`, `webgpu`, `hexagon`) fan out to the matching `ggml-speech` features, so a manifest entry like the one below resolves one shared `ggml-speech` with unified features:
 
 ```json
 {
@@ -51,6 +51,15 @@ Backend features (`metal`, `vulkan`, `opencl`, `cuda`, `webgpu`) fan out to the 
   ]
 }
 ```
+
+`speech-cpp[hexagon]` forwards the opt-in Qualcomm DSP backend to
+`ggml-speech[hexagon]`. Supply compatible `HEXAGON_SDK_ROOT` and
+`HEXAGON_TOOLS_ROOT` build environments. Android ARM64 builds select the
+SDK's Android prebuilt libraries. The port installs all matching
+`libggml-htp-v*.so` DSP skeletons and fails the requested build if none
+are present. Consumers must stage those original filenames alongside their
+runtime backends; enable the feature only for hardware/model combinations
+that have been validated. Default builds do not enable Hexagon.
 
 `speech-cpp[audiogen]` includes the explicit full MiniMax Core ML runtime on
 macOS, enabling `AUDIOGEN_MINIMAX_COREML` alongside ACE-Step and MiniMax.
