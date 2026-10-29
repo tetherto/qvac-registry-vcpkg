@@ -16,7 +16,7 @@
 #   cuda   -> GGML_CUDA=ON
 #   opencl -> GGML_OPENCL=ON
 
-# Server CUDA architectures and merged compatibility/fallback support:
+# Server CUDA architectures (#141) and compatibility/fallback support (#130):
 # https://github.com/tetherto/qvac-ext-ggml/pull/141
 # https://github.com/tetherto/qvac-ext-ggml/pull/130
 vcpkg_from_github(
@@ -115,8 +115,8 @@ endif()
 # files are dlopen'd on end-user machines that may not have libc++ installed
 # (e.g. stock ubuntu-24.04), where an unresolved libc++.so.1 NEEDED makes the
 # dlopen fail silently and the GPU backend never registers.  Statically link
-# the C++ runtime into the modules so they are self-contained, matching
-# qvac-fabric's DL modules and how the consuming addons link themselves.  The
+# the C++ runtime into the modules so they are self-contained. Non-CUDA modules
+# match qvac-fabric's DL modules and the consuming addons. The
 # module<->addon boundary is the C ggml-backend ABI. Vulkan uses libc++;
 # linux-cuda-runtime.cmake gives nvcc and its private GGML core a static
 # libstdc++ runtime instead. Android ships libc++_shared via the NDK STL.

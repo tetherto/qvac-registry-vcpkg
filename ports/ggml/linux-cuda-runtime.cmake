@@ -58,7 +58,15 @@ function(qvac_isolate_cuda_runtime)
             $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-stdlib=libstdc++>)
         target_link_options(ggml-cuda PRIVATE -stdlib=libstdc++)
     endif()
+
+    # The loader resolves only these entry points; backend operations are
+    # returned as function pointers. Hide CUDA internals and weak C++ runtime
+    # instantiations as well as the private core's archive symbols.
+    set(cuda_exports "${CMAKE_CURRENT_BINARY_DIR}/qvac-cuda-exports.map")
+    file(WRITE "${cuda_exports}" "{\n  global: ggml_backend_init; ggml_backend_score;\n  local: *;\n};\n")
+    set_property(TARGET ggml-cuda APPEND PROPERTY LINK_DEPENDS "${cuda_exports}")
     target_link_options(ggml-cuda PRIVATE
+        "LINKER:--version-script=${cuda_exports}"
         -static-libstdc++
         LINKER:--exclude-libs,ALL
         LINKER:-z,defs)
