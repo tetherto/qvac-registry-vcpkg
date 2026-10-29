@@ -22,6 +22,7 @@ vcpkg_check_features(
     kleidiai BUILD_KLEIDIAI
     openmp BUILD_OPENMP
     hip-backend BUILD_HIP_BACKEND
+    webgpu BUILD_WEBGPU
     cuda-backend BUILD_CUDA_BACKEND
     cuda-jetson-backend BUILD_CUDA_JETSON_BACKEND
     rpc-server BUILD_RPC_SERVER
@@ -226,6 +227,18 @@ if (VCPKG_TARGET_IS_ANDROID AND BUILD_GPU_BACKENDS)
   list(APPEND PLATFORM_OPTIONS -DGGML_OPENCL=ON)
 endif()
 
+# WebGPU rides on the dawn port from the official registry (Dawn built from
+# source under the same triplet, so a clang/libc++ triplet never links a
+# libstdc++-built Dawn). Orthogonal to gpu-backends: it is the speech stack's
+# opt-in backend and lands as one more runtime-loaded module under
+# GGML_BACKEND_DL. ggml-webgpu embeds its WGSL shaders with a Python script at
+# configure time, hence the explicit interpreter.
+set(WEBGPU_OPTIONS -DGGML_WEBGPU=OFF)
+if(BUILD_WEBGPU)
+  vcpkg_find_acquire_program(PYTHON3)
+  set(WEBGPU_OPTIONS -DGGML_WEBGPU=ON "-DPython3_EXECUTABLE=${PYTHON3}")
+endif()
+
 if(BUILD_GPU_BACKENDS AND NOT VCPKG_TARGET_IS_OSX AND NOT VCPKG_TARGET_IS_IOS)
   if(VCPKG_TARGET_IS_WINDOWS AND NOT VCPKG_TARGET_IS_MINGW)
     string(APPEND VCPKG_C_FLAGS " /I${CURRENT_INSTALLED_DIR}/include")
@@ -302,6 +315,7 @@ vcpkg_cmake_configure(
     -DLLAMA_ALL_WARNINGS=OFF
     ${LLAMA_OPTIONS}
     ${PLATFORM_OPTIONS}
+    ${WEBGPU_OPTIONS}
     ${FEATURE_OPTIONS}
 )
 
