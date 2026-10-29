@@ -61,7 +61,7 @@
       "port-version": 0
     },
     "qvac-fabric": {
-      "baseline": "11259.1.0",
+      "baseline": "11259.2.0",
       "port-version": 0
     },
     "qvac-lib-inference-addon-cpp": {
@@ -89,7 +89,7 @@
       "port-version": 0
     },
     "speech-cpp": {
-      "baseline": "2026-10-28",
+      "baseline": "2026-10-29",
       "port-version": 1
     },
     "ssplit": {
