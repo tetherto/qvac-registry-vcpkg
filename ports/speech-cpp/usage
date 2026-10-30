@@ -37,10 +37,5 @@ Example consumer manifest dependency:
   { "name": "speech-cpp", "default-features": false,
     "features": ["whisper", "parakeet", "vulkan"] }
 
-  hexagon - Opt-in Qualcomm DSP backend plus matching libggml-htp-v*.so
-            skeletons. Requires a compatible SDK/Tools installation exposed
-            by the build triplet. Stage the DSP skeletons with the host
-            backend and configure DSP_LIBRARY_PATH before discovery.
-
 Whisper's coreml feature enables its encoder with missing-sidecar fallback.
 Use whisper_encoder_on_coreml(ctx) to inspect the loaded native state.

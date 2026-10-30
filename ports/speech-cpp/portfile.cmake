@@ -85,13 +85,29 @@ vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
         opencl  GGML_OPENCL
         cuda    GGML_CUDA
         webgpu  GGML_WEBGPU
-        hexagon GGML_HEXAGON
         coreml  WHISPER_COREML
         coreml  WHISPER_COREML_ALLOW_FALLBACK
         coreml  PARAKEET_COREML
         coreml  TTS_CPP_COREML
         coreml  AUDIOGEN_COREML
 )
+
+set(SPEECH_GGML_CONFIG "${CURRENT_INSTALLED_DIR}/share/ggml/ggml-config.cmake")
+
+function(speech_refuse_hexagon_ggml ggml_config)
+    file(STRINGS "${ggml_config}" hexagon_entry REGEX "^set\\(GGML_HEXAGON \"")
+    string(REGEX MATCH "^set\\(GGML_HEXAGON \"([^\"]*)\"\\)" hexagon_match "${hexagon_entry}")
+    set(hexagon_enabled "${CMAKE_MATCH_1}")
+    if(hexagon_enabled)
+        message(FATAL_ERROR
+            "speech-cpp: the installed ggml-speech was built with GGML_HEXAGON="
+            "${hexagon_enabled} (${ggml_config}). The Hexagon backend is not released "
+            "with the speech addons, so speech-cpp must not be built against it. "
+            "Rebuild ggml-speech without the GGML_HEXAGON override.")
+    endif()
+endfunction()
+
+speech_refuse_hexagon_ggml("${SPEECH_GGML_CONFIG}")
 
 set(PLATFORM_OPTIONS)
 if(NOT VCPKG_TARGET_IS_OSX)
@@ -149,7 +165,6 @@ vcpkg_cmake_configure(
         ${PLATFORM_OPTIONS}
     MAYBE_UNUSED_VARIABLES
         GGML_WEBGPU
-        GGML_HEXAGON
         WHISPER_COREML
         WHISPER_COREML_ALLOW_FALLBACK
         PARAKEET_COREML

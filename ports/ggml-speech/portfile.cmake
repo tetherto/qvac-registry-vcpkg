@@ -11,7 +11,6 @@ set(GGML_VULKAN OFF)
 set(GGML_CUDA   OFF)
 set(GGML_OPENCL OFF)
 set(GGML_WEBGPU OFF)
-set(GGML_HEXAGON OFF)
 set(GGML_METAL_FUSE_MV_BIAS OFF)
 
 if("metal" IN_LIST FEATURES)
@@ -206,18 +205,26 @@ if(NOT VCPKG_BUILD_TYPE)
     list(APPEND GGML_SPEECH_BUILD_DIR_SUFFIXES dbg)
 endif()
 
-set(GGML_HEXAGON_OPTIONS "")
-if("hexagon" IN_LIST FEATURES)
-    set(GGML_HEXAGON ON)
-    foreach(sdk_variable HEXAGON_SDK_ROOT HEXAGON_TOOLS_ROOT)
-        if(DEFINED ENV{${sdk_variable}})
-            list(APPEND GGML_HEXAGON_OPTIONS "-D${sdk_variable}=$ENV{${sdk_variable}}")
-        endif()
-    endforeach()
-    if(VCPKG_TARGET_IS_ANDROID)
-        list(APPEND GGML_HEXAGON_OPTIONS -DPREBUILT_LIB_DIR=android_aarch64)
+function(ggml_speech_refuse_hexagon_cache cmake_cache)
+    file(STRINGS "${cmake_cache}" hexagon_entry REGEX "^GGML_HEXAGON:[A-Z]+=")
+    string(REGEX MATCH "^GGML_HEXAGON:[A-Z]+=(.*)$" hexagon_match "${hexagon_entry}")
+    set(hexagon_enabled "${CMAKE_MATCH_1}")
+    if(hexagon_enabled)
+        message(FATAL_ERROR
+            "ggml-speech: ${cmake_cache} has GGML_HEXAGON=${hexagon_enabled}. The Hexagon "
+            "backend and its DSP skeletons (libggml-htp-v*.so) are not released with the "
+            "speech addons, so this port must not build or ship them. Remove the "
+            "GGML_HEXAGON override, for example from the triplet's "
+            "VCPKG_CMAKE_CONFIGURE_OPTIONS.")
     endif()
-endif()
+endfunction()
+
+function(ggml_speech_refuse_hexagon_builds)
+    foreach(build_dir_suffix IN LISTS GGML_SPEECH_BUILD_DIR_SUFFIXES)
+        ggml_speech_refuse_hexagon_cache(
+            "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-${build_dir_suffix}/CMakeCache.txt")
+    endforeach()
+endfunction()
 
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
@@ -235,8 +242,7 @@ vcpkg_cmake_configure(
         -DGGML_OPENCL=${GGML_OPENCL}
         -DGGML_WEBGPU=${GGML_WEBGPU}
         ${GGML_WEBGPU_OPTIONS}
-        -DGGML_HEXAGON=${GGML_HEXAGON}
-        ${GGML_HEXAGON_OPTIONS}
+        -DGGML_HEXAGON=OFF
         -DGGML_METAL_FUSE_MV_BIAS=${GGML_METAL_FUSE_MV_BIAS}
         -DGGML_LIB_OUTPUT_PREFIX=qvac-speech-
         -DGGML_VULKAN_STRIP_SHADER_PAYLOADS=ON
@@ -246,14 +252,9 @@ vcpkg_cmake_configure(
         ${PLATFORM_OPTIONS}
 )
 
-vcpkg_cmake_install()
+ggml_speech_refuse_hexagon_builds()
 
-if(GGML_HEXAGON)
-    file(GLOB _hexagon_skels "${CURRENT_PACKAGES_DIR}/lib/libggml-htp-v*.so")
-    if(NOT _hexagon_skels)
-        message(FATAL_ERROR "ggml-speech[hexagon]: matching DSP skeletons were not installed")
-    endif()
-endif()
+vcpkg_cmake_install()
 
 # Pick up the MODULE backend .so files ggml builds into the buildtree's
 # bin/ directory (Android dynamic-backend mode). cmake install() doesn't

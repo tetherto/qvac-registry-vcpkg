@@ -24,7 +24,7 @@ The ONNX Runtime stack — `onnxruntime`, `onnx`, and the `eigen3`, `pybind11`, 
 | `tts` | Chatterbox, Supertonic, CosyVoice3, Parler, Audio8, LavaSR | `tts-cpp` | `tts-cpp::tts-cpp` |
 | `audiogen` | ACE-Step music generation | `audiogen-cpp` | `audiogen-cpp::audiogen-cpp` |
 
-Backend features (`metal`, `vulkan`, `opencl`, `cuda`, `webgpu`, `hexagon`) fan out to the matching `ggml-speech` features, so a manifest entry like the one below resolves one shared `ggml-speech` with unified features:
+Backend features (`metal`, `vulkan`, `opencl`, `cuda`, `webgpu`) fan out to the matching `ggml-speech` features, so a manifest entry like the one below resolves one shared `ggml-speech` with unified features:
 
 ```json
 {
@@ -131,16 +131,8 @@ VCPKG_ROOT=/path/to/vcpkg python3 -m unittest discover -s tests -p test_speech_c
 | 3 | List needed packages in `"packages"` or use `["*"]` to allow all. |
 | 4 | Add the ports you need in your `vcpkg.json` or install them via the vcpkg CLI. |
 
-## Optional ASR acceleration
+## Optional Whisper Core ML acceleration
 
 `speech-cpp[whisper,coreml]` enables the Whisper encoder and retains fallback
 when its optional sidecar is absent. The native loaded state is available
 through `whisper_encoder_on_coreml`.
-
-`ggml-speech[hexagon]` builds the host backend and matching DSP skeletons from
-one pinned source. `speech-cpp[hexagon]` forwards that feature. Configure the
-compatible Qualcomm SDK and Tools through the triplet's tracked
-`VCPKG_ENV_PASSTHROUGH` entries for `HEXAGON_SDK_ROOT` and `HEXAGON_TOOLS_ROOT`.
-The consumer must ship all installed `libggml-htp-v*.so` files beside the host
-backend, make that directory visible to FastRPC, and validate actual HTP
-execution on a compatible device. The feature is off by default.
