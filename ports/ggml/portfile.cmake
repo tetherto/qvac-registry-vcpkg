@@ -8,6 +8,7 @@
 #   include/ggml.h  (+ other ggml public headers)
 #   lib/libggml.a, lib/libggml-base.a, lib/libggml-cpu.a, ...
 #   lib/libqvac-diffusion-ggml-*.so  (dlopen'd GPU backend modules, see below)
+#   lib/qvac-diffusion-ggml-*.dll    (the same modules on Windows)
 #   share/ggml/      (CMake package config)
 #
 # GPU backend selection via vcpkg features:
@@ -88,14 +89,13 @@ if(VCPKG_TARGET_IS_ANDROID AND "vulkan" IN_LIST FEATURES)
     list(APPEND PLATFORM_OPTIONS -DFETCHCONTENT_FULLY_DISCONNECTED=OFF)
 endif()
 
-# Hybrid backend mode for Android/Linux and Windows CUDA builds: GPU backends
-# are runtime-loaded modules. The consuming
-# addon carries no libvulkan.so.1 / libOpenCL.so NEEDED dependency, so it
-# loads on hosts without any graphics stack (the GPU module simply fails to
-# dlopen and ggml falls back to CPU).  The CPU backend is statically linked
-# (GGML_CPU_STATIC) so that SD can call ggml_set_f32, ggml_backend_cpu_init,
-# etc. directly at link time.
-if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR (VCPKG_TARGET_IS_WINDOWS AND GGML_CUDA))
+# Hybrid backend mode for Android, desktop Linux and Windows: GPU backends
+# are runtime-loaded modules. The consuming addon carries no libvulkan.so.1 /
+# libOpenCL.so / vulkan-1.dll import, so it loads on hosts without any
+# graphics stack (the GPU module simply fails to load and ggml falls back to
+# CPU).  The CPU backend is statically linked (GGML_CPU_STATIC) so that SD
+# can call ggml_set_f32, ggml_backend_cpu_init, etc. directly at link time.
+if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR VCPKG_TARGET_IS_WINDOWS)
     list(APPEND PLATFORM_OPTIONS
         -DGGML_BACKEND_DL=ON
         -DGGML_CPU_STATIC=ON
@@ -153,7 +153,7 @@ vcpkg_cmake_install()
 
 # Keep runtime modules in lib/, matching qvac-fabric's package layout.
 # Windows CMake exports still reference bin/, so retain that installed copy.
-if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR (VCPKG_TARGET_IS_WINDOWS AND GGML_CUDA))
+if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR VCPKG_TARGET_IS_WINDOWS)
     set(backend_prefix "${VCPKG_TARGET_SHARED_LIBRARY_PREFIX}")
     set(backend_suffix "${VCPKG_TARGET_SHARED_LIBRARY_SUFFIX}")
     file(GLOB _backend_modules
@@ -164,7 +164,7 @@ if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR (VCPKG_TARGET_IS_WINDOWS 
     endif()
 endif()
 
-if(VCPKG_TARGET_IS_WINDOWS AND GGML_CUDA)
+if(VCPKG_TARGET_IS_WINDOWS)
     # These DLLs are plugins loaded at runtime, not shared dependencies of
     # the static core, and MODULE targets do not produce import libraries.
     set(VCPKG_POLICY_DLLS_IN_STATIC_LIBRARY enabled)
