@@ -7,12 +7,13 @@
 #   speech-cpp[audiogen]  -> engines/audiogen        (package `audiogen-cpp`)
 #
 # The repo-root CMakeLists.txt is the superbuild this port drives: it resolves
-# ONE system ggml (find_package(ggml) from the ggml-speech port) and hands it
-# to every enabled engine, so the whole stack shares a single ggml pin — the
-# ggml/ tree vendored inside the whisper subtree is never compiled. Backend
-# selection (metal / vulkan / opencl / cuda) is therefore expressed purely as
-# ggml-speech features in vcpkg.json; the GGML_* flags passed below only steer
-# engine-side gating (e.g. which GPU paths the engines consider validated).
+# ONE system ggml (find_package(ggml) from the qvac-fabric port, the ggml the
+# LLM stack ships) and hands it to every enabled engine, so the whole stack
+# shares a single ggml pin — the ggml/ tree vendored inside the whisper subtree
+# is never compiled. Backend selection (metal / vulkan / opencl / cuda / webgpu)
+# is therefore expressed purely as qvac-fabric features in vcpkg.json; the
+# GGML_* flags passed below only steer engine-side gating (e.g. which GPU paths
+# the engines consider validated).
 #
 # Upstream whisper.cpp v1.9.1+ ships its own C-API `parakeet` (lib/libparakeet.*,
 # lib/cmake/parakeet/, parakeet.pc) which collides with engines/parakeet. The
@@ -72,7 +73,7 @@ if (NOT SPEECH_ENABLED_ENGINES)
         "features: ${SPEECH_ENGINE_FEATURE_LIST}.")
 endif()
 
-# Engine-side GPU gating (the actual backends are compiled into ggml-speech;
+# Engine-side GPU gating (the actual backends are compiled into qvac-fabric;
 # see the header comment). The coreml feature fans out to every engine that
 # has an Apple Core ML sidecar: the Parakeet encoder, the Audio8 codec
 # synthesis stack (tts) and the ACE-Step VAE decoder (audiogen). Each flag is
@@ -98,10 +99,10 @@ function(speech_refuse_hexagon_ggml ggml_config)
     set(hexagon_enabled "${CMAKE_MATCH_1}")
     if(hexagon_enabled)
         message(FATAL_ERROR
-            "speech-cpp: the installed ggml-speech was built with GGML_HEXAGON="
+            "speech-cpp: the installed qvac-fabric ggml was built with GGML_HEXAGON="
             "${hexagon_enabled} (${ggml_config}). The Hexagon backend is not released "
             "with the speech addons, so speech-cpp must not be built against it. "
-            "Rebuild ggml-speech without the GGML_HEXAGON override.")
+            "Rebuild qvac-fabric without the GGML_HEXAGON override.")
     endif()
 endfunction()
 

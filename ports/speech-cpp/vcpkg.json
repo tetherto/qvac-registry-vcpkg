@@ -1,15 +1,15 @@
 {
   "name": "speech-cpp",
   "version-date": "2026-10-29",
-  "port-version": 1,
-  "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
+  "port-version": 2,
+  "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency (the qvac-fabric port, the same ggml the LLM stack ships) and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
   "dependencies": [
     {
-      "name": "ggml-speech",
+      "name": "qvac-fabric",
       "default-features": false,
-      "version>=": "2026-10-27"
+      "version>=": "11259.2.0#1"
     },
     {
       "name": "vcpkg-cmake",
@@ -44,42 +44,42 @@
       "supports": "osx | ios"
     },
     "cuda": {
-      "description": "Enable CUDA GPU acceleration for all enabled engines (Linux / Windows on NVIDIA, via ggml-speech[cuda]). Needs nvcc on the build host; at runtime CUDA engages only where the NVIDIA driver and the CUDA 13 runtime libraries (cudart, cuBLAS) both resolve, and devices without compiled kernels are skipped in favor of Vulkan or CPU.",
+      "description": "Enable CUDA GPU acceleration for all enabled engines (Linux / Windows on NVIDIA, via qvac-fabric[cuda-backend]). Needs nvcc on the build host; at runtime CUDA engages only where the NVIDIA driver and the CUDA runtime libraries resolve, and devices without compiled kernels are skipped in favor of Vulkan or CPU.",
       "supports": "!osx & !ios & !android",
       "dependencies": [
         {
-          "name": "ggml-speech",
+          "name": "qvac-fabric",
           "default-features": false,
           "features": [
-            "cuda"
+            "cuda-backend"
           ],
           "platform": "!osx & !ios & !android"
         }
       ]
     },
     "metal": {
-      "description": "Enable Metal GPU acceleration for all enabled engines (macOS / iOS, via ggml-speech[metal]).",
+      "description": "Enable Metal GPU acceleration for all enabled engines (macOS / iOS, via qvac-fabric[gpu-backends], which builds Metal on Apple platforms).",
       "supports": "osx | ios",
       "dependencies": [
         {
-          "name": "ggml-speech",
+          "name": "qvac-fabric",
           "default-features": false,
           "features": [
-            "metal"
+            "gpu-backends"
           ],
           "platform": "osx | ios"
         }
       ]
     },
     "opencl": {
-      "description": "Enable OpenCL GPU acceleration for all enabled engines (Android / Adreno, via ggml-speech[opencl]).",
+      "description": "Enable OpenCL GPU acceleration for all enabled engines (Android / Adreno, via qvac-fabric[gpu-backends], which builds OpenCL alongside Vulkan on Android).",
       "supports": "android",
       "dependencies": [
         {
-          "name": "ggml-speech",
+          "name": "qvac-fabric",
           "default-features": false,
           "features": [
-            "opencl"
+            "gpu-backends"
           ],
           "platform": "android"
         }
@@ -95,24 +95,24 @@
       ]
     },
     "vulkan": {
-      "description": "Enable Vulkan GPU acceleration for all enabled engines (Linux / Windows / Android; Apple platforms use the metal feature instead, via ggml-speech[vulkan]).",
+      "description": "Enable Vulkan GPU acceleration for all enabled engines (Linux / Windows / Android; Apple platforms use the metal feature instead, via qvac-fabric[gpu-backends]).",
       "supports": "!osx & !ios",
       "dependencies": [
         {
-          "name": "ggml-speech",
+          "name": "qvac-fabric",
           "default-features": false,
           "features": [
-            "vulkan"
+            "gpu-backends"
           ],
           "platform": "!osx & !ios"
         }
       ]
     },
     "webgpu": {
-      "description": "Enable the WebGPU (Dawn) GPU acceleration for all enabled engines, via ggml-speech[webgpu]. Opt-in on every platform, selected at runtime with the engines' backend = \"webgpu\" option or a --backend webgpu CLI flag. See the ggml-speech feature for the official-registry ports (dawn and its dependencies) a consumer has to import.",
+      "description": "Enable the WebGPU (Dawn) GPU acceleration for all enabled engines, via qvac-fabric[webgpu]. Opt-in on every platform, selected at runtime with the engines' backend = \"webgpu\" option or a --backend webgpu CLI flag. See the qvac-fabric feature for the official-registry ports (dawn and its dependencies) a consumer has to import.",
       "dependencies": [
         {
-          "name": "ggml-speech",
+          "name": "qvac-fabric",
           "default-features": false,
           "features": [
             "webgpu"
