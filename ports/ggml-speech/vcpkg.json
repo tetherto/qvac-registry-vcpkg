@@ -71,6 +71,10 @@
           ]
         }
       ]
+    },
+    "hexagon": {
+      "description": "Opt-in Qualcomm Hexagon backend and all matching libggml-htp-v*.so DSP skeletons. The build host must provide HEXAGON_SDK_ROOT and HEXAGON_TOOLS_ROOT through its triplet environment; host and DSP binaries are built from the same pinned ggml revision."
     }
-  }
+  },
+  "port-version": 1
 }

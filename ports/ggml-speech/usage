@@ -9,3 +9,8 @@ Available vcpkg features:
   cuda   - CUDA GPU backend
   opencl - OpenCL GPU backend
   webgpu - WebGPU GPU backend (Dawn; opt-in on every platform)
+
+Hexagon is opt-in with ggml-speech[hexagon]. Set compatible HEXAGON_SDK_ROOT
+and HEXAGON_TOOLS_ROOT on the build host. Stage every installed
+libggml-htp-v*.so next to the application backends using its original name.
+Requested Hexagon builds fail if DSP skeleton assets are absent.

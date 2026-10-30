@@ -105,6 +105,30 @@ class SpeechCppFeatures(unittest.TestCase):
         self.assertEqual(options.get("AUDIOGEN_MINIMAX_COREML", "OFF"), "ON")
         self.assertEqual(options["AUDIOGEN_COREML"], "ON")
 
+    def test_whisper_coreml_keeps_missing_sidecar_fallback(self):
+        for platform in ("osx", "ios"):
+            with self.subTest(platform=platform):
+                options = feature_options(["whisper", "parakeet", "coreml"], platform)
+                self.assertEqual(options["WHISPER_COREML"], "ON")
+                self.assertEqual(options["WHISPER_COREML_ALLOW_FALLBACK"], "ON")
+                self.assertEqual(options["PARAKEET_COREML"], "ON")
+        plain = feature_options(["whisper"], "linux")
+        self.assertEqual(plain["WHISPER_COREML"], "OFF")
+        self.assertEqual(plain["WHISPER_COREML_ALLOW_FALLBACK"], "OFF")
+
+    def test_optional_backends_do_not_change_default_builds(self):
+        plain = feature_options(["whisper", "parakeet"], "android")
+        self.assertEqual(plain["GGML_HEXAGON"], "OFF")
+        self.assertEqual(plain["GGML_WEBGPU"], "OFF")
+        for feature, flag in (("webgpu", "GGML_WEBGPU"), ("hexagon", "GGML_HEXAGON")):
+            enabled = feature_options(["whisper", "parakeet", feature], "android")
+            self.assertEqual(enabled[flag], "ON")
+            manifest = json.loads((PORT / "vcpkg.json").read_text())
+            dependency = manifest["features"][feature]["dependencies"][0]
+            self.assertEqual(dependency["name"], "ggml-speech")
+            self.assertFalse(dependency["default-features"])
+            self.assertEqual(dependency["features"], [feature])
+
     def test_minimax_does_not_require_a_separate_feature(self):
         manifest = json.loads((PORT / "vcpkg.json").read_text())
         self.assertIn("audiogen", manifest["features"])

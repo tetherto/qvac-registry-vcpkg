@@ -31,8 +31,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-fabric-speech.cpp
-    REF 9ed06a668923b1ea3f68ad28614228aa1156223e
-    SHA512 8c0534ddbc6b292452eb20521229f18370411cf725dfe545bc45ecbe0d84dcb09d09d15db99401462ea93222a95def3d573731650541c503c5963564f3976a25
+    REF aac16cc4880daf70e9e7b69be637b64b80554b1d
+    SHA512 d2757d6ee7e14abf3d42d6b1ab8d445fab1c0568a57cb073b8d6c87d94a43f4fb33b636c52e5e5694f0891e6536cd50afd5b016df4e96b2ff98218a0faf9540c
     HEAD_REF master
 )
 
@@ -85,27 +85,13 @@ vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
         opencl  GGML_OPENCL
         cuda    GGML_CUDA
         webgpu  GGML_WEBGPU
+        hexagon GGML_HEXAGON
+        coreml  WHISPER_COREML
+        coreml  WHISPER_COREML_ALLOW_FALLBACK
         coreml  PARAKEET_COREML
         coreml  TTS_CPP_COREML
         coreml  AUDIOGEN_COREML
 )
-
-set(SPEECH_GGML_CONFIG "${CURRENT_INSTALLED_DIR}/share/ggml/ggml-config.cmake")
-
-function(speech_refuse_hexagon_ggml ggml_config)
-    file(STRINGS "${ggml_config}" hexagon_entry REGEX "^set\\(GGML_HEXAGON \"")
-    string(REGEX MATCH "^set\\(GGML_HEXAGON \"([^\"]*)\"\\)" hexagon_match "${hexagon_entry}")
-    set(hexagon_enabled "${CMAKE_MATCH_1}")
-    if(hexagon_enabled)
-        message(FATAL_ERROR
-            "speech-cpp: the installed ggml-speech was built with GGML_HEXAGON="
-            "${hexagon_enabled} (${ggml_config}). The Hexagon backend is not released "
-            "with the speech addons, so speech-cpp must not be built against it. "
-            "Rebuild ggml-speech without the GGML_HEXAGON override.")
-    endif()
-endfunction()
-
-speech_refuse_hexagon_ggml("${SPEECH_GGML_CONFIG}")
 
 set(PLATFORM_OPTIONS)
 if(NOT VCPKG_TARGET_IS_OSX)
@@ -163,6 +149,9 @@ vcpkg_cmake_configure(
         ${PLATFORM_OPTIONS}
     MAYBE_UNUSED_VARIABLES
         GGML_WEBGPU
+        GGML_HEXAGON
+        WHISPER_COREML
+        WHISPER_COREML_ALLOW_FALLBACK
         PARAKEET_COREML
         TTS_CPP_COREML
         AUDIOGEN_COREML

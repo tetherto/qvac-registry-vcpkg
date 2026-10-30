@@ -1,7 +1,7 @@
 {
   "name": "speech-cpp",
   "version-date": "2026-10-30",
-  "port-version": 0,
+  "port-version": 1,
   "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
@@ -9,7 +9,7 @@
     {
       "name": "ggml-speech",
       "default-features": false,
-      "version>=": "2026-10-27"
+      "version>=": "2026-10-27#1"
     },
     {
       "name": "vcpkg-cmake",
@@ -40,7 +40,7 @@
       "description": "Build ACE-Step and MiniMax music generation from engines/audiogen, including the explicit MiniMax Core ML runtime on macOS (runtime requires macOS 15+). CMake package: find_package(audiogen-cpp CONFIG) + audiogen-cpp::audiogen-cpp."
     },
     "coreml": {
-      "description": "Enable the Apple Core ML (Neural Engine) sidecars of every enabled engine that has one: the Parakeet FastConformer encoder, the Nemotron 3 Diarization and Sortformer v2.1 whole-network diarizers, and the MOSS-Transcribe-Diarize audio encoder in parakeet (PARAKEET_COREML); the Audio8 codec synthesis stack, the Supertonic vocoder, the Chatterbox S3Gen encoder, CFM and HiFT, the CosyVoice3 LM, flow frontend/decoder, F0 predictor and HiFT vocoder, the MOSS-TTS codec decoder, the MOSS-SoundEffect DiT and VAE, the MOSS-Speech speech tokenizer, and explicit LavaSR denoiser/enhancer models in tts (TTS_CPP_COREML); and the ACE-Step VAE decoder in audiogen (AUDIOGEN_COREML). Runtime model selection and fallback are engine-specific; LavaSR requires both an explicit compiled model path and a compute policy. Combine with the engine features you build; this feature no longer implies parakeet.",
+      "description": "Enable the Apple Core ML (Neural Engine) sidecars of every enabled engine that has one: the Whisper encoder with fallback when no matching sidecar is available (WHISPER_COREML and WHISPER_COREML_ALLOW_FALLBACK); the Parakeet FastConformer encoder, the Nemotron 3 Diarization and Sortformer v2.1 whole-network diarizers, and the MOSS-Transcribe-Diarize audio encoder in parakeet (PARAKEET_COREML); the Audio8 codec synthesis stack, the Supertonic vocoder, the Chatterbox S3Gen encoder, CFM and HiFT, the CosyVoice3 LM, flow frontend/decoder, F0 predictor and HiFT vocoder, the MOSS-TTS codec decoder, the MOSS-SoundEffect DiT and VAE, the MOSS-Speech speech tokenizer, and explicit LavaSR denoiser/enhancer models in tts (TTS_CPP_COREML); and the ACE-Step VAE decoder in audiogen (AUDIOGEN_COREML). Runtime model selection and fallback are engine-specific; LavaSR requires both an explicit compiled model path and a compute policy. Combine with the engine features you build; this feature no longer implies parakeet.",
       "supports": "osx | ios"
     },
     "cuda": {
@@ -122,6 +122,18 @@
     },
     "whisper": {
       "description": "Build the whisper engine from third_party/whisper.cpp (upstream whisper.cpp with the QVAC delta; upstream's bundled parakeet is gated off). CMake package: find_package(whisper CONFIG) + whisper::whisper."
+    },
+    "hexagon": {
+      "description": "Opt-in Qualcomm Hexagon DSP backend, built with its matching DSP skeletons through ggml-speech[hexagon]. Requires a compatible Hexagon SDK and Tools installation on the build host.",
+      "dependencies": [
+        {
+          "name": "ggml-speech",
+          "default-features": false,
+          "features": [
+            "hexagon"
+          ]
+        }
+      ]
     }
   }
 }
