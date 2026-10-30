@@ -52,6 +52,19 @@ Backend features (`metal`, `vulkan`, `opencl`, `cuda`, `webgpu`) fan out to the 
 }
 ```
 
+`speech-cpp[audiogen]` includes the explicit full MiniMax Core ML runtime on
+macOS, enabling `AUDIOGEN_MINIMAX_COREML` alongside ACE-Step and MiniMax.
+At runtime set both `coreml_profile_dir` and `coreml_compute_units`; the full
+stateful runtime requires macOS 15+. Linux, Windows and mobile builds keep
+this runtime disabled. The existing `coreml` feature still controls the
+engines' automatic sidecars independently.
+
+Run the speech feature-routing regression tests with CMake and vcpkg installed:
+
+```bash
+VCPKG_ROOT=/path/to/vcpkg python3 -m unittest discover -s tests -p test_speech_cpp_features.py
+```
+
 `speech-cpp` replaced the per-engine `whisper-cpp`, `parakeet-cpp`, `tts-cpp` and `audiogen-cpp` ports, which pinned the same upstream repo at four different commits. Those ports were removed once every consumer had migrated, so manifests that still name them no longer resolve — depend on the matching `speech-cpp` feature instead.
 
 ## Prerequisites

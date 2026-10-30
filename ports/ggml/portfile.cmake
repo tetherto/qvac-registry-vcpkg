@@ -17,14 +17,14 @@
 #   cuda   -> GGML_CUDA=ON
 #   opencl -> GGML_OPENCL=ON
 
-# Windows backend modules against a static ggml core (QVAC-25560), on top of
-# the CUDA device compatibility and backend fallback work from
+# Server CUDA architectures (#141) and compatibility/fallback support (#130):
+# https://github.com/tetherto/qvac-ext-ggml/pull/141
 # https://github.com/tetherto/qvac-ext-ggml/pull/130
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF a98582045925ca61fe908d60eabbae3c62238cad
-    SHA512 92d2d75a54fc0436c0c16f8670f36c52a40cc361583f1bb722154e09d2a4c2ac6b371e797079de072035058d4a634b26e36ca9560c89558632419f3ee8ee5f2a
+    REF a4adfcb1304fb05b64473f1fe8d678bbce7a9ce0
+    SHA512 15a7828668d60b2b630d906433370d792c597654af3ebcfe7c5b9121b563700db7074fb15934cf6d3ee55a4890bc48873c691b2ea2e5cb3d75e9ba412febdbc5
 )
 
 # --- GPU feature flags ---
@@ -41,21 +41,12 @@ if("vulkan" IN_LIST FEATURES)
     set(GGML_VULKAN ON)
 endif()
 
-set(GGML_CUDA_COMPILER_OPTION "")
+set(GGML_CUDA_OPTIONS "")
 
 if("cuda" IN_LIST FEATURES)
     set(GGML_CUDA ON)
-    # Locate nvcc explicitly - /usr/local/cuda/bin may not be on the PATH that
-    # vcpkg's isolated cmake process inherits.
-    find_program(NVCC_EXECUTABLE nvcc
-        PATHS /usr/local/cuda/bin /usr/local/cuda-12.8/bin
-        NO_DEFAULT_PATH
-    )
-    if(NOT NVCC_EXECUTABLE)
-        find_program(NVCC_EXECUTABLE nvcc REQUIRED)
-    endif()
-    set(GGML_CUDA_COMPILER_OPTION "-DCMAKE_CUDA_COMPILER=${NVCC_EXECUTABLE}")
-    message(STATUS "CUDA compiler: ${NVCC_EXECUTABLE}")
+    include("${CMAKE_CURRENT_LIST_DIR}/cuda-toolkit.cmake")
+    qvac_ggml_cuda_options(GGML_CUDA_OPTIONS)
 endif()
 
 if("opencl" IN_LIST FEATURES)
@@ -65,8 +56,23 @@ endif()
 # --- Platform options ---
 set(PLATFORM_OPTIONS)
 
+if(VCPKG_TARGET_IS_LINUX AND GGML_CUDA)
+    list(APPEND PLATFORM_OPTIONS
+        "-DCMAKE_PROJECT_ggml_INCLUDE=${CMAKE_CURRENT_LIST_DIR}/linux-cuda-runtime.cmake"
+    )
+endif()
+
 if(VCPKG_TARGET_IS_WINDOWS)
     list(APPEND PLATFORM_OPTIONS -DGGML_LTO=ON)
+endif()
+
+if(GGML_CUDA)
+    # Keep the supported four FlashAttention combinations fixed. This fork's
+    # CUDA graphs implementation is llama.cpp-only and is not used by diffusion.
+    list(APPEND GGML_CUDA_OPTIONS
+        -DGGML_CUDA_FA=ON
+        -DGGML_CUDA_FA_ALL_QUANTS=OFF
+        -DGGML_CUDA_GRAPHS=OFF)
 endif()
 
 if(VCPKG_TARGET_IS_IOS)
@@ -84,12 +90,11 @@ if(VCPKG_TARGET_IS_ANDROID AND "vulkan" IN_LIST FEATURES)
 endif()
 
 # Hybrid backend mode for Android, desktop Linux and Windows: GPU backends
-# (Vulkan, OpenCL) are MODULE .so / .dll files loaded at runtime via dlopen or
-# LoadLibrary - the consuming addon carries no libvulkan.so.1 / libOpenCL.so /
-# vulkan-1.dll import, so it loads on hosts without any graphics stack (the
-# GPU module simply fails to load and ggml falls back to CPU).  The CPU
-# backend is statically linked (GGML_CPU_STATIC) so that SD can call
-# ggml_set_f32, ggml_backend_cpu_init, etc. directly at link time.
+# are runtime-loaded modules. The consuming addon carries no libvulkan.so.1 /
+# libOpenCL.so / vulkan-1.dll import, so it loads on hosts without any
+# graphics stack (the GPU module simply fails to load and ggml falls back to
+# CPU).  The CPU backend is statically linked (GGML_CPU_STATIC) so that SD
+# can call ggml_set_f32, ggml_backend_cpu_init, etc. directly at link time.
 if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR VCPKG_TARGET_IS_WINDOWS)
     list(APPEND PLATFORM_OPTIONS
         -DGGML_BACKEND_DL=ON
@@ -110,11 +115,11 @@ endif()
 # files are dlopen'd on end-user machines that may not have libc++ installed
 # (e.g. stock ubuntu-24.04), where an unresolved libc++.so.1 NEEDED makes the
 # dlopen fail silently and the GPU backend never registers.  Statically link
-# the C++ runtime into the modules so they are self-contained, matching
-# qvac-fabric's DL modules and how the consuming addons link themselves.  The
-# module<->addon boundary is the C ggml-backend ABI, so per-module libc++
-# copies never exchange C++ objects.  Android ships libc++_shared via the NDK
-# STL instead.
+# the C++ runtime into the modules so they are self-contained. Non-CUDA modules
+# match qvac-fabric's DL modules and the consuming addons. The
+# module<->addon boundary is the C ggml-backend ABI. Vulkan uses libc++;
+# linux-cuda-runtime.cmake gives nvcc and its private GGML core a static
+# libstdc++ runtime instead. Android ships libc++_shared via the NDK STL.
 if(VCPKG_TARGET_IS_LINUX)
     string(APPEND VCPKG_LINKER_FLAGS " -static-libstdc++")
 endif()
@@ -140,33 +145,38 @@ vcpkg_cmake_configure(
         -DGGML_CUDA=${GGML_CUDA}
         -DGGML_OPENCL=${GGML_OPENCL}
         -DGGML_MAX_NAME=128  # stable-diffusion.cpp requires >= 128
-        ${GGML_CUDA_COMPILER_OPTION}
+        ${GGML_CUDA_OPTIONS}
         ${PLATFORM_OPTIONS}
 )
 
 vcpkg_cmake_install()
 
-# Windows DL backends: install(TARGETS) treats a MODULE as a LIBRARY
-# artifact, so the .dll files already land in lib/, where the consuming addon
-# stages them from, and the exported ggml-targets.cmake records that path.
-# A static-linkage triplet must not ship a bin/ directory.
-if(VCPKG_TARGET_IS_WINDOWS)
-    file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/bin"
-                        "${CURRENT_PACKAGES_DIR}/debug/bin")
+# Keep runtime modules in lib/, matching qvac-fabric's package layout.
+# Windows CMake exports still reference bin/, so retain that installed copy.
+if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR VCPKG_TARGET_IS_WINDOWS)
+    set(backend_prefix "${VCPKG_TARGET_SHARED_LIBRARY_PREFIX}")
+    set(backend_suffix "${VCPKG_TARGET_SHARED_LIBRARY_SUFFIX}")
+    file(GLOB _backend_modules
+        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/${backend_prefix}qvac-diffusion-ggml-*${backend_suffix}"
+        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/Release/${backend_prefix}qvac-diffusion-ggml-*${backend_suffix}")
+    if(_backend_modules)
+        file(INSTALL ${_backend_modules} DESTINATION "${CURRENT_PACKAGES_DIR}/lib")
+    endif()
 endif()
 
-# Install DL backend .so files for Android and desktop Linux.  ggml's own
-# install(TARGETS) already puts each MODULE in lib/ (the Windows block above
-# relies on that); this also copies the matching .so files from the build
-# tree into lib/.
-if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX)
-    file(GLOB _backend_sos
-        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libqvac-diffusion-ggml-*.so"
-        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libqvac-ggml-*.so"
-        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/bin/libggml-*.so"
-    )
-    if(_backend_sos)
-        file(INSTALL ${_backend_sos} DESTINATION "${CURRENT_PACKAGES_DIR}/lib")
+if(VCPKG_TARGET_IS_WINDOWS)
+    # These DLLs are plugins loaded at runtime, not shared dependencies of
+    # the static core, and MODULE targets do not produce import libraries.
+    set(VCPKG_POLICY_DLLS_IN_STATIC_LIBRARY enabled)
+    set(VCPKG_POLICY_DLLS_WITHOUT_LIBS enabled)
+    set(VCPKG_POLICY_ALLOW_DLLS_IN_LIB enabled)
+endif()
+
+# A missing CUDA module must never populate the CUDA feature's cache entry.
+if(GGML_CUDA)
+    set(cuda_module "${CURRENT_PACKAGES_DIR}/lib/${VCPKG_TARGET_SHARED_LIBRARY_PREFIX}qvac-diffusion-ggml-cuda${VCPKG_TARGET_SHARED_LIBRARY_SUFFIX}")
+    if(NOT EXISTS "${cuda_module}")
+        message(FATAL_ERROR "ggml: expected CUDA module was not installed at ${cuda_module}")
     endif()
 endif()
 
@@ -194,13 +204,6 @@ file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
 # DL backends are only built for release; debug build produces fewer binaries.
 set(VCPKG_POLICY_MISMATCHED_NUMBER_OF_BINARIES enabled)
-if(VCPKG_TARGET_IS_WINDOWS)
-    # The runtime-loaded backend DLLs are payload of a static-linkage port,
-    # not linked libraries, and live in lib/ next to the static archives;
-    # without these the post-build checks flag them.
-    set(VCPKG_POLICY_DLLS_IN_STATIC_LIBRARY enabled)
-    set(VCPKG_POLICY_ALLOW_DLLS_IN_LIB enabled)
-endif()
 
 file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
 # The 2026-08-11 source tree ships no LICENSE file; install the fork's MIT

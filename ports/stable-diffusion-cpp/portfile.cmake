@@ -10,9 +10,11 @@
 #   share/stable-diffusion-cpp/  (CMake package config)
 #
 # GPU backend selection is handled at runtime via ggml's backend registry;
-# on Android, desktop Linux and Windows the GPU backends are runtime-loaded
-# modules (hybrid GGML_BACKEND_DL, see the ggml port).
+# on Android and desktop Linux the GPU backends are dlopen'd modules
+# (hybrid GGML_BACKEND_DL, see the ggml port).
 #
+# Server CUDA build documentation and matching ggml submodule:
+# https://github.com/tetherto/qvac-ext-stable-diffusion.cpp/pull/59
 # Windows size optimizations merged into the 2026-08-11 branch:
 # https://github.com/tetherto/qvac-ext-stable-diffusion.cpp/pull/56
 # WebP/WebM support auto-disables: upstream vendors them as git submodules
@@ -21,8 +23,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 4ec33ca21eec64b9778b6fd16d58e88cd501936d
-    SHA512 9bb29bd7fa19899a131287df21281162a5fbbb703229f3391516728b4466798d56d0b381e7f26faf1dec2b480cce4bfc75c95b936b4b1d2975cc7cebc1b54e28
+    REF 67fd0f590e8de432e6bb95fb05b0c3fdfdb2a1dd
+    SHA512 12edbd114fd74512b02bbecd11391f2f4522e8785df7a73f949d8ee3e076878b3f48d27a7ccef8379c83a3f5ea30231aa2b6db7b7962f999d70861eb475f2f5c
 )
 
 # Even under SD_USE_SYSTEM_GGML the sources reach into one ggml *internal*
@@ -34,8 +36,8 @@ vcpkg_from_github(
 vcpkg_from_github(
     OUT_SOURCE_PATH GGML_SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF a98582045925ca61fe908d60eabbae3c62238cad
-    SHA512 92d2d75a54fc0436c0c16f8670f36c52a40cc361583f1bb722154e09d2a4c2ac6b371e797079de072035058d4a634b26e36ca9560c89558632419f3ee8ee5f2a
+    REF a4adfcb1304fb05b64473f1fe8d678bbce7a9ce0
+    SHA512 15a7828668d60b2b630d906433370d792c597654af3ebcfe7c5b9121b563700db7074fb15934cf6d3ee55a4890bc48873c691b2ea2e5cb3d75e9ba412febdbc5
 )
 file(REMOVE_RECURSE "${SOURCE_PATH}/ggml")
 file(MAKE_DIRECTORY "${SOURCE_PATH}/ggml")
