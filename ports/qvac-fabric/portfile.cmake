@@ -203,6 +203,13 @@ if(BUILD_CUDA_BACKEND)
     list(APPEND PLATFORM_OPTIONS
       "-DCMAKE_CUDA_FLAGS=-allow-unsupported-compiler -Xfatbin=-compress-all")
   endif()
+  # The pinned nvcc (13.0, and 12.6 for Jetson) cannot compile host code
+  # against libc++, so the CUDA module is built against libstdc++ throughout,
+  # including its own ggml-base, and links it statically and privately.
+  if(VCPKG_TARGET_IS_LINUX)
+    list(APPEND PLATFORM_OPTIONS
+      "-DCMAKE_PROJECT_ggml_INCLUDE=${CMAKE_CURRENT_LIST_DIR}/linux-cuda-runtime.cmake")
+  endif()
 endif()
 
 if(VCPKG_TARGET_IS_ANDROID AND BUILD_KLEIDIAI)
@@ -328,6 +335,18 @@ if(BUILD_CUDA_BACKEND)
   if(NOT EXISTS "${QVAC_CUDA_MODULE}")
     message(FATAL_ERROR "qvac-fabric: expected CUDA module was not installed at ${QVAC_CUDA_MODULE}")
   endif()
+endif()
+
+# Each module links its C++ runtime statically, which holds only if every
+# source in it compiled against that runtime. CUDA and HIP compile through
+# their own drivers, and a module that misses this loads only in processes
+# which already map libstdc++.
+if(VCPKG_TARGET_IS_LINUX AND DL_BACKENDS)
+  include("${CMAKE_CURRENT_LIST_DIR}/qvac-check-cxx-runtime.cmake")
+  file(GLOB QVAC_MODULES
+    "${CURRENT_PACKAGES_DIR}/lib/*.so"
+    "${CURRENT_PACKAGES_DIR}/debug/lib/*.so")
+  qvac_check_cxx_runtime(${QVAC_MODULES})
 endif()
 
 if(BUILD_LLAMA)
