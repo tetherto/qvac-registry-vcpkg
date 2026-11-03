@@ -31,8 +31,8 @@ set(VCPKG_BUILD_TYPE release)
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-fabric-speech.cpp
-    REF fe2edadcde5f5885e00bf3dea6bdf4b3de4d6e36
-    SHA512 5f8044c4199bfe377b0ae87727139f806866c8adcb8773a35fbda1a398d017f90d755f12b3b0750dd4d0365693706f8e2ffaebb2dbea0625170dd8c8c9eb05ea
+    REF cad06b93f4ef622e1f3e64e04abcff4d3de725d1
+    SHA512 1aa64abaa56600b9a1ab2d806adcd198aa5211f7b0c93a8ce12d5e66386d302a8cb4108ca7f189ad2eb2290a04e2653bd7423ff1baa5190485915abd8359f79a
     HEAD_REF master
 )
 
@@ -85,6 +85,8 @@ vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
         opencl  GGML_OPENCL
         cuda    GGML_CUDA
         webgpu  GGML_WEBGPU
+        coreml  WHISPER_COREML
+        coreml  WHISPER_COREML_ALLOW_FALLBACK
         coreml  PARAKEET_COREML
         coreml  TTS_CPP_COREML
         coreml  AUDIOGEN_COREML
@@ -163,6 +165,8 @@ vcpkg_cmake_configure(
         ${PLATFORM_OPTIONS}
     MAYBE_UNUSED_VARIABLES
         GGML_WEBGPU
+        WHISPER_COREML
+        WHISPER_COREML_ALLOW_FALLBACK
         PARAKEET_COREML
         TTS_CPP_COREML
         AUDIOGEN_COREML
