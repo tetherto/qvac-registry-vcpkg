@@ -124,6 +124,14 @@ endif()
 
 set(PLATFORM_OPTIONS)
 
+# nvcc before CUDA 13.4 cannot compile libc++ host code. Keep the CUDA
+# module and its private ggml-base on libstdc++, linked statically and hidden
+# behind the loader's C entry points. Other backends retain the triplet STL.
+if(VCPKG_TARGET_IS_LINUX AND GGML_CUDA)
+    list(APPEND PLATFORM_OPTIONS
+        "-DCMAKE_PROJECT_ggml_INCLUDE=${CMAKE_CURRENT_LIST_DIR}/linux-cuda-runtime.cmake")
+endif()
+
 # tinyBLAS GEMM for the F16 and Q8_0 weights: measured 1.2x on x86 (7950X3D,
 # Ryzen AI MAX+ 395) and 1.7x at F16 on Apple silicon for Parakeet; other
 # targets are unmeasured and keep the plain ggml-cpu path.
@@ -305,6 +313,16 @@ if(QVAC_LINUX_ARM64_DL_CPU)
                 "${CURRENT_PACKAGES_DIR}${_cfg}/lib/libqvac-speech-ggml-cpu-${_unmeasured_tier}.so")
         endforeach()
     endforeach()
+endif()
+
+# Check the actual staged payload after desktop modules have been copied
+# from bin/ to lib/, including debug modules when that configuration is built.
+if(VCPKG_TARGET_IS_LINUX AND QVAC_DESKTOP_DL)
+    include("${CMAKE_CURRENT_LIST_DIR}/qvac-check-cxx-runtime.cmake")
+    file(GLOB QVAC_MODULES
+        "${CURRENT_PACKAGES_DIR}/lib/*.so"
+        "${CURRENT_PACKAGES_DIR}/debug/lib/*.so")
+    qvac_check_cxx_runtime(${QVAC_MODULES})
 endif()
 
 vcpkg_cmake_config_fixup(PACKAGE_NAME ggml CONFIG_PATH share/ggml)
