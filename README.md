@@ -15,7 +15,7 @@ The ONNX Runtime stack — `onnxruntime`, `onnx`, and the `eigen3`, `pybind11`, 
 
 ### The speech stack: `speech-cpp`
 
-`speech-cpp` is an umbrella port over [qvac-fabric-speech.cpp](https://github.com/tetherto/qvac-fabric-speech.cpp) (formerly `qvac-ext-lib-whisper.cpp`): one source pin for the whole speech stack, with the engines selected as features and every engine linking the single `ggml-speech` ggml.
+`speech-cpp` is an umbrella port over [qvac-fabric-speech.cpp](https://github.com/tetherto/qvac-fabric-speech.cpp) (formerly `qvac-ext-lib-whisper.cpp`): one source pin for the whole speech stack, with the engines selected as features and every engine linking the single `qvac-fabric` ggml, the same ggml the LLM stack ships.
 
 | Feature | Engine | `find_package` | Imported target |
 |---|---|---|---|
@@ -24,7 +24,7 @@ The ONNX Runtime stack — `onnxruntime`, `onnx`, and the `eigen3`, `pybind11`, 
 | `tts` | Chatterbox, Supertonic, CosyVoice3, Parler, Audio8, LavaSR | `tts-cpp` | `tts-cpp::tts-cpp` |
 | `audiogen` | ACE-Step music generation | `audiogen-cpp` | `audiogen-cpp::audiogen-cpp` |
 
-Backend features (`metal`, `vulkan`, `opencl`, `cuda`, `webgpu`) fan out to the matching `ggml-speech` features, so a manifest entry like the one below resolves one shared `ggml-speech` with unified features:
+Backend features (`metal`, `vulkan`, `opencl`, `cuda`, `webgpu`) fan out to the matching `qvac-fabric` features (`gpu-backends` for Metal, Vulkan and OpenCL, `cuda-backend`, `webgpu`), so a manifest entry like the one below resolves one shared `qvac-fabric` with unified features:
 
 ```json
 {
@@ -37,8 +37,8 @@ Backend features (`metal`, `vulkan`, `opencl`, `cuda`, `webgpu`) fan out to the 
 `webgpu` is opt-in on every platform and builds Google Dawn from the `dawn` port of microsoft/vcpkg, which this registry does not carry. A consumer that enables it pins Dawn itself:
 
 - Add `dawn`, `vulkan-headers`, `vulkan-utility-libraries` and `vcpkg-get-python-packages` to the microsoft/vcpkg entry's `packages` in `vcpkg-configuration.json`. The override below resolves `dawn` even when that entry's baseline predates the port.
-- Pin `dawn` to `20260410.140140` in the manifest's `overrides`. It is the newest version the speech-branch `ggml-webgpu` compiles against; 20260911 changed the uncaptured-error callback signature.
-- List `dawn` as a top-level dependency with `"default-features": false`. vcpkg only honours that flag in the top-level manifest, and Dawn's Linux defaults (`x11`, `gl`, `gles`) need X11 development headers on the build host. `ggml-speech[webgpu]` still requests the `vulkan` or `metal` feature it needs.
+- Pin `dawn` to `20260410.140140` in the manifest's `overrides`. It is the version the fabric `ggml-webgpu` compiles against; 20260911 changed the uncaptured-error callback signature.
+- List `dawn` as a top-level dependency with `"default-features": false`. vcpkg only honours that flag in the top-level manifest, and Dawn's Linux defaults (`x11`, `gl`, `gles`) need X11 development headers on the build host. `qvac-fabric[webgpu]` still requests the `vulkan` or `metal` feature it needs.
 
 ```json
 {
