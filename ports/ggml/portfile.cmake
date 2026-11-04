@@ -144,7 +144,7 @@ vcpkg_cmake_configure(
         -DGGML_VULKAN=${GGML_VULKAN}
         -DGGML_CUDA=${GGML_CUDA}
         -DGGML_OPENCL=${GGML_OPENCL}
-        -DGGML_MAX_NAME=128  # stable-diffusion.cpp requires >= 128
+        -DGGML_MAX_NAME=160  # match the 2026-11-01 engine and all consumers
         ${GGML_CUDA_OPTIONS}
         ${PLATFORM_OPTIONS}
 )
