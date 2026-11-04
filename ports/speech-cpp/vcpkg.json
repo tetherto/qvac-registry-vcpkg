@@ -1,7 +1,7 @@
 {
   "name": "speech-cpp",
   "version-date": "2026-11-04",
-  "port-version": 0,
+  "port-version": 1,
   "description": "Umbrella port over the QVAC speech stack with one shared ggml dependency and selectable whisper, parakeet, TTS, and audiogen engines.",
   "homepage": "https://github.com/tetherto/qvac-fabric-speech.cpp",
   "license": "MIT",
@@ -9,7 +9,7 @@
     {
       "name": "ggml-speech",
       "default-features": false,
-      "version>=": "2026-10-27"
+      "version>=": "2026-11-04"
     },
     {
       "name": "vcpkg-cmake",
@@ -122,6 +122,19 @@
     },
     "whisper": {
       "description": "Build the whisper engine from third_party/whisper.cpp (upstream whisper.cpp with the QVAC delta; upstream's bundled parakeet is gated off). CMake package: find_package(whisper CONFIG) + whisper::whisper."
+    },
+    "xdna": {
+      "description": "Enable the AMD XDNA NPU backend for AudioGen on Linux x64",
+      "supports": "linux & x64",
+      "dependencies": [
+        {
+          "name": "ggml-speech",
+          "default-features": false,
+          "features": [
+            "xdna"
+          ]
+        }
+      ]
     }
   }
 }

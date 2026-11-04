@@ -1,8 +1,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF 380c5f9f3e1811dfd88adeb1c19ab887bcf8ab3e
-    SHA512 287656a82b0eab1606ad8962095edfe44c1b549587995777c75bfc67a77fb36fb8ce65b1864438607d804181f8241960a9d7d9c65a269665e8db5dd945fe2873
+    REF 0983f8df3e38ef17d41b25febec2d1eb5bafadbf
+    SHA512 05f86d0069d402e6cbfa2a339db3f7b74b02f84bcace439e2ccb37b36d421d89113b50131b2e52ed045c5cfe7da0321dea42fdb66fc23c2dd098d0d384d8fc9c
     HEAD_REF speech
 )
 
@@ -11,10 +11,15 @@ set(GGML_VULKAN OFF)
 set(GGML_CUDA   OFF)
 set(GGML_OPENCL OFF)
 set(GGML_WEBGPU OFF)
+set(GGML_XDNA OFF)
 set(GGML_METAL_FUSE_MV_BIAS OFF)
 
 if("metal" IN_LIST FEATURES)
     set(GGML_METAL ON)
+endif()
+
+if("xdna" IN_LIST FEATURES)
+    set(GGML_XDNA ON)
 endif()
 
 # Off by default: the chatterbox Q-variant mul_mv + bias/residual fusion
@@ -249,6 +254,8 @@ vcpkg_cmake_configure(
         -DGGML_CUDA=${GGML_CUDA}
         -DGGML_OPENCL=${GGML_OPENCL}
         -DGGML_WEBGPU=${GGML_WEBGPU}
+        -DGGML_XDNA=${GGML_XDNA}
+        -DGGML_XDNA_BUILD_TESTS=OFF
         ${GGML_WEBGPU_OPTIONS}
         -DGGML_HEXAGON=OFF
         -DGGML_METAL_FUSE_MV_BIAS=${GGML_METAL_FUSE_MV_BIAS}
@@ -263,6 +270,19 @@ vcpkg_cmake_configure(
 ggml_speech_refuse_hexagon_builds()
 
 vcpkg_cmake_install()
+
+if(GGML_XDNA)
+    foreach(_xdna_stem IN ITEMS
+            gemm_bf16_f32_M32_K1024_N2048_c8
+            gemm_bf16_f32_M256_K1024_N2048_c8)
+        foreach(_xdna_ext IN ITEMS xclbin insts.bin)
+            if(NOT EXISTS "${CURRENT_PACKAGES_DIR}/lib/${_xdna_stem}.${_xdna_ext}")
+                message(FATAL_ERROR
+                    "ggml-speech[xdna]: missing ${_xdna_stem}.${_xdna_ext}. Configure IRON before building this feature.")
+            endif()
+        endforeach()
+    endforeach()
+endif()
 
 # Pick up the MODULE backend .so files ggml builds into the buildtree's
 # bin/ directory (Android dynamic-backend mode). cmake install() doesn't
@@ -353,4 +373,11 @@ if(QVAC_DESKTOP_DL_GPU AND VCPKG_TARGET_IS_WINDOWS)
 endif()
 
 file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
-vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
+if(GGML_XDNA)
+    vcpkg_install_copyright(FILE_LIST
+        "${SOURCE_PATH}/LICENSE"
+        "${SOURCE_PATH}/src/ggml-xdna/LICENSE"
+        "${SOURCE_PATH}/src/ggml-xdna/THIRD_PARTY_NOTICES")
+else()
+    vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
+endif()
