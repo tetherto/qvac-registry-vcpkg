@@ -22,6 +22,10 @@ vcpkg_from_github(
     REPO tetherto/qvac-ext-stable-diffusion.cpp
     REF 11d3d0138537abd8098c13d9bd2889bf1413bab1
     SHA512 52e47c7908871ad931a1a270db1968c4d63f194a502bbf451bb9ab64cd13a30bc3b1506e45bd8ad2e54f84c3f0e3351e7fff62dd3f51a2403a79ed8e7f4d432f
+    PATCHES
+        fix-lora-integer-alpha.patch
+        preserve-latent-vae-tiles.patch
+        enable-flux3-reference-editing.patch
 )
 
 # Only build Release — debug builds are not needed for the prebuild and can
