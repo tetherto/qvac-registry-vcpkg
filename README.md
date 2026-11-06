@@ -67,6 +67,14 @@ VCPKG_ROOT=/path/to/vcpkg python3 -m unittest discover -s tests -p test_speech_c
 
 `speech-cpp` replaced the per-engine `whisper-cpp`, `parakeet-cpp`, `tts-cpp` and `audiogen-cpp` ports, which pinned the same upstream repo at four different commits. Those ports were removed once every consumer had migrated, so manifests that still name them no longer resolve — depend on the matching `speech-cpp` feature instead.
 
+### The diffusion stack: `stable-diffusion-cpp` and `ggml`
+
+The `2026-11-01` ports pair the verified engine (including MOSS-Image and
+QVAC compatibility fixes) with its matching GGML source. Both use
+`GGML_MAX_NAME=160`; rebuild consumers together with these libraries because
+this setting changes the public tensor layout. MOSS requires an external
+`tokenizer.json` passed through `sd_ctx_params_t.tokenizer`.
+
 ## Prerequisites
 
 - [vcpkg](https://vcpkg.io/en/docs/getting-started.html) (manifest mode or classic)
