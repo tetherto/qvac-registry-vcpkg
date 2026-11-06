@@ -75,19 +75,6 @@ QVAC compatibility fixes) with its matching GGML source. Both use
 this setting changes the public tensor layout. MOSS requires an external
 `tokenizer.json` passed through `sd_ctx_params_t.tokenizer`.
 
-Check the installed CMake package, transitive GGML definition, public API,
-and static-library linkage with a separate consumer:
-
-```bash
-cmake -S tests/diffusion-consumer -B build/diffusion-consumer \
-  -DCMAKE_PREFIX_PATH=/path/to/vcpkg_installed/<triplet>
-cmake --build build/diffusion-consumer
-ctest --test-dir build/diffusion-consumer --output-on-failure
-```
-
-Use the compiler and runtime configuration that built the ports. This smoke
-test needs no model weights; it does not replace GPU inference validation.
-
 ## Prerequisites
 
 - [vcpkg](https://vcpkg.io/en/docs/getting-started.html) (manifest mode or classic)
