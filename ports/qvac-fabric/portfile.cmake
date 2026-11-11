@@ -187,11 +187,13 @@ if(BUILD_CUDA_BACKEND)
     -DGGML_CUDA=ON
     "-DCMAKE_CUDA_ARCHITECTURES=${QVAC_CUDA_ARCHS}"
     "-DCMAKE_CUDA_COMPILER=${NVCC_EXECUTABLE}"
-    # Pin the kernel set rather than inheriting defaults that can move on a
-    # fabric sync. The same cache identity must always mean the same module.
+    # Graphs and flash attention stay on whatever ggml defaults to. The
+    # flash-attention K/V quant pairs are ggml's own GGML_CUDA_FA_QUANTS
+    # default, as in a llama.cpp build: that list only moves with the fabric
+    # source, which changes the port hash, so one cache identity is still one
+    # module.
     -DGGML_CUDA_GRAPHS=ON
-    -DGGML_CUDA_FA=ON
-    "-DGGML_CUDA_FA_QUANTS=q4_0-q4_0\;q8_0-q8_0\;f16-f16\;bf16-bf16")
+    -DGGML_CUDA_FA=ON)
   if(QVAC_CUDA_MODULE_SUFFIX)
     list(APPEND PLATFORM_OPTIONS "-DGGML_CUDA_MODULE_SUFFIX=${QVAC_CUDA_MODULE_SUFFIX}")
   endif()
