@@ -20,11 +20,14 @@
 # Server CUDA architectures (#141) and compatibility/fallback support (#130):
 # https://github.com/tetherto/qvac-ext-ggml/pull/141
 # https://github.com/tetherto/qvac-ext-ggml/pull/130
+# OpenCL GROUP_NORM over every batch item and flash-attention query chunks at
+# the right output rows (#150): batched-CFG and 768x768 images on Adreno.
+# https://github.com/tetherto/qvac-ext-ggml/pull/150
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF a4adfcb1304fb05b64473f1fe8d678bbce7a9ce0
-    SHA512 15a7828668d60b2b630d906433370d792c597654af3ebcfe7c5b9121b563700db7074fb15934cf6d3ee55a4890bc48873c691b2ea2e5cb3d75e9ba412febdbc5
+    REF ab9b3ef1b07d38587c7435ffb86f44839f82642a
+    SHA512 2d60a6ffea493e47c1977c8187229d669c1263d9ba89c5ba7a10cf6106adc5f20fcc8a2033fd6a748759cacbace771f86074298e1cbc521c0f237462fdf382ae
 )
 
 # --- GPU feature flags ---
