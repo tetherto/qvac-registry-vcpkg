@@ -197,6 +197,14 @@ if(BUILD_CUDA_BACKEND)
   if(QVAC_CUDA_MODULE_SUFFIX)
     list(APPEND PLATFORM_OPTIONS "-DGGML_CUDA_MODULE_SUFFIX=${QVAC_CUDA_MODULE_SUFFIX}")
   endif()
+  # Fabric's NVRTC pass fuses each graph's elementwise ops into generated
+  # kernels (GGML_CUDA_NVRTC_FUSION=0 turns it off at run time). The module
+  # then links libnvrtc beside cudart and cuBLAS, and caches the kernels under
+  # ~/.cache/ggml-nvrtc. Linux CUDA 13 only: the Jetson and Windows modules
+  # are not built with it yet.
+  if(VCPKG_TARGET_IS_LINUX AND NOT BUILD_CUDA_JETSON_BACKEND)
+    list(APPEND PLATFORM_OPTIONS -DGGML_CUDA_NVRTC_FUSION=ON)
+  endif()
   # The CUDA host compiler and -allow-unsupported-compiler come from the
   # consumer's toolchain, e.g. qvac's linux-clang.cmake.
   if(VCPKG_TARGET_IS_LINUX AND BUILD_CUDA_JETSON_BACKEND)
