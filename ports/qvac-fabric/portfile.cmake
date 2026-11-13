@@ -28,6 +28,7 @@ vcpkg_check_features(
     rpc-server BUILD_RPC_SERVER
     rpc-rdma BUILD_RPC_RDMA
     xdna-backend BUILD_XDNA_BACKEND
+    coreml-ffn BUILD_COREML_FFN
 )
 
 # gpu-backends is default-on via default-features in vcpkg.json. CPU-only
@@ -68,6 +69,16 @@ elseif (VCPKG_TARGET_IS_OSX OR VCPKG_TARGET_IS_IOS)
   endif()
 else()
   list(APPEND PLATFORM_OPTIONS -DGGML_VULKAN=ON)
+endif()
+
+# Core ML FFN sidecar, opt-in via 'coreml-ffn' (vcpkg.json limits it to macOS
+# and pulls in gpu-backends and llama). Fabric links it against the Metal
+# backend, which macOS builds statically (no GGML_BACKEND_DL). The option also
+# compiles GGML_METAL_CUSTOM_OPS into ggml-metal, so only consumers that run
+# the sidecar request it. LLAMA_COREML stays off: no EmbeddingGemma sidecar.
+if(BUILD_COREML_FFN)
+  message(STATUS "qvac-fabric: coreml-ffn ON - building the Core ML FFN sidecar")
+  list(APPEND PLATFORM_OPTIONS -DLLAMA_COREML_FFN=ON)
 endif()
 
 # Android: always build CPU variants (NEON_DOTPROD, NEON_I8MM, etc.) and CPU

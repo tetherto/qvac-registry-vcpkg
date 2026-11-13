@@ -1,6 +1,7 @@
 {
   "name": "qvac-fabric",
   "version": "11739.3.0",
+  "port-version": 1,
   "description": "LLM inference in C/C++",
   "homepage": "https://github.com/tetherto/qvac-fabric-llm.cpp",
   "license": "MIT",
@@ -23,6 +24,20 @@
     "llama"
   ],
   "features": {
+    "coreml-ffn": {
+      "description": "Build fabric's Core ML FFN sidecar (LLAMA_COREML_FFN): with --coreml-ffn, part of each Qwen3.8-27B FFN runs on the Neural Engine during prompt processing while Metal runs the rest; other models stay on Metal. macOS only. It also compiles GGML_METAL_CUSTOM_OPS into the Metal backend and links CoreML, Foundation and Metal into llama. The EmbeddingGemma sidecar (LLAMA_COREML) is not built.",
+      "supports": "osx",
+      "dependencies": [
+        {
+          "name": "qvac-fabric",
+          "default-features": false,
+          "features": [
+            "gpu-backends",
+            "llama"
+          ]
+        }
+      ]
+    },
     "cuda-backend": {
       "description": "Build the NVIDIA CUDA GPU backend as a runtime-loaded module alongside Vulkan. Supports Linux x64 and arm64, and Windows x64. Requires a CUDA toolkit at build time. On Windows the CUDA 13 runtime is loaded from the user's CUDA install, %CUDA_PATH%\\bin\\x64. An absent or unloadable CUDA module is skipped so selection falls through to Vulkan and then CPU.",
       "supports": "(linux & (x64 | arm64)) | (windows & x64)",
