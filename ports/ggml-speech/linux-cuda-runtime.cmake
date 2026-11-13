@@ -1,9 +1,8 @@
 # nvcc before CUDA 13.4 cannot compile host code against libc++, which QVAC's
-# Linux addon uses. A CUDA MODULE must use one runtime throughout, including
+# Linux addons use. A CUDA MODULE must use one runtime throughout, including
 # its static GGML core, so it gets a private core built against libstdc++.
 # Keep that core private so no C++ objects or symbols cross the C ABI.
-# The ggml port carries the same function; the two differ only where the
-# forks do.
+# Adapted from qvac-fabric; the speech loader needs only init and score.
 function(qvac_isolate_cuda_runtime)
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR NOT TARGET ggml-cuda)
         return()
@@ -65,10 +64,9 @@ function(qvac_isolate_cuda_runtime)
     endif()
 
     # The loader resolves only these entry points (ggml-backend-reg.cpp);
-    # backend operations are returned as function pointers. Unlike the ggml
-    # fork, this one also forwards its logger to the module.
+    # backend operations are returned as function pointers.
     set(cuda_exports "${CMAKE_CURRENT_BINARY_DIR}/qvac-cuda-exports.map")
-    file(WRITE "${cuda_exports}" "{\n  global: ggml_backend_init; ggml_backend_score;\n    ggml_log_set; ggml_log_get; ggml_log_callback_default;\n  local: *;\n};\n")
+    file(WRITE "${cuda_exports}" "{\n  global: ggml_backend_init; ggml_backend_score;\n  local: *;\n};\n")
     set_property(TARGET ggml-cuda APPEND PROPERTY LINK_DEPENDS "${cuda_exports}")
     # libstdc++'s __cxa_pure_virtual is referenced only weakly, which does not
     # pull it from the archive.

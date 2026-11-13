@@ -13,36 +13,16 @@
 # on Android and desktop Linux the GPU backends are dlopen'd modules
 # (hybrid GGML_BACKEND_DL, see the ggml port).
 #
-# Server CUDA build documentation and matching ggml submodule:
-# https://github.com/tetherto/qvac-ext-stable-diffusion.cpp/pull/59
-# Windows size optimizations merged into the 2026-08-11 branch:
-# https://github.com/tetherto/qvac-ext-stable-diffusion.cpp/pull/56
+# Verified 2026-11-01 engine, including QVAC compatibility and video fixes.
 # WebP/WebM support auto-disables: upstream vendors them as git submodules
 # under thirdparty/, which GitHub REF tarballs do not contain
 # (SD_WEBP_DEFAULT/SD_WEBM_DEFAULT fall back to OFF).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 67fd0f590e8de432e6bb95fb05b0c3fdfdb2a1dd
-    SHA512 12edbd114fd74512b02bbecd11391f2f4522e8785df7a73f949d8ee3e076878b3f48d27a7ccef8379c83a3f5ea30231aa2b6db7b7962f999d70861eb475f2f5c
+    REF 29f8fe63dc44c7bd4353dc0a71b4910e4b33e272
+    SHA512 46c4c165685b7cfec4607bcbcd709eca8b8558b683fe9e7474799a53cee327c26b3c00030b092d0c325122db04cb06e9f0cfab24cce0b191a00d40a811495f43
 )
-
-# Even under SD_USE_SYSTEM_GGML the sources reach into one ggml *internal*
-# header (src/core/ggml_extend_backend.cpp includes "ggml/src/ggml-impl.h");
-# developers get it from the ggml git submodule, which REF tarballs do not
-# contain. Fetch the same qvac-ext-ggml commit the ggml port builds and place
-# it at the submodule path so the internal header matches the linked ggml
-# exactly. KEEP THIS REF IN LOCKSTEP with ports/ggml/portfile.cmake.
-vcpkg_from_github(
-    OUT_SOURCE_PATH GGML_SOURCE_PATH
-    REPO tetherto/qvac-ext-ggml
-    REF a4adfcb1304fb05b64473f1fe8d678bbce7a9ce0
-    SHA512 15a7828668d60b2b630d906433370d792c597654af3ebcfe7c5b9121b563700db7074fb15934cf6d3ee55a4890bc48873c691b2ea2e5cb3d75e9ba412febdbc5
-)
-file(REMOVE_RECURSE "${SOURCE_PATH}/ggml")
-file(MAKE_DIRECTORY "${SOURCE_PATH}/ggml")
-file(GLOB _ggml_tree LIST_DIRECTORIES true "${GGML_SOURCE_PATH}/*")
-file(COPY ${_ggml_tree} DESTINATION "${SOURCE_PATH}/ggml")
 
 # Only build Release — debug builds are not needed for the prebuild and can
 # fail with MSVC iterator-debug-level mismatches.

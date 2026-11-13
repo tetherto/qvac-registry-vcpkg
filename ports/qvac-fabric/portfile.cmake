@@ -2,7 +2,7 @@ vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-fabric-llm.cpp
   REF v${VERSION}
-  SHA512 b3ff2597e80189d1f6656a11c91291eb70febff69df59645426b6bfcfc3b71a7df5d0a9652424984b8d0f504b927a3471b967b034e8450ee3e93d64e0e7c1d29
+  SHA512 58c962da71590c258d71abb4c8bfefdf9218c5c0c442fc456f2669efb8e69e1bc693d14e09afc57b28f09d54797f44c3f64302d2ef35c7e98ee3bb9551940c1d
 )
 
 # Upstream CMake options only — passed through to vcpkg_cmake_configure.
@@ -27,6 +27,7 @@ vcpkg_check_features(
     cuda-jetson-backend BUILD_CUDA_JETSON_BACKEND
     rpc-server BUILD_RPC_SERVER
     rpc-rdma BUILD_RPC_RDMA
+    xdna-backend BUILD_XDNA_BACKEND
 )
 
 # gpu-backends is default-on via default-features in vcpkg.json. CPU-only
@@ -186,13 +187,23 @@ if(BUILD_CUDA_BACKEND)
     -DGGML_CUDA=ON
     "-DCMAKE_CUDA_ARCHITECTURES=${QVAC_CUDA_ARCHS}"
     "-DCMAKE_CUDA_COMPILER=${NVCC_EXECUTABLE}"
-    # Pin the kernel set rather than inheriting defaults that can move on a
-    # fabric sync. The same cache identity must always mean the same module.
+    # Graphs and flash attention stay on whatever ggml defaults to. The
+    # flash-attention K/V quant pairs are ggml's own GGML_CUDA_FA_QUANTS
+    # default, as in a llama.cpp build: that list only moves with the fabric
+    # source, which changes the port hash, so one cache identity is still one
+    # module.
     -DGGML_CUDA_GRAPHS=ON
-    -DGGML_CUDA_FA=ON
-    "-DGGML_CUDA_FA_QUANTS=q4_0-q4_0\;q8_0-q8_0\;f16-f16\;bf16-bf16")
+    -DGGML_CUDA_FA=ON)
   if(QVAC_CUDA_MODULE_SUFFIX)
     list(APPEND PLATFORM_OPTIONS "-DGGML_CUDA_MODULE_SUFFIX=${QVAC_CUDA_MODULE_SUFFIX}")
+  endif()
+  # Fabric's NVRTC pass fuses each graph's elementwise ops into generated
+  # kernels (GGML_CUDA_NVRTC_FUSION=0 turns it off at run time). The module
+  # then links libnvrtc beside cudart and cuBLAS, and caches the kernels under
+  # ~/.cache/ggml-nvrtc. Linux CUDA 13 only: the Jetson and Windows modules
+  # are not built with it yet.
+  if(VCPKG_TARGET_IS_LINUX AND NOT BUILD_CUDA_JETSON_BACKEND)
+    list(APPEND PLATFORM_OPTIONS -DGGML_CUDA_NVRTC_FUSION=ON)
   endif()
   # The CUDA host compiler and -allow-unsupported-compiler come from the
   # consumer's toolchain, e.g. qvac's linux-clang.cmake.
@@ -203,13 +214,44 @@ if(BUILD_CUDA_BACKEND)
     list(APPEND PLATFORM_OPTIONS
       "-DCMAKE_CUDA_FLAGS=-allow-unsupported-compiler -Xfatbin=-compress-all")
   endif()
-  # The pinned nvcc (13.0, and 12.6 for Jetson) cannot compile host code
-  # against libc++, so the CUDA module is built against libstdc++ throughout,
-  # including its own ggml-base, and links it statically and privately.
-  if(VCPKG_TARGET_IS_LINUX)
-    list(APPEND PLATFORM_OPTIONS
-      "-DCMAKE_PROJECT_ggml_INCLUDE=${CMAKE_CURRENT_LIST_DIR}/linux-cuda-runtime.cmake")
+endif()
+
+# XDNA (AMD NPU) backend, opt-in via 'xdna-backend': a runtime-loaded module
+# sharing the libstdc++ GGML core with CUDA, with its own embedded CPU backend.
+# Requesting it without XRT or IRON is an error, never a silent skip: ggml skips
+# the kernels when IRON is missing, and a module without them would share the
+# real build's binary-cache ABI. The xrt port checks XRT and, through its
+# vcpkg-port-config.cmake, sets XRT_ROOT and XRT_XCLBINUTIL here.
+# Consumers must track XILINX_XRT and the XRT config in their triplet ABI
+# (see usage); this module embeds the absolute XRT library path.
+if(BUILD_XDNA_BACKEND)
+  if(NOT DL_BACKENDS)
+    message(FATAL_ERROR "qvac-fabric: xdna-backend needs the GGML_BACKEND_DL build (Linux x64 with gpu-backends)")
   endif()
+  if(NOT XRT_XCLBINUTIL OR NOT EXISTS "${XRT_XCLBINUTIL}")
+    message(FATAL_ERROR "qvac-fabric: xdna-backend found no xclbinutil from the xrt port (XRT_ROOT '${XRT_ROOT}')")
+  endif()
+  set(QVAC_XDNA_IRON_PYTHON "$ENV{QVAC_XDNA_IRON_PYTHON}")
+  if(QVAC_XDNA_IRON_PYTHON STREQUAL "")
+    message(FATAL_ERROR "qvac-fabric: xdna-backend requires QVAC_XDNA_IRON_PYTHON, a Python interpreter with IRON (mlir-aie + llvm-aie) to compile the NPU kernels.")
+  endif()
+  execute_process(
+    COMMAND "${QVAC_XDNA_IRON_PYTHON}" -c "import aie.iron, aie.helpers.taplib, aie.iron.kernels"
+    RESULT_VARIABLE _qvac_iron_result
+    ERROR_VARIABLE _qvac_iron_error)
+  if(NOT _qvac_iron_result EQUAL 0)
+    message(FATAL_ERROR "qvac-fabric: ${QVAC_XDNA_IRON_PYTHON} cannot import IRON:\n${_qvac_iron_error}")
+  endif()
+  message(STATUS "qvac-fabric: xdna-backend ON, XRT ${XRT_ROOT}, IRON ${QVAC_XDNA_IRON_PYTHON}")
+  get_filename_component(_qvac_xrt_bin "${XRT_XCLBINUTIL}" DIRECTORY)
+  vcpkg_add_to_path(PREPEND "${_qvac_xrt_bin}")
+  list(APPEND PLATFORM_OPTIONS
+    -DGGML_XDNA=ON
+    -DGGML_XDNA_BUILD_KERNELS=ON
+    -DGGML_XDNA_BUILD_TESTS=OFF
+    "-DGGML_XDNA_GEMM_PYTHON=${QVAC_XDNA_IRON_PYTHON}"
+    "-DQVAC_XRT_ROOT=${XRT_ROOT}")
+  set(X_VCPKG_RPATH_KEEP_SYSTEM_PATHS ON)
 endif()
 
 if(VCPKG_TARGET_IS_ANDROID AND BUILD_KLEIDIAI)
@@ -268,6 +310,8 @@ endif()
 # libc++_shared via the NDK STL, Windows uses the MSVC runtime.
 if(VCPKG_TARGET_IS_LINUX AND DL_BACKENDS)
   string(APPEND VCPKG_LINKER_FLAGS " -static-libstdc++")
+  list(APPEND PLATFORM_OPTIONS
+    "-DCMAKE_PROJECT_ggml_INCLUDE=${CMAKE_CURRENT_LIST_DIR}/linux-cxx-runtime.cmake")
 endif()
 
 set(LLAMA_OPTIONS)
@@ -337,8 +381,8 @@ if(BUILD_CUDA_BACKEND)
   endif()
 endif()
 
-# Each module links its C++ runtime statically, which holds only if every
-# source in it compiled against that runtime. CUDA and HIP compile through
+# Modules other than XDNA link their C++ runtime statically, which requires every
+# source to compile against that runtime. CUDA and HIP compile through
 # their own drivers, and a module that misses this loads only in processes
 # which already map libstdc++.
 if(VCPKG_TARGET_IS_LINUX AND DL_BACKENDS)
@@ -346,7 +390,11 @@ if(VCPKG_TARGET_IS_LINUX AND DL_BACKENDS)
   file(GLOB QVAC_MODULES
     "${CURRENT_PACKAGES_DIR}/lib/*.so"
     "${CURRENT_PACKAGES_DIR}/debug/lib/*.so")
-  qvac_check_cxx_runtime(${QVAC_MODULES})
+  set(QVAC_RUNTIME_OPTIONS)
+  if(BUILD_XDNA_BACKEND)
+    list(APPEND QVAC_RUNTIME_OPTIONS WITH_XDNA)
+  endif()
+  qvac_check_cxx_runtime(${QVAC_RUNTIME_OPTIONS} ${QVAC_MODULES})
 endif()
 
 if(BUILD_LLAMA)
@@ -372,6 +420,62 @@ if (NOT VCPKG_BUILD_TYPE)
   file(REMOVE "${CURRENT_PACKAGES_DIR}/debug/bin/convert_hf_to_gguf.py")
 endif()
 
+if(BUILD_XDNA_BACKEND)
+  # ggml-xdna also adds /opt/xilinx/xrt to CMAKE_PREFIX_PATH; XRT has to come
+  # through the xrt port, which is what the package's ABI records.
+  foreach(_qvac_cfg IN ITEMS rel dbg)
+    set(_qvac_cache "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-${_qvac_cfg}/CMakeCache.txt")
+    if(EXISTS "${_qvac_cache}")
+      foreach(_qvac_pkg IN ITEMS xrt AIEBU)
+        string(TOLOWER "${_qvac_pkg}" _qvac_share)
+        file(STRINGS "${_qvac_cache}" _qvac_dir REGEX "^${_qvac_pkg}_DIR:")
+        string(REGEX REPLACE "^${_qvac_pkg}_DIR:[A-Z]+=" "" _qvac_dir "${_qvac_dir}")
+        if(NOT _qvac_dir STREQUAL "${CURRENT_INSTALLED_DIR}/share/${_qvac_share}")
+          message(FATAL_ERROR "qvac-fabric: the XDNA configure found ${_qvac_pkg} at '${_qvac_dir}', not through the xrt port")
+        endif()
+      endforeach()
+    endif()
+  endforeach()
+
+  set(QVAC_XDNA_MODULE "${VCPKG_TARGET_SHARED_LIBRARY_PREFIX}qvac-ggml-xdna${VCPKG_TARGET_SHARED_LIBRARY_SUFFIX}")
+  foreach(_qvac_cfg IN ITEMS rel dbg)
+    set(_qvac_build_dir "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-${_qvac_cfg}")
+    if(NOT EXISTS "${_qvac_build_dir}")
+      continue()
+    endif()
+    if(_qvac_cfg STREQUAL "rel")
+      set(_qvac_prefix "${CURRENT_PACKAGES_DIR}")
+    else()
+      set(_qvac_prefix "${CURRENT_PACKAGES_DIR}/debug")
+    endif()
+    if(NOT EXISTS "${_qvac_prefix}/lib/${QVAC_XDNA_MODULE}")
+      message(FATAL_ERROR "qvac-fabric: expected XDNA module was not installed at ${_qvac_prefix}/lib/${QVAC_XDNA_MODULE}")
+    endif()
+    # The backend loads these two under a design-tagged name.
+    foreach(_qvac_stem IN ITEMS fused_layer gemv_n32_r4_c8)
+      file(GLOB _qvac_tagged "${_qvac_prefix}/lib/${_qvac_stem}_*.xclbin")
+      if(NOT _qvac_tagged)
+        message(FATAL_ERROR "qvac-fabric: the XDNA kernel ${_qvac_stem} was not installed in ${_qvac_prefix}/lib")
+      endif()
+    endforeach()
+  endforeach()
+
+  # Export the kernel list beside the normal GGML backend targets.
+  file(GLOB QVAC_XDNA_KERNELS RELATIVE "${CURRENT_PACKAGES_DIR}/lib"
+    "${CURRENT_PACKAGES_DIR}/lib/*.xclbin" "${CURRENT_PACKAGES_DIR}/lib/*.insts.bin")
+  string(CONFIGURE [=[
+get_filename_component(_ggml_xdna_prefix "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+# The kernel artifacts the module loads; ship them next to it.
+set(GGML_XDNA_KERNEL_FILES "@QVAC_XDNA_KERNELS@")
+list(TRANSFORM GGML_XDNA_KERNEL_FILES PREPEND "${_ggml_xdna_prefix}/lib/")
+unset(_ggml_xdna_prefix)
+]=] QVAC_XDNA_TARGETS @ONLY)
+  file(WRITE "${CURRENT_PACKAGES_DIR}/share/ggml/ggml-xdna-targets.cmake" "${QVAC_XDNA_TARGETS}")
+  vcpkg_replace_string("${CURRENT_PACKAGES_DIR}/share/ggml/ggml-config.cmake"
+    "check_required_components(ggml)"
+    "include(\"\${CMAKE_CURRENT_LIST_DIR}/ggml-xdna-targets.cmake\")\n\ncheck_required_components(ggml)")
+endif()
+
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
@@ -380,4 +484,13 @@ if (VCPKG_LIBRARY_LINKAGE MATCHES "static")
   file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/bin")
 endif()
 
-vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
+set(QVAC_LICENSE_FILES "${SOURCE_PATH}/LICENSE")
+if(BUILD_XDNA_BACKEND)
+  list(APPEND QVAC_LICENSE_FILES
+    "${SOURCE_PATH}/ggml/src/ggml-xdna/LICENSE"
+    "${SOURCE_PATH}/ggml/src/ggml-xdna/LICENSES/Apache-2.0-WITH-LLVM-exception.txt"
+    "${SOURCE_PATH}/ggml/src/ggml-xdna/THIRD_PARTY_NOTICES")
+endif()
+vcpkg_install_copyright(FILE_LIST ${QVAC_LICENSE_FILES})
+
+file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
