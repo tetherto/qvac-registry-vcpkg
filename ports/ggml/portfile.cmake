@@ -6,8 +6,8 @@
 #
 # Installed artefacts:
 #   include/ggml.h  (+ other ggml public headers)
-#   lib/libggml.a, lib/libggml-base.a, lib/libggml-cpu.a, ...
-#   lib/libqvac-diffusion-ggml-*.so  (dlopen'd GPU backend modules, see below)
+#   lib/libggml.a, lib/libggml-base.a, ...
+#   lib/libqvac-diffusion-ggml-*.so  (runtime-loaded CPU and GPU modules)
 #   lib/qvac-diffusion-ggml-*.dll    (the same modules on Windows)
 #   share/ggml/      (CMake package config)
 #
@@ -92,16 +92,10 @@ if(VCPKG_TARGET_IS_ANDROID AND "vulkan" IN_LIST FEATURES)
     list(APPEND PLATFORM_OPTIONS -DFETCHCONTENT_FULLY_DISCONNECTED=OFF)
 endif()
 
-# Hybrid backend mode for Android, desktop Linux and Windows: GPU backends
-# are runtime-loaded modules. The consuming addon carries no libvulkan.so.1 /
-# libOpenCL.so / vulkan-1.dll import, so it loads on hosts without any
-# graphics stack (the GPU module simply fails to load and ggml falls back to
-# CPU).  The CPU backend is statically linked (GGML_CPU_STATIC) so that SD
-# can call ggml_set_f32, ggml_backend_cpu_init, etc. directly at link time.
 if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR VCPKG_TARGET_IS_WINDOWS)
     list(APPEND PLATFORM_OPTIONS
         -DGGML_BACKEND_DL=ON
-        -DGGML_CPU_STATIC=ON
+        -DGGML_CPU_STATIC=OFF
     )
 endif()
 
@@ -173,6 +167,13 @@ if(VCPKG_TARGET_IS_WINDOWS)
     set(VCPKG_POLICY_DLLS_IN_STATIC_LIBRARY enabled)
     set(VCPKG_POLICY_DLLS_WITHOUT_LIBS enabled)
     set(VCPKG_POLICY_ALLOW_DLLS_IN_LIB enabled)
+endif()
+
+if(VCPKG_TARGET_IS_ANDROID OR VCPKG_TARGET_IS_LINUX OR VCPKG_TARGET_IS_WINDOWS)
+    set(cpu_module "${CURRENT_PACKAGES_DIR}/lib/${VCPKG_TARGET_SHARED_LIBRARY_PREFIX}qvac-diffusion-ggml-cpu${VCPKG_TARGET_SHARED_LIBRARY_SUFFIX}")
+    if(NOT EXISTS "${cpu_module}")
+        message(FATAL_ERROR "ggml: required CPU module was not installed at ${cpu_module}")
+    endif()
 endif()
 
 # A missing CUDA module must never populate the CUDA feature's cache entry.
