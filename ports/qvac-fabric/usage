@@ -26,3 +26,11 @@ links it dynamically to match XRT. Both use the same CMake configure.
 
 No NPU is required to compile. The XDNA module and its kernel artifacts must
 be installed together. Hosts without XRT skip the optional module.
+
+qvac-fabric[coreml-ffn] (macOS) builds the Qwen3.8-27B Core ML FFN sidecar;
+llama_supports_coreml_ffn() then returns true. A common_params with
+coreml_ffn set turns it on in common_init_from_params. Static consumers link
+the CoreML, Foundation and Metal frameworks. The first load compiles 4.5-9 GB
+of Core ML programs into the cache directory (coreml_ffn_cache, default
+$LLAMA_CACHE/coreml-ffn or ~/Library/Caches/llama.cpp/coreml-ffn). See
+docs/coreml-ffn.md in qvac-fabric-llm.cpp.
