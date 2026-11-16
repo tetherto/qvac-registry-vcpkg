@@ -20,8 +20,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 29f8fe63dc44c7bd4353dc0a71b4910e4b33e272
-    SHA512 46c4c165685b7cfec4607bcbcd709eca8b8558b683fe9e7474799a53cee327c26b3c00030b092d0c325122db04cb06e9f0cfab24cce0b191a00d40a811495f43
+    REF 6b42a78c3876156f85ec3e495c8a2f6deb835570
+    SHA512 db3ad6816d86a40d25bc1fc19f5d43dde68d4ffcd8ddf3b4ed6236e9ff20ac26288b4a051129bbe6784552d2b896ad55b9b52b99bac9725281363bf3243e0d4c
 )
 
 # Only build Release — debug builds are not needed for the prebuild and can
