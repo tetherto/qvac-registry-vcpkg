@@ -13,15 +13,15 @@
 # on Android and desktop Linux the GPU backends are dlopen'd modules
 # (hybrid GGML_BACKEND_DL, see the ggml port).
 #
-# Verified 2026-11-01 engine, including QVAC compatibility and video fixes.
+# 2026-11-01 engine with guarded per-context VAE/H3 controls (engine PR #64).
 # WebP/WebM support auto-disables: upstream vendors them as git submodules
 # under thirdparty/, which GitHub REF tarballs do not contain
 # (SD_WEBP_DEFAULT/SD_WEBM_DEFAULT fall back to OFF).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 29f8fe63dc44c7bd4353dc0a71b4910e4b33e272
-    SHA512 46c4c165685b7cfec4607bcbcd709eca8b8558b683fe9e7474799a53cee327c26b3c00030b092d0c325122db04cb06e9f0cfab24cce0b191a00d40a811495f43
+    REF bc53357484bc5d2ba08fbe5301dae192e5b9a176
+    SHA512 dced9d52efbf8ae7b35cd9e81816190f85178a631c6166095034375d92e0847125f435ec8fed4e7642817158ceb5f5967d34f71b83fcd89756b5d969efa5f71a
 )
 
 # Only build Release — debug builds are not needed for the prebuild and can
