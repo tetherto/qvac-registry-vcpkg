@@ -13,17 +13,17 @@
 # on Android and desktop Linux the GPU backends are dlopen'd modules
 # (hybrid GGML_BACKEND_DL, see the ggml port).
 #
-# 2026-11-01 engine with guarded per-context VAE/H3 controls (engine PR #64)
-# and optional CoreML UNet/TAE decoder sidecars (engine PR #66, SD_COREML,
-# off by default).
+# 2026-11-01 engine with guarded per-context VAE/H3 controls (engine PR #64),
+# Flux.2 VAE convolution fixes (engine PRs #65, #67) and optional Core ML
+# UNet/TAE decoder sidecars (engine PR #69, SD_COREML, off by default).
 # WebP/WebM support auto-disables: upstream vendors them as git submodules
 # under thirdparty/, which GitHub REF tarballs do not contain
 # (SD_WEBP_DEFAULT/SD_WEBM_DEFAULT fall back to OFF).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 929de03e3a331b543086da29a2cb8b249004efaf
-    SHA512 d09d8eb85186ef87ea7119c6d9cdc0b1124762f7b0ba573d5d471a79ccce5c402231f3205174b4c0fbde9718446b88b5d7da01dfd62d25997514cdd13bf25578
+    REF 9e544e85276f330f861dd8f4e60d5953df7fae55
+    SHA512 2a195b5a273f6104adc6e46aa62a700b60d8603f1e110efe382d3c0d8649fc0d0d3821204d8ea139d2b48c29286254fc5e4217f0cf0c9d59c7518cb610e6608a
 )
 
 # Only build Release — debug builds are not needed for the prebuild and can

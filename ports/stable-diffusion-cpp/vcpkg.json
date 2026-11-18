@@ -35,7 +35,7 @@
   ],
   "features": {
     "coreml": {
-      "description": "Enable CoreML UNet and tiny-decoder sidecars on the Apple Neural Engine (macOS/iOS)",
+      "description": "Enable Core ML sidecars (FLUX.2 denoiser, SD 1.x/2.x UNet, tiny decoder) on Apple devices (macOS/iOS)",
       "supports": "osx | ios"
     },
     "cuda": {

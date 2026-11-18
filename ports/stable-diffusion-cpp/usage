@@ -18,8 +18,9 @@ GPU backends are controlled through the ggml dependency:
   cuda   - CUDA GPU backend
   opencl - OpenCL GPU backend (Android/Adreno)
 
-Optional CoreML sidecars (macOS/iOS, feature "coreml", off by default) run the
-UNet and the TAESD/SDXS tiny decoder on the Apple Neural Engine. Point
+Optional Core ML sidecars (macOS/iOS, feature "coreml", off by default) run the
+FLUX.2 denoiser, the SD 1.x/2.x UNet and the TAESD/SDXS tiny decoder on the
+Apple Neural Engine. For the UNet and decoder, point
 sd_ctx_params_t.coreml_unet_path / coreml_tae_decoder_path at CoreML models
 (.mlmodelc or .mlpackage; see docs/coreml.md upstream). Supported: SDXS, SD 2.1-base.
 
