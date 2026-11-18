@@ -13,20 +13,34 @@
 # on Android and desktop Linux the GPU backends are dlopen'd modules
 # (hybrid GGML_BACKEND_DL, see the ggml port).
 #
-# 2026-11-01 engine with guarded per-context VAE/H3 controls (engine PR #64).
+# 2026-11-01 engine with guarded per-context VAE/H3 controls (engine PR #64)
+# and optional CoreML UNet/TAE decoder sidecars (engine PR #66, SD_COREML,
+# off by default).
 # WebP/WebM support auto-disables: upstream vendors them as git submodules
 # under thirdparty/, which GitHub REF tarballs do not contain
 # (SD_WEBP_DEFAULT/SD_WEBM_DEFAULT fall back to OFF).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF bc53357484bc5d2ba08fbe5301dae192e5b9a176
-    SHA512 dced9d52efbf8ae7b35cd9e81816190f85178a631c6166095034375d92e0847125f435ec8fed4e7642817158ceb5f5967d34f71b83fcd89756b5d969efa5f71a
+    REF 929de03e3a331b543086da29a2cb8b249004efaf
+    SHA512 d09d8eb85186ef87ea7119c6d9cdc0b1124762f7b0ba573d5d471a79ccce5c402231f3205174b4c0fbde9718446b88b5d7da01dfd62d25997514cdd13bf25578
 )
 
 # Only build Release — debug builds are not needed for the prebuild and can
 # fail with MSVC iterator-debug-level mismatches.
 set(VCPKG_BUILD_TYPE release)
+
+vcpkg_check_features(
+    OUT_FEATURE_OPTIONS FEATURE_OPTIONS
+    FEATURES
+        coreml SD_COREML
+)
+# Consumed by stable-diffusion-cppConfig.cmake.in: the static library needs
+# the CoreML frameworks on the consumer's link line.
+set(SD_CPP_COREML OFF)
+if("coreml" IN_LIST FEATURES)
+    set(SD_CPP_COREML ON)
+endif()
 
 set(SD_LTO OFF)
 if(VCPKG_TARGET_IS_WINDOWS)
@@ -42,6 +56,7 @@ vcpkg_cmake_configure(
         -DSD_BUILD_SHARED_LIBS=OFF
         -DSD_USE_SYSTEM_GGML=ON
         -DSD_LTO=${SD_LTO}
+        ${FEATURE_OPTIONS}
 )
 
 vcpkg_cmake_install()
@@ -54,8 +69,12 @@ vcpkg_cmake_install()
 # truth and vcpkg's misplaced-cmake-files check stays quiet.
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/lib/cmake"
                     "${CURRENT_PACKAGES_DIR}/debug/lib/cmake")
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/stable-diffusion-cppConfig.cmake.in"
+    "${CURRENT_PACKAGES_DIR}/share/stable-diffusion-cpp/stable-diffusion-cppConfig.cmake"
+    @ONLY
+)
 file(INSTALL
-    "${CMAKE_CURRENT_LIST_DIR}/stable-diffusion-cppConfig.cmake"
     "${CMAKE_CURRENT_LIST_DIR}/stable-diffusion-cppConfigVersion.cmake"
     DESTINATION "${CURRENT_PACKAGES_DIR}/share/stable-diffusion-cpp"
 )
