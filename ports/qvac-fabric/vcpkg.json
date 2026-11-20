@@ -1,6 +1,7 @@
 {
   "name": "qvac-fabric",
   "version": "11739.4.0",
+  "port-version": 1,
   "description": "LLM inference in C/C++",
   "homepage": "https://github.com/tetherto/qvac-fabric-llm.cpp",
   "license": "MIT",
@@ -92,6 +93,19 @@
           "default-features": false,
           "features": [
             "llama"
+          ]
+        }
+      ]
+    },
+    "shared-core": {
+      "description": "Experimental QVAC shared ggml core with ABI-specific filenames. Does not change the default linkage.",
+      "supports": "linux | android | (windows & !uwp)",
+      "dependencies": [
+        {
+          "name": "qvac-fabric",
+          "default-features": false,
+          "features": [
+            "gpu-backends"
           ]
         }
       ]

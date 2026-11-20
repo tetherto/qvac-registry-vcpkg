@@ -3,6 +3,7 @@ vcpkg_from_github(
   REPO tetherto/qvac-fabric-llm.cpp
   REF v${VERSION}
   SHA512 926a87b6cb4919bb9f00b81e1a81400c315d55f6c59d16302911ec983d361a866a64e7accb0b5c7813473e081839a5fe73fc54d6b4d07c867e439e63729d3b42
+  PATCHES shared-core.patch
 )
 
 # Upstream CMake options only — passed through to vcpkg_cmake_configure.
@@ -12,6 +13,7 @@ vcpkg_check_features(
     force-profiler FORCE_GGML_VK_PERF_LOGGER
     llama BUILD_LLAMA
     vector-index GGML_VECTOR_INDEX
+    shared-core GGML_SHARED_CORE
 )
 
 # Portfile-only feature flags (drive PLATFORM_OPTIONS; not upstream cache vars).
@@ -394,7 +396,12 @@ if(VCPKG_TARGET_IS_LINUX AND DL_BACKENDS)
   if(BUILD_XDNA_BACKEND)
     list(APPEND QVAC_RUNTIME_OPTIONS WITH_XDNA)
   endif()
-  qvac_check_cxx_runtime(${QVAC_RUNTIME_OPTIONS} ${QVAC_MODULES})
+  if("shared-core" IN_LIST FEATURES)
+    include("${CMAKE_CURRENT_LIST_DIR}/qvac-check-shared-core.cmake")
+    qvac_check_shared_core(${QVAC_RUNTIME_OPTIONS} ${QVAC_MODULES})
+  else()
+    qvac_check_cxx_runtime(${QVAC_RUNTIME_OPTIONS} ${QVAC_MODULES})
+  endif()
 
   # The release modules ship in the npm platform packages, which npm caps in
   # size. dlopen needs only the dynamic symbols, so drop the static symbol
@@ -490,7 +497,13 @@ endif()
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
-if (VCPKG_LIBRARY_LINKAGE MATCHES "static")
+# Intentional mixed linkage: only the opt-in core overrides the static triplet.
+# https://learn.microsoft.com/en-us/vcpkg/reference/policies#vcpkg_policy_dlls_in_static_library
+if("shared-core" IN_LIST FEATURES AND VCPKG_LIBRARY_LINKAGE STREQUAL "static")
+  set(VCPKG_POLICY_DLLS_IN_STATIC_LIBRARY enabled)
+endif()
+
+if (VCPKG_LIBRARY_LINKAGE MATCHES "static" AND NOT "shared-core" IN_LIST FEATURES)
   file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/bin")
   file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/bin")
 endif()

@@ -26,3 +26,14 @@ links it dynamically to match XRT. Both use the same CMake configure.
 
 No NPU is required to compile. The XDNA module and its kernel artifacts must
 be installed together. Hosts without XRT skip the optional module.
+
+Experimental qvac-fabric[shared-core] keeps llama/helpers static but builds the
+GGML core libraries shared under QVAC-specific ABI-1 filenames. It is opt-in
+and is not the released fabric layout. Linux ggml-base embeds/exports libc++
+under QVAC_GGML_BASE_ABI_1; libc++ clients import it, CUDA keeps private static
+libstdc++, and XDNA keeps shared libstdc++/XRT. The port validates those binary
+imports and retains Windows DLLs/import libraries even under a static triplet.
+The application must stage all core libraries and matching backends together.
+Runtime bindings and Windows/Android application loading require separate
+validation before switching a released consumer. The source patch is prepared
+for the fork; drop it once a pinned source release includes GGML_SHARED_CORE.
