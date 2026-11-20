@@ -61,7 +61,7 @@
       "port-version": 0
     },
     "qvac-fabric": {
-      "baseline": "11739.4.0",
+      "baseline": "12032.0.0",
       "port-version": 0
     },
     "qvac-lib-inference-addon-cpp": {

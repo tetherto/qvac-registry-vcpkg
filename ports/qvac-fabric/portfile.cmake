@@ -1,8 +1,9 @@
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
-  REPO tetherto/qvac-fabric-llm.cpp
-  REF v${VERSION}
-  SHA512 926a87b6cb4919bb9f00b81e1a81400c315d55f6c59d16302911ec983d361a866a64e7accb0b5c7813473e081839a5fe73fc54d6b4d07c867e439e63729d3b42
+  REPO jpgaribotti/qvac-fabric-llm.cpp
+  REF f89291d9c27e8e4f780abf9786c0c1521d70fb97
+  HEAD_REF feat/shared-core-12032
+  SHA512 6142122bf059481cb7fb45df00e30ad0ada2f7da4c84a18c9bc9fde43272a8b5dc9b478017f1c507c637a4f70bf35578bda55a99c843deca8f91bc19064a6ade
 )
 
 # Upstream CMake options only — passed through to vcpkg_cmake_configure.
@@ -217,7 +218,7 @@ if(BUILD_CUDA_BACKEND)
 endif()
 
 # XDNA (AMD NPU) backend, opt-in via 'xdna-backend': a runtime-loaded module
-# sharing the libstdc++ GGML core with CUDA, with its own embedded CPU backend.
+# importing the shared GGML core, with its own embedded CPU backend.
 # Requesting it without XRT or IRON is an error, never a silent skip: ggml skips
 # the kernels when IRON is missing, and a module without them would share the
 # real build's binary-cache ABI. The xrt port checks XRT and, through its
@@ -298,22 +299,6 @@ if(BUILD_GPU_BACKENDS AND NOT VCPKG_TARGET_IS_OSX AND NOT VCPKG_TARGET_IS_IOS)
   endif()
 endif()
 
-# Under GGML_BACKEND_DL the per-microarch backends ship as standalone
-# libqvac-ggml-*.so modules that the consumer dlopen's at runtime. Built with
-# -stdlib=libc++ they otherwise carry a runtime NEEDED dependency on the system
-# libc++.so.1 / libc++abi.so.1, so they silently fail to dlopen on any target
-# without libc++ installed (e.g. stock ubuntu-24.04 — no CPU backend registers,
-# inference aborts). Statically link the C++ runtime into the modules so they
-# are self-contained, matching how the addons link themselves. The module<->addon
-# boundary is the C ggml-backend ABI, so per-module libc++ copies never exchange
-# C++ objects. Linux only: Apple/iOS use Metal frameworks, Android ships
-# libc++_shared via the NDK STL, Windows uses the MSVC runtime.
-if(VCPKG_TARGET_IS_LINUX AND DL_BACKENDS)
-  string(APPEND VCPKG_LINKER_FLAGS " -static-libstdc++")
-  list(APPEND PLATFORM_OPTIONS
-    "-DCMAKE_PROJECT_ggml_INCLUDE=${CMAKE_CURRENT_LIST_DIR}/linux-cxx-runtime.cmake")
-endif()
-
 set(LLAMA_OPTIONS)
 if("llama" IN_LIST FEATURES)
   list(APPEND LLAMA_OPTIONS -DLLAMA_MTMD=ON)
@@ -381,10 +366,8 @@ if(BUILD_CUDA_BACKEND)
   endif()
 endif()
 
-# Modules other than XDNA link their C++ runtime statically, which requires every
-# source to compile against that runtime. CUDA and HIP compile through
-# their own drivers, and a module that misses this loads only in processes
-# which already map libstdc++.
+# The shared base exports libc++; CUDA keeps private static libstdc++ and
+# XDNA imports the system GNU runtime. Validate the installed binary imports.
 if(VCPKG_TARGET_IS_LINUX AND DL_BACKENDS)
   include("${CMAKE_CURRENT_LIST_DIR}/qvac-check-cxx-runtime.cmake")
   file(GLOB QVAC_MODULES
@@ -394,7 +377,8 @@ if(VCPKG_TARGET_IS_LINUX AND DL_BACKENDS)
   if(BUILD_XDNA_BACKEND)
     list(APPEND QVAC_RUNTIME_OPTIONS WITH_XDNA)
   endif()
-  qvac_check_cxx_runtime(${QVAC_RUNTIME_OPTIONS} ${QVAC_MODULES})
+  include("${CMAKE_CURRENT_LIST_DIR}/qvac-check-shared-core.cmake")
+  qvac_check_shared_core(${QVAC_RUNTIME_OPTIONS} ${QVAC_MODULES})
 
   # The release modules ship in the npm platform packages, which npm caps in
   # size. dlopen needs only the dynamic symbols, so drop the static symbol
@@ -490,7 +474,13 @@ endif()
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
-if (VCPKG_LIBRARY_LINKAGE MATCHES "static")
+# Intentional mixed linkage: the dynamic-backend core overrides the static triplet.
+# https://learn.microsoft.com/en-us/vcpkg/reference/policies#vcpkg_policy_dlls_in_static_library
+if(DL_BACKENDS AND VCPKG_LIBRARY_LINKAGE STREQUAL "static")
+  set(VCPKG_POLICY_DLLS_IN_STATIC_LIBRARY enabled)
+endif()
+
+if (VCPKG_LIBRARY_LINKAGE MATCHES "static" AND NOT DL_BACKENDS)
   file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/bin")
   file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/bin")
 endif()
