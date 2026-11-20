@@ -97,19 +97,6 @@
         }
       ]
     },
-    "shared-core": {
-      "description": "Experimental QVAC shared ggml core with ABI-specific filenames. Does not change the default linkage.",
-      "supports": "linux | android | (windows & !uwp)",
-      "dependencies": [
-        {
-          "name": "qvac-fabric",
-          "default-features": false,
-          "features": [
-            "gpu-backends"
-          ]
-        }
-      ]
-    },
     "vector-index": {
       "description": "Build and install the ggml vector index library."
     },
@@ -133,7 +120,7 @@
       ]
     },
     "xdna-backend": {
-      "description": "Build the AMD XDNA (Ryzen AI NPU) backend as a runtime-loaded module, libqvac-ggml-xdna.so, with its kernel artifacts next to it. The module links XRT's C++ API, so it is built against the system libstdc++ (dynamically) using ggml-base-libstdcxx (also used by CUDA when enabled). Requires the system XRT (through the xrt port) and QVAC_XDNA_IRON_PYTHON, an interpreter with IRON (mlir-aie + llvm-aie). Where XRT is not installed the module fails to load and is skipped.",
+      "description": "Build the AMD XDNA (Ryzen AI NPU) backend as a runtime-loaded module, libqvac-ggml-xdna.so, with its kernel artifacts next to it. The module links XRT's C++ API, so it is built against the system libstdc++ (dynamically) and imports the shared ggml-base through its C API. Requires the system XRT (through the xrt port) and QVAC_XDNA_IRON_PYTHON, an interpreter with IRON (mlir-aie + llvm-aie). Where XRT is not installed the module fails to load and is skipped.",
       "supports": "linux & x64",
       "dependencies": [
         {

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import ctypes
+import os
 import shutil
 import tempfile
 import unittest
@@ -9,6 +10,7 @@ import unittest
 from test_fabric_libstdcxx_runtime import RuntimeIsolation, FIXTURE, PORT
 
 
+@unittest.skipUnless(os.environ.get("QVAC_FABRIC_SOURCE"), "Set QVAC_FABRIC_SOURCE to the pinned fork checkout")
 class SharedCoreIsolation(RuntimeIsolation):
     # The legacy layout has its own tests in the imported module.
     test_cuda_only = None
@@ -26,6 +28,13 @@ class SharedCoreIsolation(RuntimeIsolation):
                 "target_link_libraries(ggml PRIVATE ggml-base)\n"
                 "set_target_properties(ggml PROPERTIES OUTPUT_NAME qvac-ggml-1)\n"
                 'set(GGML_AVAILABLE_BACKENDS "ggml-cuda;ggml-xdna")')
+            source = Path(os.environ["QVAC_FABRIC_SOURCE"]) / "ggml/src"
+            hook = root / "runtime.cmake"
+            hook.write_text(
+                'include("' + str(source / "linux-cxx-runtime.cmake") + '")\n'
+                'include("' + str(source / "shared-core-runtime.cmake") + '")\n'
+                'cmake_language(DEFER CALL qvac_configure_cxx_runtimes)\n'
+                'cmake_language(DEFER CALL qvac_configure_shared_core_runtime)\n')
             (root / "CMakeLists.txt").write_text(fixture)
             (root / "base.cpp").write_text(
                 '#include <string>\nextern "C" int ggml_probe(int n) { '
@@ -52,8 +61,8 @@ class SharedCoreIsolation(RuntimeIsolation):
             self.run_command([
                 "cmake", "-S", str(root), "-B", str(build),
                 "-DCMAKE_C_COMPILER=" + CC, "-DCMAKE_CXX_COMPILER=" + CXX,
-                "-DRUNTIME_HOOK=" + str(PORT / "linux-cxx-runtime.cmake"),
-                "-DWITH_CUDA=ON", "-DWITH_XDNA=ON", "-DGGML_SHARED_CORE=ON",
+                "-DRUNTIME_HOOK=" + str(hook),
+                "-DWITH_CUDA=ON", "-DWITH_XDNA=ON",
             ])
             self.run_command(["cmake", "--build", str(build), "-j", "2"])
             self.assertEqual(list(build.rglob("libggml-base-libstdcxx.a")), [])
