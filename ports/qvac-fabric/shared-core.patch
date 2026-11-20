@@ -1,5 +1,32 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c52dcb3ec..06d0e501e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -461,6 +461,10 @@ if (LLAMA_COREML_FFN)
+     string(APPEND LLAMA_PC_LIBS_PRIVATE " -framework Metal")
+ endif()
+
++set(LLAMA_PC_GGML_LIBS "-lggml -lggml-base")
++if (GGML_SHARED_CORE)
++    set(LLAMA_PC_GGML_LIBS "-lqvac-ggml-1 -lqvac-ggml-base-1")
++endif()
+ configure_file(cmake/llama.pc.in
+         "${CMAKE_CURRENT_BINARY_DIR}/llama.pc"
+         @ONLY)
+diff --git a/cmake/llama.pc.in b/cmake/llama.pc.in
+index 471ec6974..2fa60eedf 100644
+--- a/cmake/llama.pc.in
++++ b/cmake/llama.pc.in
+@@ -6,6 +6,6 @@ includedir=@LLAMA_PC_INCLUDEDIR@
+ Name: llama
+ Description: Port of Facebook's LLaMA model in C/C++
+ Version: @LLAMA_VERSION@
+-Libs: -L${libdir} -lggml -lggml-base -lllama
++Libs: -L${libdir} @LLAMA_PC_GGML_LIBS@ -lllama
+ Libs.private: @LLAMA_PC_LIBS_PRIVATE@
+ Cflags: -I${includedir}
 diff --git a/ggml/CMakeLists.txt b/ggml/CMakeLists.txt
-index 99a350d9b..6f2adeb7a 100644
+index 99a350d9b..86640afee 100644
 --- a/ggml/CMakeLists.txt
 +++ b/ggml/CMakeLists.txt
 @@ -84,6 +84,14 @@ endif()
@@ -27,6 +54,42 @@ index 99a350d9b..6f2adeb7a 100644
 
  set_target_properties(ggml PROPERTIES PUBLIC_HEADER "${GGML_PUBLIC_HEADERS}")
  #if (GGML_METAL)
+@@ -471,6 +480,11 @@ if (GGML_STANDALONE)
+     list(REMOVE_DUPLICATES GGML_PC_LIBS_PRIVATE)
+     string(REPLACE ";" " " GGML_PC_LIBS_PRIVATE "${GGML_PC_LIBS_PRIVATE}")
+
++    set(GGML_PC_CORE_LIBS "-lggml -lggml-base")
++    if (GGML_SHARED_CORE)
++        set(GGML_PC_CORE_LIBS "-lqvac-ggml-1 -lqvac-ggml-base-1")
++        set(GGML_PC_LIBS_PRIVATE "")
++    endif()
+     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ggml.pc.in
+         ${CMAKE_CURRENT_BINARY_DIR}/ggml.pc
+         @ONLY)
+diff --git a/ggml/ggml-vector-index.pc.in b/ggml/ggml-vector-index.pc.in
+index 5b9e7d297..ebd8dbe64 100644
+--- a/ggml/ggml-vector-index.pc.in
++++ b/ggml/ggml-vector-index.pc.in
+@@ -6,6 +6,6 @@ includedir=@GGML_PC_INCLUDEDIR@
+ Name: ggml-vector-index
+ Description: Vector index library for ggml
+ Version: @GGML_VERSION@
+-Libs: -L${libdir} -lggml-vector-index
++Libs: -L${libdir} @GGML_VECTOR_INDEX_PC_LIBS@
+ Libs.private: @GGML_VECTOR_INDEX_PC_LIBS_PRIVATE@
+ Cflags: -I${includedir}
+diff --git a/ggml/ggml.pc.in b/ggml/ggml.pc.in
+index 34830218e..3e503d946 100644
+--- a/ggml/ggml.pc.in
++++ b/ggml/ggml.pc.in
+@@ -6,6 +6,6 @@ includedir=@GGML_PC_INCLUDEDIR@
+ Name: ggml
+ Description: Tensor library for machine learning
+ Version: @GGML_VERSION@
+-Libs: -L${libdir} -lggml -lggml-base
++Libs: -L${libdir} @GGML_PC_CORE_LIBS@
+ Libs.private: @GGML_PC_LIBS_PRIVATE@
+ Cflags: -I${includedir}
 diff --git a/ggml/src/CMakeLists.txt b/ggml/src/CMakeLists.txt
 index a2c201a4b..a3988db0c 100644
 --- a/ggml/src/CMakeLists.txt
@@ -53,3 +116,19 @@ index a2c201a4b..a3988db0c 100644
  foreach (target ${GGML_CORE_TARGETS})
      target_include_directories(${target} PUBLIC    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> $<INSTALL_INTERFACE:include>)
      target_compile_features   (${target} PRIVATE c_std_11 cxx_std_17) # don't bump
+diff --git a/ggml/src/ggml-vector-index/CMakeLists.txt b/ggml/src/ggml-vector-index/CMakeLists.txt
+index e57732364..41fb9fdf2 100644
+--- a/ggml/src/ggml-vector-index/CMakeLists.txt
++++ b/ggml/src/ggml-vector-index/CMakeLists.txt
+@@ -404,6 +404,11 @@ if (GGML_VECTOR_INDEX_USE_ACCELERATE_QUERY)
+ endif()
+ string(JOIN " " GGML_VECTOR_INDEX_PC_LIBS_PRIVATE ${GGML_VECTOR_INDEX_PRIVATE_LIBS_LIST})
+
++set(GGML_VECTOR_INDEX_PC_LIBS "-lggml-vector-index")
++if (GGML_SHARED_CORE)
++    set(GGML_VECTOR_INDEX_PC_LIBS "-lqvac-ggml-vector-index-1 -lqvac-ggml-base-1")
++    set(GGML_VECTOR_INDEX_PC_LIBS_PRIVATE "")
++endif()
+ configure_file(
+     ${CMAKE_CURRENT_LIST_DIR}/../../ggml-vector-index.pc.in
+     ${CMAKE_CURRENT_BINARY_DIR}/ggml-vector-index.pc
