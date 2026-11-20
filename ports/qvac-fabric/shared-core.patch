@@ -1,0 +1,55 @@
+diff --git a/ggml/CMakeLists.txt b/ggml/CMakeLists.txt
+index 99a350d9b..6f2adeb7a 100644
+--- a/ggml/CMakeLists.txt
++++ b/ggml/CMakeLists.txt
+@@ -84,6 +84,14 @@ endif()
+
+ option(BUILD_SHARED_LIBS           "ggml: build shared libraries" ${BUILD_SHARED_LIBS_DEFAULT})
+ option(GGML_BACKEND_DL             "ggml: build backends as dynamic libraries (requires BUILD_SHARED_LIBS)" OFF)
++option(GGML_SHARED_CORE "ggml: build QVAC shared core libraries independently of llama linkage" OFF)
++if (GGML_SHARED_CORE)
++    if (NOT CMAKE_SYSTEM_NAME MATCHES "^(Linux|Windows|Android)$" OR NOT GGML_BACKEND_DL)
++        message(FATAL_ERROR "GGML_SHARED_CORE requires dynamic backends on Linux, Windows or Android")
++    endif()
++    # Scope this to ggml; llama and its helpers retain the parent linkage.
++    set(BUILD_SHARED_LIBS ON)
++endif()
+ set(GGML_BACKEND_DIR "" CACHE PATH "ggml: directory to load dynamic backends from (requires GGML_BACKEND_DL")
+
+ #
+@@ -370,7 +378,8 @@ set(GGML_PUBLIC_HEADERS
+     include/ggml-webgpu.h
+     include/ggml-zendnn.h
+     include/ggml-openvino.h
+-    include/gguf.h)
++    include/gguf.h
++    include/uint8-buff-stream.h)
+
+ set_target_properties(ggml PROPERTIES PUBLIC_HEADER "${GGML_PUBLIC_HEADERS}")
+ #if (GGML_METAL)
+diff --git a/ggml/src/CMakeLists.txt b/ggml/src/CMakeLists.txt
+index a2c201a4b..a3988db0c 100644
+--- a/ggml/src/CMakeLists.txt
++++ b/ggml/src/CMakeLists.txt
+@@ -700,6 +700,21 @@ if (GGML_VECTOR_INDEX)
+     list(APPEND GGML_CORE_TARGETS ggml-vector-index)
+ endif()
+
++if (GGML_SHARED_CORE)
++    if (TARGET ggml-vector-index)
++        target_link_libraries(ggml-vector-index PRIVATE ggml-base)
++    endif()
++    foreach (target ${GGML_CORE_TARGETS})
++        # Encode the native ABI in the filename, including Windows and Android.
++        set_target_properties(${target} PROPERTIES
++            OUTPUT_NAME "qvac-${target}-1"
++            INSTALL_RPATH "$ORIGIN"
++            BUILD_WITH_INSTALL_RPATH ON)
++        set_property(TARGET ${target} PROPERTY VERSION)
++        set_property(TARGET ${target} PROPERTY SOVERSION)
++    endforeach()
++endif()
++
+ foreach (target ${GGML_CORE_TARGETS})
+     target_include_directories(${target} PUBLIC    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include> $<INSTALL_INTERFACE:include>)
+     target_compile_features   (${target} PRIVATE c_std_11 cxx_std_17) # don't bump

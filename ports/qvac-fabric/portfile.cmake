@@ -2,7 +2,8 @@ vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-fabric-llm.cpp
   REF v${VERSION}
-  SHA512 f47bf0ffc6ab368b389633ed5a4e4e37c6c6ffe12aaf977593956d21cef84f4e7196d0d8f98e96c45ff4ae623fbb4f74ebfb2ba099f06960490bb81afbc0d000
+  SHA512 af290df3313f04ad12ade32416be4edac4f72bdfbc6cc9b6e3e1ede748cba15343a7ac7212fda7b51a6f0780849e9d06429f2cc4188f377797d5a7cc564b0afc
+  PATCHES shared-core.patch
 )
 
 # Upstream CMake options only — passed through to vcpkg_cmake_configure.
@@ -12,6 +13,7 @@ vcpkg_check_features(
     force-profiler FORCE_GGML_VK_PERF_LOGGER
     llama BUILD_LLAMA
     vector-index GGML_VECTOR_INDEX
+    shared-core GGML_SHARED_CORE
 )
 
 # Portfile-only feature flags (drive PLATFORM_OPTIONS; not upstream cache vars).
@@ -415,7 +417,12 @@ if(VCPKG_TARGET_IS_LINUX AND DL_BACKENDS)
   if(BUILD_XDNA_BACKEND)
     list(APPEND QVAC_RUNTIME_OPTIONS WITH_XDNA)
   endif()
-  qvac_check_cxx_runtime(${QVAC_RUNTIME_OPTIONS} ${QVAC_MODULES})
+  if("shared-core" IN_LIST FEATURES)
+    include("${CMAKE_CURRENT_LIST_DIR}/qvac-check-shared-core.cmake")
+    qvac_check_shared_core(${QVAC_RUNTIME_OPTIONS} ${QVAC_MODULES})
+  else()
+    qvac_check_cxx_runtime(${QVAC_RUNTIME_OPTIONS} ${QVAC_MODULES})
+  endif()
 
   # The release modules ship in the npm platform packages, which npm caps in
   # size. dlopen needs only the dynamic symbols, so drop the static symbol
@@ -511,7 +518,13 @@ endif()
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
 file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/share")
 
-if (VCPKG_LIBRARY_LINKAGE MATCHES "static")
+# Intentional mixed linkage: only the opt-in core overrides the static triplet.
+# https://learn.microsoft.com/en-us/vcpkg/reference/policies#vcpkg_policy_dlls_in_static_library
+if("shared-core" IN_LIST FEATURES AND VCPKG_LIBRARY_LINKAGE STREQUAL "static")
+  set(VCPKG_POLICY_DLLS_IN_STATIC_LIBRARY enabled)
+endif()
+
+if (VCPKG_LIBRARY_LINKAGE MATCHES "static" AND NOT "shared-core" IN_LIST FEATURES)
   file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/bin")
   file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/bin")
 endif()
