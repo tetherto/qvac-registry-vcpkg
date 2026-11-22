@@ -15,15 +15,17 @@
 #
 # 2026-11-01 engine with guarded per-context VAE/H3 controls (engine PR #64),
 # Flux.2 VAE convolution fixes (engine PRs #65, #67) and optional Core ML
-# UNet/TAE decoder sidecars (engine PR #69, SD_COREML, off by default).
+# UNet/TAE decoder sidecars (engine PR #69, SD_COREML, off by default),
+# Flux.2 Metal VAE probing (engine PR #70), Strix H3 integration/docs
+# (engine PR #72) and Fibo reference-image capability reporting (engine PR #74).
 # WebP/WebM support auto-disables: upstream vendors them as git submodules
 # under thirdparty/, which GitHub REF tarballs do not contain
 # (SD_WEBP_DEFAULT/SD_WEBM_DEFAULT fall back to OFF).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF 9e544e85276f330f861dd8f4e60d5953df7fae55
-    SHA512 2a195b5a273f6104adc6e46aa62a700b60d8603f1e110efe382d3c0d8649fc0d0d3821204d8ea139d2b48c29286254fc5e4217f0cf0c9d59c7518cb610e6608a
+    REF 1fd70f8ed4af0343cf89689634d78e0f70d6fb43
+    SHA512 432e44a1149de650c470ccf64a0a9df0592179e8433befba4f76f5212db24dca09df3666b46aa817725a46ec8708652b5da487c735f4f2abcc0a4bc415456cdd
 )
 
 # Only build Release — debug builds are not needed for the prebuild and can
