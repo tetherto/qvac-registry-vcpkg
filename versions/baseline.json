@@ -61,7 +61,7 @@
       "port-version": 0
     },
     "qvac-fabric": {
-      "baseline": "11739.4.0",
+      "baseline": "11739.5.0",
       "port-version": 0
     },
     "qvac-lib-inference-addon-cpp": {
@@ -89,7 +89,7 @@
       "port-version": 0
     },
     "speech-cpp": {
-      "baseline": "2026-11-18",
+      "baseline": "2026-11-19",
       "port-version": 0
     },
     "ssplit": {
@@ -98,7 +98,7 @@
     },
     "stable-diffusion-cpp": {
       "baseline": "2026-11-01",
-      "port-version": 1
+      "port-version": 3
     },
     "tokenizers-cpp": {
       "baseline": "0.1.1",

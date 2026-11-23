@@ -13,20 +13,30 @@
 # on Android and desktop Linux the GPU backends are dlopen'd modules
 # (hybrid GGML_BACKEND_DL, see the ggml port).
 #
-# 2026-11-01 engine with guarded per-context VAE/H3 controls (engine PR #64).
+# 2026-11-01 engine with guarded per-context VAE/H3 controls (engine PR #64),
+# Flux.2 VAE convolution fixes (engine PRs #65, #67) and optional Core ML
+# UNet/TAE decoder sidecars (engine PR #69, SD_COREML, off by default),
+# Flux.2 Metal VAE probing (engine PR #70), Strix H3 integration/docs
+# (engine PR #72) and Fibo reference-image capability reporting (engine PR #74).
 # WebP/WebM support auto-disables: upstream vendors them as git submodules
 # under thirdparty/, which GitHub REF tarballs do not contain
 # (SD_WEBP_DEFAULT/SD_WEBM_DEFAULT fall back to OFF).
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-stable-diffusion.cpp
-    REF bc53357484bc5d2ba08fbe5301dae192e5b9a176
-    SHA512 dced9d52efbf8ae7b35cd9e81816190f85178a631c6166095034375d92e0847125f435ec8fed4e7642817158ceb5f5967d34f71b83fcd89756b5d969efa5f71a
+    REF 1fd70f8ed4af0343cf89689634d78e0f70d6fb43
+    SHA512 432e44a1149de650c470ccf64a0a9df0592179e8433befba4f76f5212db24dca09df3666b46aa817725a46ec8708652b5da487c735f4f2abcc0a4bc415456cdd
 )
 
 # Only build Release — debug builds are not needed for the prebuild and can
 # fail with MSVC iterator-debug-level mismatches.
 set(VCPKG_BUILD_TYPE release)
+
+vcpkg_check_features(
+    OUT_FEATURE_OPTIONS FEATURE_OPTIONS
+    FEATURES
+        coreml SD_COREML
+)
 
 set(SD_LTO OFF)
 if(VCPKG_TARGET_IS_WINDOWS)
@@ -42,6 +52,7 @@ vcpkg_cmake_configure(
         -DSD_BUILD_SHARED_LIBS=OFF
         -DSD_USE_SYSTEM_GGML=ON
         -DSD_LTO=${SD_LTO}
+        ${FEATURE_OPTIONS}
 )
 
 vcpkg_cmake_install()
@@ -59,6 +70,17 @@ file(INSTALL
     "${CMAKE_CURRENT_LIST_DIR}/stable-diffusion-cppConfigVersion.cmake"
     DESTINATION "${CURRENT_PACKAGES_DIR}/share/stable-diffusion-cpp"
 )
+# The coreml sidecars call into Core ML from the static library, so
+# consumers need the frameworks on their link line.
+if("coreml" IN_LIST FEATURES)
+    file(APPEND "${CURRENT_PACKAGES_DIR}/share/stable-diffusion-cpp/stable-diffusion-cppConfig.cmake" [[
+
+set_property(TARGET stable-diffusion::stable-diffusion APPEND PROPERTY
+    INTERFACE_LINK_LIBRARIES
+        "-framework CoreML" "-framework Foundation" "-framework Accelerate"
+)
+]])
+endif()
 
 vcpkg_fixup_pkgconfig()
 
