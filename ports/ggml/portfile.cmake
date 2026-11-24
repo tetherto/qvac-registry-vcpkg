@@ -26,8 +26,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO tetherto/qvac-ext-ggml
-    REF ab9b3ef1b07d38587c7435ffb86f44839f82642a
-    SHA512 2d60a6ffea493e47c1977c8187229d669c1263d9ba89c5ba7a10cf6106adc5f20fcc8a2033fd6a748759cacbace771f86074298e1cbc521c0f237462fdf382ae
+    REF 68417df4e635a35c7afcbd349bbbb3884a2c4b4e
+    SHA512 42ffacfc550778656706aaa6cdb0acb9fcc250e2ca778d50b64929c2e1c11d51e60f7a35e7fb11a37bcb5ea17d9bb949b2d2245e33d2f97a6c42efff16c5e50a
 )
 
 # --- GPU feature flags ---
