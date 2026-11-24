@@ -1,7 +1,7 @@
 {
   "name": "stable-diffusion-cpp",
   "version-date": "2026-11-01",
-  "port-version": 3,
+  "port-version": 4,
   "description": "Diffusion model inference in pure C/C++ (SD1.x, SD2.x, SDXL, SD3, FLUX, MOSS-Image, Wan, Ideogram, ...)",
   "homepage": "https://github.com/tetherto/qvac-ext-stable-diffusion.cpp",
   "license": "MIT",
@@ -35,7 +35,7 @@
   ],
   "features": {
     "coreml": {
-      "description": "Enable Core ML sidecars (FLUX.2 denoiser, SD 1.x/2.x UNet, tiny decoder) on Apple devices (macOS/iOS)",
+      "description": "Enable Core ML sidecars (FLUX.2 denoiser, SD 1.x/2.x and SDXL UNet, tiny decoder) on Apple devices (macOS/iOS)",
       "supports": "osx | ios"
     },
     "cuda": {

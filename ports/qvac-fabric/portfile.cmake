@@ -2,7 +2,7 @@ vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-fabric-llm.cpp
   REF v${VERSION}
-  SHA512 dfda0002c3a180dbcc3cb16a444619ba95e264fe59f55aaccc5b6cf5b05fbbe6e02d3f0ecad024e4d4146ac157d3f41e9abe92810fcbf4a13818d0a916e321a7
+  SHA512 af290df3313f04ad12ade32416be4edac4f72bdfbc6cc9b6e3e1ede748cba15343a7ac7212fda7b51a6f0780849e9d06429f2cc4188f377797d5a7cc564b0afc
 )
 
 # Upstream CMake options only — passed through to vcpkg_cmake_configure.
@@ -196,6 +196,27 @@ if(BUILD_CUDA_BACKEND)
     -DGGML_CUDA_FA=ON)
   if(QVAC_CUDA_MODULE_SUFFIX)
     list(APPEND PLATFORM_OPTIONS "-DGGML_CUDA_MODULE_SUFFIX=${QVAC_CUDA_MODULE_SUFFIX}")
+  endif()
+  # CUTLASS block-scaled MXFP4/NVFP4 matmuls for Blackwell (sm_120f/sm_121f),
+  # used at run time only on those GPUs. It needs CUDA 12.9+, so the Jetson
+  # 12.6 module is left out. FetchContent is disconnected, so vcpkg fetches
+  # the headers, and the tag must match the one fabric pins.
+  if(NOT BUILD_CUDA_JETSON_BACKEND)
+    set(QVAC_CUTLASS_REF "v4.7.0")
+    file(READ "${SOURCE_PATH}/ggml/src/ggml-cuda/CMakeLists.txt" _qvac_cuda_cmake)
+    string(REGEX MATCH "cutlass\\.git[ \t\r\n]+GIT_TAG[ \t]+([^ \t\r\n]+)" _ "${_qvac_cuda_cmake}")
+    if(NOT CMAKE_MATCH_1 STREQUAL QVAC_CUTLASS_REF)
+      message(FATAL_ERROR "qvac-fabric: fabric pins CUTLASS '${CMAKE_MATCH_1}', port fetches ${QVAC_CUTLASS_REF}")
+    endif()
+    vcpkg_from_github(
+      OUT_SOURCE_PATH QVAC_CUTLASS_SOURCE_PATH
+      REPO NVIDIA/cutlass
+      REF ${QVAC_CUTLASS_REF}
+      SHA512 0725370991c997c1285e205f3ead58e2bb234974e50073a59698cb4f960aeffc2f70c15765c746826bd30d8a88ae5a2b26011878120196ba40dc65f739ab5b8f
+    )
+    list(APPEND PLATFORM_OPTIONS
+      -DGGML_CUDA_CUTLASS=ON
+      "-DFETCHCONTENT_SOURCE_DIR_CUTLASS=${QVAC_CUTLASS_SOURCE_PATH}")
   endif()
   # Fabric's NVRTC pass fuses each graph's elementwise ops into generated
   # kernels (GGML_CUDA_NVRTC_FUSION=0 turns it off at run time). The module
@@ -496,6 +517,9 @@ if (VCPKG_LIBRARY_LINKAGE MATCHES "static")
 endif()
 
 set(QVAC_LICENSE_FILES "${SOURCE_PATH}/LICENSE")
+if(QVAC_CUTLASS_SOURCE_PATH)
+  list(APPEND QVAC_LICENSE_FILES "${QVAC_CUTLASS_SOURCE_PATH}/LICENSE.txt")
+endif()
 if(BUILD_XDNA_BACKEND)
   list(APPEND QVAC_LICENSE_FILES
     "${SOURCE_PATH}/ggml/src/ggml-xdna/LICENSE"
