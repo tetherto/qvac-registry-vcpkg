@@ -48,7 +48,7 @@ endif()
 '''
 
 
-@unittest.skipUnless(CXX and CC and shutil.which("cmake") and os.environ.get("QVAC_FABRIC_SOURCE"), "Set QVAC_FABRIC_SOURCE to the pinned fork checkout")
+@unittest.skipUnless(CXX and CC and shutil.which("cmake") and os.environ.get("QVAC_FABRIC_SOURCE"), "Set QVAC_FABRIC_SOURCE to the pinned source checkout")
 class SharedCoreIsolation(unittest.TestCase):
     def run_command(self, args, success=True):
         result = subprocess.run(args, text=True, capture_output=True)
