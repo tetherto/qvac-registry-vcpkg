@@ -1,8 +1,11 @@
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO tetherto/qvac-ext-marian-dev
-  REF da6ff8fd
-  SHA512 383fd6e9b108f3cbfa3cf3ce431894da7bb9f2a8e5bc1627e222aa829179f0a40af07b6ada3f4b780004d3320fa026fd4e7da69ad91134569ab3192a49835df4
+  # da6ff8fd + QVAC-28896: createLoggers() no longer installs std::terminate and
+  # SIGSEGV/SIGFPE handlers unless marian::setInstallErrorHandlers(true) is called,
+  # so a host process (a JVM, for one) keeps its own signal handlers.
+  REF 73b90b27b43bffdc2e6ccecfe42500ede55bcff3
+  SHA512 ad5f497106c7fc011fa54ebd2945b1ec474bc9450433437c65aba90a2790b3e1c3db7be100804354443f3e29f2926295c991c5e0e8e1fee234989a3f7e2f9273
 )
 
 # Marian defaults to `set(BUILD_ARCH native CACHE STRING ...)` and splices it
